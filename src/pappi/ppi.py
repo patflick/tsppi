@@ -2,14 +2,18 @@
 import sqlite3
 import csv
 import re
+import os
+
+from . import matching
+from . import PAPPI_SQL_FOLDER_PATH
 
 # TODO put all constants in an own module
 PAPPI_PPI_RAW_TABLE_NAME = 'ppi_raw_proteins'
-PAPPI_PPI_FILTER_SCRIPT = 'ppi_filter.sql'
+PAPPI_PPI_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'ppi_filter.sql')
 PAPPI_DEFAULT_SQLITE_DB = 'pappiDB.sqlite'
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 
-def import_ppi_file(infile, database, table=PAPPI_PPI_RAW_TABLE_NAME):
+def import_stringdb_file(infile, database, table=PAPPI_PPI_RAW_TABLE_NAME):
     # initialize the sqlite3 connection
     con = sqlite3.Connection(database)
     cur = con.cursor()
@@ -38,7 +42,7 @@ def import_ppi_file(infile, database, table=PAPPI_PPI_RAW_TABLE_NAME):
     con.commit()
     con.close()
 
-def init_ppi(database):
+def init_stringdb_ppi(database):
     with open(PAPPI_PPI_FILTER_SCRIPT, 'r') as script_file:
         # initialize the sqlite3 connection
         con = sqlite3.Connection(database)
@@ -55,12 +59,12 @@ def init_ppi(database):
         con.commit()
         con.close()
 
-def import_ppi(ppifile, ensg2ensp_file, database=PAPPI_DEFAULT_SQLITE_DB):
+def import_stringdb(ppifile, ensg2ensp_file, database=PAPPI_DEFAULT_SQLITE_DB):
     # first import the file as table
-    import_ppi_file(ppifile, database, PAPPI_PPI_RAW_TABLE_NAME)
+    import_stringdb_file(ppifile, database, PAPPI_PPI_RAW_TABLE_NAME)
     
     # import ENSG<->ENSP matching
-    import_ppi_file(ensg2ensp_file, database, PAPPI_ENSP2ENSG_TABLE_NAME)
+    matching.import_p2g_file(ensg2ensp_file, database, PAPPI_ENSP2ENSG_TABLE_NAME)
     
     # then create/fill the other tables (scoring, mean tissue, summary)
-    init_ppi(database)
+    init_stringdb_ppi(database)

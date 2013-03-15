@@ -1,11 +1,19 @@
 import sqlite3
 import csv
+import os
+
+from . import PAPPI_SQL_FOLDER_PATH
 
 PAPPI_DEFAULT_SQLITE_DB = 'pappiDB.sqlite'
 PAPPI_HPA_RAW_TABLE_NAME = 'hpa_normal_tissue'
-PAPPI_HPA_FILTER_SCRIPT = 'sql/hpa_filter.sql'
+PAPPI_HPA_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'hpa_filter.sql')
 
 def init_hpa_data(database):
+    """
+    Initializes the imported HPA data. This includes filtering for
+    APE scoring with `High` or `Medium` Reliability and adding
+    a numerical value for the Level (High: 3, Medium: 2, Low: 1, None: 0).
+    """
     with open(PAPPI_HPA_FILTER_SCRIPT, 'r') as script_file:
         # initialize the sqlite3 connection
         con = sqlite3.Connection(database)
