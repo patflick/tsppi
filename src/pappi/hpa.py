@@ -1,23 +1,28 @@
-import sqlite3
+'''
+Import and filtering operations for the HPA data.
+
+@author: Patrick Flick
+'''
+
 import csv
-import os
 
-from . import PAPPI_SQL_FOLDER_PATH
+from config import PAPPI_SQL_HPA_FILTER_SCRIPT
 
-PAPPI_DEFAULT_SQLITE_DB = 'pappiDB.sqlite'
+
 PAPPI_HPA_RAW_TABLE_NAME = 'hpa_normal_tissue'
-PAPPI_HPA_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'hpa_filter.sql')
 
-def init_hpa_data(database):
+
+def init_tissue_data(sql_conn):
     """
     Initializes the imported HPA data. This includes filtering for
     APE scoring with `High` or `Medium` Reliability and adding
     a numerical value for the Level (High: 3, Medium: 2, Low: 1, None: 0).
+    
+    @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_HPA_FILTER_SCRIPT, 'r') as script_file:
-        # initialize the sqlite3 connection
-        con = sqlite3.Connection(database)
-        cur = con.cursor()
+    with open(PAPPI_SQL_HPA_FILTER_SCRIPT, 'r') as script_file:
+        # initialize the cursor object
+        cur = sql_conn.cursor()
 
         # read script
         sql_script = script_file.read()
@@ -25,16 +30,23 @@ def init_hpa_data(database):
         # execute the script
         cur.executescript(sql_script)
 
-        # commit and close sql connection
+        # close cursor and commit
         cur.close()
-        con.commit()
-        con.close()
+        sql_conn.commit()
 
 
-def import_hpa_file(infile, database, table = PAPPI_HPA_RAW_TABLE_NAME):
-    # initialize the sqlite3 connection
-    con = sqlite3.Connection(database)
-    cur = con.cursor()
+
+def import_tissue_file(infile, sql_conn, table = PAPPI_HPA_RAW_TABLE_NAME):
+    """
+    Imports the downloaded HPA tissue file into the database given by the
+    `sql_conn` SQL connection into a new table given by `table`.
+    
+    @param infile: The opened file handle of the file to be imported.
+    @param sql_conn: The SQL connection to be used.
+    @param table: The SQL table name into which the HPA data is to be imported.
+    """
+    # initialize the cursor object
+    cur = sql_conn.cursor()
     
     # create table for the raw HPA data:
     # "Gene","Tissue","Cell type","Level","Expression type","Reliability"
@@ -49,13 +61,20 @@ def import_hpa_file(infile, database, table = PAPPI_HPA_RAW_TABLE_NAME):
     # insert all lines
     cur.executemany('INSERT INTO "' + table + '" VALUES (?, ?, ?, ?, ?, ?)', csv_reader)
     
-    # commit and close sql connection
+    # close cursor and commit
     cur.close()
-    con.commit()
-    con.close()
+    sql_conn.commit()
+
+
+
+def import_tissue(hpafile, sql_conn):
+    """
+    Imports the HPA data, filters and initializes further tables (by calling init_tissue_data).
     
-def import_hpa(hpafile, database=PAPPI_DEFAULT_SQLITE_DB):
+    @param hpafile: The file handle for the HPA tissue data file.
+    @param sql_conn: The SQL connection to be used.
+    """
     # first import the file as table
-    import_hpa_file(hpafile, database, PAPPI_HPA_RAW_TABLE_NAME)
+    import_tissue_file(hpafile, sql_conn, PAPPI_HPA_RAW_TABLE_NAME)
     # then create/fill the other tables (scoring, mean tissue, summary)
-    init_hpa_data(database)
+    init_tissue_data(sql_conn)
