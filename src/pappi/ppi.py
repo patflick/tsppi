@@ -8,15 +8,22 @@ import csv
 import re
 
 from . import matching
-from config import PAPPI_SQL_PPI_FILTER_SCRIPT
+from config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
+from config import PAPPI_SQL_CCSB_FILTER_SCRIPT
 
 # TODO put all constants in an own module
-PAPPI_PPI_RAW_TABLE_NAME = 'ppi_raw_proteins'
+PAPPI_STRINGDB_RAW_TABLE_NAME = 'stringdb_raw'
+PAPPI_CCSB_RAW_TABLE_NAME = 'ccsb_raw'
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 
 
-def import_stringdb_file(infile, sql_conn, table=PAPPI_PPI_RAW_TABLE_NAME):
+#################################
+# String-DB import and convert
+#################################
+
+
+def import_stringdb_file(infile, sql_conn, table=PAPPI_STRINGDB_RAW_TABLE_NAME):
     """
     Imports the string-db PPI network from the tab separated file. The PPI is imported
     using the `sql_conn` SQL connection into a new table given by `table`.
@@ -60,7 +67,7 @@ def init_stringdb_ppi(sql_conn):
     
     @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_SQL_PPI_FILTER_SCRIPT, 'r') as script_file:
+    with open(PAPPI_SQL_STRINGDB_FILTER_SCRIPT, 'r') as script_file:
         # initialize the cursor object
         cur = sql_conn.cursor()
 
@@ -86,10 +93,94 @@ def import_stringdb(ppifile, ensg2ensp_file, sql_conn):
     @param sql_conn: The SQL connection to be used.
     """
     # first import the file as table
-    import_stringdb_file(ppifile, sql_conn, PAPPI_PPI_RAW_TABLE_NAME)
+    import_stringdb_file(ppifile, sql_conn, PAPPI_STRINGDB_RAW_TABLE_NAME)
     
     # import ENSG<->ENSP matching
-    matching.import_p2g_file(ensg2ensp_file, sql_conn, PAPPI_ENSP2ENSG_TABLE_NAME)
+    matching.import_ENSG2ENSP_file(ensg2ensp_file, sql_conn, PAPPI_ENSP2ENSG_TABLE_NAME)
     
-    # then create/fill the other tables (scoring, mean tissue, summary)
+    # then perform the ENSG<->ENSP mapping, returning the PPI network
+    # that uses ENSG IDs (this is the same format that results from the CCSB import & init functions)
     init_stringdb_ppi(sql_conn)
+
+
+#################################
+# CCSB import and convert
+#################################
+
+def import_ccsb_file(infile, sql_conn, table=PAPPI_CCSB_RAW_TABLE_NAME):
+    """
+    Imports the CCSB PPI network from the tab separated file. The PPI is imported
+    using the `sql_conn` SQL connection into a new table given by `table`.
+    
+    This imports the data from:
+        http://interactome.dfci.harvard.edu/H_sapiens/index.php?page=newrelease
+    
+    @param infile: The opened file handle of the file to be imported.
+    @param sql_conn: The SQL connection to be used.
+    @param table: The SQL table name into which the CCSB data is to be imported.
+    """
+    # initialize the cursor object
+    cur = sql_conn.cursor()
+    
+    # create table for the raw HPA data:
+    # GENE_IDA    SYMBOL_A    GENE_IDB    SYMBOL_B
+    cur.execute('DROP TABLE IF EXISTS "' + table + '";');
+    cur.execute('CREATE TABLE "' + table + '" ("Gene_IDA" int, "Symbol_A" varchar(16), "Gene_IDB" int, "Symbol_B" varchar(16))')
+    
+    # get csv reader for the CCSB file
+    csv_reader = csv.reader(infile, delimiter='\t',quoting=csv.QUOTE_NONE)
+    
+    # ignore header line
+    csv_reader.next()
+    
+    # insert all lines
+    cur.executemany('INSERT INTO "' + table + '" VALUES (?, ?, ?, ?)', csv_reader)
+
+    # close cursor and commit
+    cur.close()
+    sql_conn.commit()
+    
+
+def init_ccsb_ppi(sql_conn):
+    """
+    Initializes the imported CCSB PPI data. This means the Entrez IDs
+    are mapped to Ensembl IDs using the `entrez_to_ensembl` table.
+    
+    @param sql_conn: The SQL connection to be used.
+    """
+    with open(PAPPI_SQL_CCSB_FILTER_SCRIPT, 'r') as script_file:
+        # initialize the cursor object
+        cur = sql_conn.cursor()
+
+        # read script
+        sql_script = script_file.read()
+        
+        # execute the script
+        cur.executescript(sql_script)
+
+        # close cursor and commit
+        cur.close()
+        sql_conn.commit()
+
+def import_ccsb(ccsb_file, hgnc_file, sql_conn):
+    """
+    Imports and initializes the CCSB PPI network. Also the given HGNC mapping file
+    is imported, which is used for mapping the Entrez Gene IDs of the CCSB data
+    to Ensembl Gene IDs used in HPA.
+    
+    @param ppifile: The file handle for the PPI network file, downloaded from CCSB
+    @param ensg2ensp_file: The file handle for the ENSG<->ENSP mapping to be imported.
+    @param sql_conn: The SQL connection to be used.
+    """
+    # first import the file as table
+    import_ccsb_file(ccsb_file, sql_conn, PAPPI_CCSB_RAW_TABLE_NAME)
+    
+    # import HGNC for Entrez<->ENSG mapping
+    matching.import_hgnc_entrez2ensembl(hgnc_file, sql_conn)
+    
+    # then perform the entrez to ensembl mapping, returning the PPI network
+    # that uses ENSG IDs (this is the same format that results from the string-db import & init functions)
+    init_ccsb_ppi(sql_conn)
+
+
+

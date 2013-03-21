@@ -9,6 +9,10 @@ PPI_FILE='/cygdrive/d/PPI/string-db/human_protein.links.v9.0_700.csv'
 HPA_FILE='/home/flick/dev/ppi/hpa/data/hpa_normal_tissue_v11.csv'
 P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
 HGNC_FILE='/home/flick/dev/ppi/hpa/data/hgnc_entrez_ensembl.txt'
+CCSB_FILE='/home/flick/dev/ppi/hpa/data/HI_2012_PRE.tsv'
+
+# whether to use string-db or ccsb:
+USE_STRINGDB=False
 
 # TODO properly test this
 # TODO continue with pipeline (merge two tissues, intersect with PPI, do graph scoring)
@@ -30,11 +34,14 @@ if (os.path.exists(DATABASE)):
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
 
-hgnc_file = open(HGNC_FILE)
-pappi.matching.import_hgnc_entrez2ensembl(hgnc_file, con)
+hpa_file = open(HPA_FILE)
+pappi.hpa.import_tissue(hpa_file, con)
 
-#hpa_file = open(HPA_FILE)
-#pappi.hpa.import_tissue(hpa_file, con)
-#ppi_file = open(PPI_FILE)
-#p2g_file = open(P2G_FILE)
-#pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
+if (USE_STRINGDB):
+    ppi_file = open(PPI_FILE)
+    p2g_file = open(P2G_FILE)
+    pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
+else:
+    ccsb_file = open(CCSB_FILE)
+    hgnc_file = open(HGNC_FILE)
+    pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)

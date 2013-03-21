@@ -17,7 +17,7 @@ SELECT
     Protein1,
     Protein2,
     Score
-FROM ppi_raw_proteins
+FROM stringdb_raw
 WHERE Protein1 < Protein2;
 
 
