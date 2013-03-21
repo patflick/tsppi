@@ -1,14 +1,14 @@
 
 
-from pappi import hpa
-from pappi import ppi
+import pappi
 import os
 
 DATABASE='/cygdrive/d/PPI/hpaDB.sqlite'
 
 PPI_FILE='/cygdrive/d/PPI/string-db/human_protein.links.v9.0_700.csv'
-HPA_FILE='/home/flick/dev/ppi/hpa/data/normal_tissue.csv'
+HPA_FILE='/home/flick/dev/ppi/hpa/data/hpa_normal_tissue_v11.csv'
 P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
+HGNC_FILE='/home/flick/dev/ppi/hpa/data/hgnc_entrez_ensembl.txt'
 
 # TODO properly test this
 # TODO continue with pipeline (merge two tissues, intersect with PPI, do graph scoring)
@@ -24,10 +24,17 @@ P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
 #    => How can I test for that?
 
 # first delete an old DB, to make sure everything is new
-os.remove(DATABASE)
+if (os.path.exists(DATABASE)):
+    os.remove(DATABASE)
 
-hpa_file = open(HPA_FILE)
-hpa.import_hpa(hpa_file, DATABASE)
-ppi_file = open(PPI_FILE)
-p2g_file = open(P2G_FILE)
-ppi.import_stringdb(ppi_file, p2g_file, DATABASE)
+# get new database connection
+con = pappi.sql.get_conn(DATABASE)
+
+hgnc_file = open(HGNC_FILE)
+pappi.matching.import_hgnc_entrez2ensembl(hgnc_file, con)
+
+#hpa_file = open(HPA_FILE)
+#pappi.hpa.import_tissue(hpa_file, con)
+#ppi_file = open(PPI_FILE)
+#p2g_file = open(P2G_FILE)
+#pappi.ppi.import_stringdb(ppi_file, p2g_file, con)

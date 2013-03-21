@@ -21,6 +21,7 @@ def get_conn(db=PAPPI_SQLITE_DEFAULT_DB):
     @param db: The SQLite database name to be used (default: pappiDB.sqlite)
     @return: The current SQL connection.
     """
+    global PAPPI_SQL_CONN
     if (not PAPPI_SQL_CONN):
         # establish a SQLite3 connection.
         # If another database is to be used, this is the only
