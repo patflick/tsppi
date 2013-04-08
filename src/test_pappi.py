@@ -36,6 +36,7 @@ con = pappi.sql.get_conn(DATABASE)
 
 hpa_file = open(HPA_FILE)
 pappi.hpa.import_tissue(hpa_file, con)
+pappi.hpa.init_gene_levels(con)
 
 if (USE_STRINGDB):
     ppi_file = open(PPI_FILE)
@@ -45,3 +46,4 @@ else:
     ccsb_file = open(CCSB_FILE)
     hgnc_file = open(HGNC_FILE)
     pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
+    

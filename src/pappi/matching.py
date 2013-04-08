@@ -7,6 +7,7 @@ Import operations for ID matching tables. (Ensembl ENSG<->ENSP and Ensembl ENSG 
 import csv
 
 from config import PAPPI_SQL_HGNC_FILTER_SCRIPT
+from sql import execute_script
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 PAPPI_HGNC_MAPPING_TABLE_NAME = 'hgnc_raw'
@@ -105,19 +106,7 @@ def init_entrez2ensembl(sql_conn):
     
     @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_SQL_HGNC_FILTER_SCRIPT, 'r') as script_file:
-        # initialize the cursor object
-        cur = sql_conn.cursor()
-
-        # read script
-        sql_script = script_file.read()
-        
-        # execute the script
-        cur.executescript(sql_script)
-
-        # close cursor and commit
-        cur.close()
-        sql_conn.commit()
+    execute_script(PAPPI_SQL_HGNC_FILTER_SCRIPT, sql_conn)
 
 
 

@@ -10,6 +10,7 @@ import re
 from . import matching
 from config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
 from config import PAPPI_SQL_CCSB_FILTER_SCRIPT
+from sql import execute_script
 
 # TODO put all constants in an own module
 PAPPI_STRINGDB_RAW_TABLE_NAME = 'stringdb_raw'
@@ -67,19 +68,7 @@ def init_stringdb_ppi(sql_conn):
     
     @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_SQL_STRINGDB_FILTER_SCRIPT, 'r') as script_file:
-        # initialize the cursor object
-        cur = sql_conn.cursor()
-
-        # read script
-        sql_script = script_file.read()
-        
-        # execute the script
-        cur.executescript(sql_script)
-
-        # close cursor and commit
-        cur.close()
-        sql_conn.commit()
+    execute_script(PAPPI_SQL_STRINGDB_FILTER_SCRIPT, sql_conn)
 
 
 
@@ -148,19 +137,9 @@ def init_ccsb_ppi(sql_conn):
     
     @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_SQL_CCSB_FILTER_SCRIPT, 'r') as script_file:
-        # initialize the cursor object
-        cur = sql_conn.cursor()
+    execute_script(PAPPI_SQL_CCSB_FILTER_SCRIPT, sql_conn)
 
-        # read script
-        sql_script = script_file.read()
-        
-        # execute the script
-        cur.executescript(sql_script)
 
-        # close cursor and commit
-        cur.close()
-        sql_conn.commit()
 
 def import_ccsb(ccsb_file, hgnc_file, sql_conn):
     """

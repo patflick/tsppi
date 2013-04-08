@@ -7,6 +7,8 @@ Import and filtering operations for the HPA data.
 import csv
 
 from config import PAPPI_SQL_HPA_FILTER_SCRIPT
+from config import PAPPI_SQL_HPA_GENE_LEVELS_SCRIPT
+from sql import execute_script
 
 
 PAPPI_HPA_RAW_TABLE_NAME = 'hpa_normal_tissue'
@@ -20,19 +22,17 @@ def init_tissue_data(sql_conn):
     
     @param sql_conn: The SQL connection to be used.
     """
-    with open(PAPPI_SQL_HPA_FILTER_SCRIPT, 'r') as script_file:
-        # initialize the cursor object
-        cur = sql_conn.cursor()
+    execute_script(PAPPI_SQL_HPA_FILTER_SCRIPT, sql_conn)
 
-        # read script
-        sql_script = script_file.read()
-        
-        # execute the script
-        cur.executescript(sql_script)
 
-        # close cursor and commit
-        cur.close()
-        sql_conn.commit()
+def init_gene_levels(sql_conn):
+    """
+    Creates a new `hpa_gene_levels` table with summarizing
+    counts for all expression levels per gene.
+    
+    @param sql_conn: The SQL connection to be used.
+    """
+    execute_script(PAPPI_SQL_HPA_GENE_LEVELS_SCRIPT, sql_conn)
 
 
 

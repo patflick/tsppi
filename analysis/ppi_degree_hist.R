@@ -2,49 +2,29 @@
 # 
 # Author: flick
 ###############################################################################
-DATABASE_FILE = 'hpaDB.sqlite'
 
-if (.Platform$OS.type == "unix")
-{
-	setwd("/cygdrive/d/PPI/");
-} else {
-	setwd("D:\\PPI");
-}
-
-dbpath = file.path(getwd(), DATABASE_FILE)
-
-library('RSQLite')
-
-drv <- dbDriver("SQLite")
-con <- dbConnect(drv, dbname = dbpath)
+# load sql config and get connection
+source("sql_config.R", chdir=TRUE)
+con <- get_sql_conn()
 
 data <- dbGetQuery(con, "
 SELECT
-		a.Gene,
-		count(CASE WHEN a.Level='High' THEN 1 ELSE NULL END) as CountHigh,
-		count(CASE WHEN a.Level='Medium' THEN 1 ELSE NULL END) as CountMedium,
-		count(CASE WHEN a.Level='Low' THEN 1 ELSE NULL END) as CountLow,
-		b.Degree as Degree
-	FROM hpa_normal_tissue AS a
-	INNER JOIN 
-		ppi_node_degrees AS b
-	ON a.Gene = b.[a.Gene]
-WHERE
-    [Expression.type] = 'APE'
-	
-    AND
-    (
-        Reliability = 'High'
-        OR
-        Reliability = 'Medium' 
-    )
-	
-GROUP BY Gene
+	Gene,
+	CountHigh,
+	CountMedium,
+	CountLow,
+	CountExpressed,
+	CountTotal
+FROM hpa_gene_levels
 ORDER BY CountHigh+CountMedium+CountLow ASC
 ")
 
 
-dbDisconnect(con)
+
+# load full PPI network
+source("ppi_network_functions.R", chdir=TRUE)
+
+full_ppi_graph <- load_ppi()
 
 
 # calculate the power law
@@ -61,10 +41,32 @@ par(mfrow=c(2,2))
 
 thresholds<-c(0.2,0.4,0.6,0.8)
 
+# TODO TODO
+#  - differentiate between degree distribution of subgraphs
+#    and the degrees in the full graph (both intersected with all APE genes, 
+#    and ALL CCSB genes => different results, maybe the degree distribution
+#    of the bigger (all CCSB genes) network is more special, the degree
+#    distribution of only the subgraphs are a bit shitty because the networks are
+#    too small (eg 472 nodes and 320 edges)
+#  - compare subgraphs with all the other network analysis with igraph
+#  - use also Staining (not only APE)
+
 for (threshold in thresholds) {
 	n <- nrow(data)
-	degrees_high = data$Degree[1:floor(threshold*n)]
-	degrees_low = data$Degree[(floor(threshold*n)+1):n]
+	# get the high and low specificity genes
+	high_specificity_genes <- data$Gene[1:floor(threshold*n)]
+	low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
+	
+	# get the induced subgraphs
+	low_spec_ppi <- subset_ppi(full_ppi_graph, low_specificity_genes)
+	high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
+	
+	# get node degrees of subgraphs
+	degrees_high = degree(high_spec_ppi)
+	degrees_low = degree(low_spec_ppi)
+	
+	#degrees_high = data$Degree[1:floor(threshold*n)]
+	#degrees_low = data$Degree[(floor(threshold*n)+1):n]
 	hist_high = hist(degrees_high, plot=FALSE,breaks=max(degrees_high))
 	hist_low = hist(degrees_low, plot=FALSE,breaks=max(degrees_low))
 	y1 = c(0,hist_low$density,0)

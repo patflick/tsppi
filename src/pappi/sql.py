@@ -13,6 +13,22 @@ import sqlite3
 PAPPI_SQL_CONN=None
 
 
+def execute_script(script_filename, sql_conn=PAPPI_SQL_CONN):
+    with open(script_filename, 'r') as script_file:
+        # initialize the cursor object
+        cur = sql_conn.cursor()
+
+        # read script
+        sql_script = script_file.read()
+        
+        # execute the script
+        cur.executescript(sql_script)
+
+        # close cursor and commit
+        cur.close()
+        sql_conn.commit()
+
+
 def get_conn(db=PAPPI_SQLITE_DEFAULT_DB):
     """
     Returns the current SQL connection object. Connects and returns a
