@@ -3,6 +3,8 @@
 # Author: flick
 ###############################################################################
 
+# load utils
+source("utils.R", chdir=TRUE)
 
 # load sql config and get connection
 source("sql_config.R", chdir=TRUE)
@@ -47,12 +49,18 @@ for (threshold in thresholds) {
 	high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
 	
 	# get node degrees of subgraphs
-	degrees_high = degree(high_spec_ppi)
-	degrees_low = degree(low_spec_ppi)
+	#degrees_high = degree(high_spec_ppi)
+	#degrees_low = degree(low_spec_ppi)
+	list[degrees_high, degrees_low] <- subgraph_vertex_property(full_ppi_graph, high_specificity_genes, low_specificity_genes, property_function=function(graph) betweenness(graph, directed=FALSE), method="global")
+	
+	ass <- assortativity.degree(full_ppi_graph, directed=FALSE)
+	ass_low <- assortativity.degree(low_spec_ppi, directed=FALSE)
+	ass_high <- assortativity.degree(high_spec_ppi, directed=FALSE)
+	print(list(global=ass,low=ass_low,high=ass_high))
 	
 	#degrees_high=data$Degree[which(data$CountLow+data$CountMedium+data$CountHigh > threshold)]
 	#degrees_low=data$Degree[which(data$CountLow+data$CountMedium+data$CountHigh <= threshold)]
-	plot(density(degrees_low), col="blue", main=paste(c("Degree distribution for threshold ", threshold),sep=""), xlab="Node degree")
+	plot(density(degrees_low), col="blue", log="x", main=paste(c("Degree distribution for threshold ", threshold),sep=""), xlab="Node degree")
 	lines(density(degrees_high),col="red")
 	legend("topright",legend=c("High Specificity", "Low Specificity"), fill=c("red","blue"))
 }

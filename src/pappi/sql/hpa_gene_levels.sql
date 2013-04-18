@@ -11,13 +11,20 @@ SELECT
 		count() as CountTotal
 	FROM hpa_normal_tissue AS a
 WHERE
-    [Expression.type] = 'APE'
-	
+	(
+    a.[Expression.type] = "APE"
     AND
     (
-        Reliability = 'High'
+        a.Reliability = "High"
         OR
-        Reliability = 'Medium'
+        a.Reliability = "Medium" 
+    )
+    )
+    OR
+    (
+    a.[Expression.type] = "Staining"
+    AND
+	a.Reliability = "Supportive"
     )
 	
 GROUP BY Gene

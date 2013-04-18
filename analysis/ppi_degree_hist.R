@@ -3,6 +3,9 @@
 # Author: flick
 ###############################################################################
 
+# load utils
+source("utils.R", chdir=TRUE)
+
 # load sql config and get connection
 source("sql_config.R", chdir=TRUE)
 con <- get_sql_conn()
@@ -19,18 +22,19 @@ FROM hpa_gene_levels
 ORDER BY CountHigh+CountMedium+CountLow ASC
 ")
 
+dbDisconnect(con)
+
 
 
 # load full PPI network
 source("ppi_network_functions.R", chdir=TRUE)
-
 full_ppi_graph <- load_ppi()
 
 
 # calculate the power law
 library(igraph)
-powerlaw <- power.law.fit(data$Degree)
-print(powerlaw)
+#powerlaw <- power.law.fit(data$Degree)
+#print(powerlaw)
 
 
 
@@ -50,6 +54,7 @@ thresholds<-c(0.2,0.4,0.6,0.8)
 #    too small (eg 472 nodes and 320 edges)
 #  - compare subgraphs with all the other network analysis with igraph
 #  - use also Staining (not only APE)
+#  - use this: http://igraph.sourceforge.net/doc/R/betweenness.html
 
 for (threshold in thresholds) {
 	n <- nrow(data)
@@ -62,8 +67,12 @@ for (threshold in thresholds) {
 	high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
 	
 	# get node degrees of subgraphs
-	degrees_high = degree(high_spec_ppi)
-	degrees_low = degree(low_spec_ppi)
+	# all_degrees <- degree(full_ppi_graph)
+	# degrees_high = all_degrees[intersect(high_specificity_genes, names(all_degrees))]
+	#degrees_high = degree(high_spec_ppi)
+	#degrees_low = degree(low_spec_ppi)
+	
+	list[degrees_high, degrees_low] <- subgraph_vertex_property(full_ppi_graph, high_specificity_genes, low_specificity_genes, property_function=function(graph) betweenness(graph, directed=FALSE), method="global")
 	
 	#degrees_high = data$Degree[1:floor(threshold*n)]
 	#degrees_low = data$Degree[(floor(threshold*n)+1):n]
@@ -71,8 +80,8 @@ for (threshold in thresholds) {
 	hist_low = hist(degrees_low, plot=FALSE,breaks=max(degrees_low))
 	y1 = c(0,hist_low$density,0)
 	y2 = c(0,hist_high$density,0) 
-	plot(c(0,hist_low$breaks), y1 ,type="s", col="blue", xlim= c(0,max(c(hist_low$breaks,hist_high$breaks))),ylim= c(0,max(c(y1,y2))),main=paste(c("Degree distribution for threshold ", threshold),sep=""), xlab="Node degree", ylab="Density")
-	lines(x=c(0,hist_high$breaks), y = y2, type="s", col="red")
+	plot(c(0,hist_low$breaks), y1 ,type="o", col="blue", log = "xy", xlim= c(1,max(c(hist_low$breaks,hist_high$breaks))),ylim= c(0.0001,max(c(y1,y2))),main=paste(c("Degree distribution for threshold ", threshold),sep=""), xlab="Node degree", ylab="Density")
+	lines(x=c(0,hist_high$breaks), y = y2, type="o", col="red")
 	legend("topright",legend=c("High Specificity", "Low Specificity"), fill=c("red","blue"))
 	pl_high <- power.law.fit(degrees_high)
 	pl_low <- power.law.fit(degrees_low)

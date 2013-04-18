@@ -11,6 +11,10 @@ P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
 HGNC_FILE='/home/flick/dev/ppi/hpa/data/hgnc_entrez_ensembl.txt'
 CCSB_FILE='/home/flick/dev/ppi/hpa/data/HI_2012_PRE.tsv'
 
+# output files
+CCSB_PPI_OUT_FILE='/cygdrive/d/PPI/ccsb_ppi.csv'
+HPA_GENE_LEVELS_OUT_FILE='/cygdrive/d/PPI/gene_levels.csv'
+
 # whether to use string-db or ccsb:
 USE_STRINGDB=False
 
@@ -47,3 +51,9 @@ else:
     hgnc_file = open(HGNC_FILE)
     pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
     
+ppi_out_file = open(CCSB_PPI_OUT_FILE, 'w')
+pappi.sql.dump_csv(ppi_out_file, "ppi_genes", con)
+
+hpa_levels_file = open(HPA_GENE_LEVELS_OUT_FILE, 'w')
+pappi.sql.dump_csv(hpa_levels_file, "hpa_gene_levels", con)
+
