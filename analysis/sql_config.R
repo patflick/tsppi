@@ -10,7 +10,7 @@ prior_wd <- getwd()
 # sets the path of the sqlite3 database file
 if (.Platform$OS.type == "unix")
 {
-	setwd("/cygdrive/d/PPI/");
+	setwd("/home/patrick/dev/bio/data");
 } else {
 	setwd("D:\\PPI");
 }
