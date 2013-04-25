@@ -37,6 +37,22 @@ subset_ppi <- function(ppi_graph, genes)
 }
 
 
+rand_subset_property <- function(ppi_graph, genes, property_function=function(graph) assortativity.degree(graph, directed=FALSE),subset_size = 0.5)
+{
+	n <- length(genes)
+	# creates a random permutation of the genes
+	genes_subset <- sample(genes, floor(subset_size*n))
+	
+	# get the induced subgraphs
+	sub_ppi <- subset_ppi(ppi_graph, genes_subset)
+	
+	# calculate property of random subset
+	#ass_total <- assortativity.degree(full_ppi_graph, directed=FALSE)
+	subset_property <- property_function(sub_ppi)
+	return(subset_property)
+}
+
+
 subgraph_vertex_property <- function(ppi_graph, x, y, property_function=degree, method="global")
 {
 	

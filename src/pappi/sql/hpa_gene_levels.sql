@@ -5,9 +5,9 @@ DROP TABLE IF EXISTS tmp_hpa_gene_levels;
 CREATE TABLE tmp_hpa_gene_levels AS
 SELECT
 		a.Gene as Gene,
-		count(CASE WHEN a.Level='High' THEN 1 ELSE NULL END) as CountHigh,
-		count(CASE WHEN a.Level='Medium' THEN 1 ELSE NULL END) as CountMedium,
-		count(CASE WHEN a.Level='Low' THEN 1 ELSE NULL END) as CountLow,
+		count(CASE WHEN a.Level='High' OR a.Level="Strong" THEN 1 ELSE NULL END) as CountHigh,
+		count(CASE WHEN a.Level='Medium' OR a.Level="Moderate" THEN 1 ELSE NULL END) as CountMedium,
+		count(CASE WHEN a.Level='Low' OR a.Level="Weak" THEN 1 ELSE NULL END) as CountLow,
 		count() as CountTotal
 	FROM hpa_normal_tissue AS a
 WHERE
@@ -20,12 +20,14 @@ WHERE
         a.Reliability = "Medium" 
     )
     )
+    /*
     OR
     (
     a.[Expression.type] = "Staining"
     AND
 	a.Reliability = "Supportive"
     )
+    */
 	
 GROUP BY Gene
 ;
