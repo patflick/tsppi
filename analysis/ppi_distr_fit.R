@@ -52,12 +52,15 @@ old_rand_subset_property <- function(ppi_graph, genes)
 	return(ass_subset)
 }
 
+full_ppi_graph <- simplify(full_ppi_graph)
 
 #vertex_property <- degree(full_ppi_graph)
 #vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
 sh_paths = shortest.paths(full_ppi_graph)
 sh_paths[is.infinite(sh_paths)] = NA
-vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
+#vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
+graph_knn <- graph.knn(full_ppi_graph)
+vertex_property <- graph_knn$knn
 
 
 # get a random samples for assortativity
