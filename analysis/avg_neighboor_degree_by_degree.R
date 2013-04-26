@@ -54,8 +54,21 @@ non_nan_degrees <- degrees[match(names(non_nan_knn), names(degrees))]
 # TODO average per degree
 
 
+deg_knn <- as.data.frame(cbind(non_nan_degrees, non_nan_knn))
+
+knn_deg_means <- aggregate(deg_knn["non_nan_knn"], by = deg_knn["non_nan_degrees"], FUN=mean)
+
+plot(non_nan_degrees, non_nan_knn)
+
+
+# TODO stddev of ALL data, meaning for every vertex, the degrees of all of his neighboors into a table
+# TODO only then aggregate with mean and std-dev
+# TODO especially no multi-stage mean (messes up the total std-dev)
 
 #for (threshold in thresholds) {
+
+
+
 
 threshold <- 0.5
 n <- nrow(data)
@@ -71,11 +84,11 @@ low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
 #    plot(density(degrees_low), col="blue", log="x", main=paste(c("Degree distribution for threshold ", threshold),sep=""), xlab="Node degree")
 #    lines(density(degrees_high),col="red")
 
-plot(density(vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]), col="red")#, log="xy")
-lines(density(vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]), col="blue")
+#plot(density(vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]), col="red")#, log="xy")
+#lines(density(vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]), col="blue")
 
-low_spec_properties = vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]
-high_spec_properties = vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]
+#low_spec_properties = vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]
+#high_spec_properties = vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]
 #par(mfrow=c(2,1))
 #hist(high_spec_properties, breaks=length(high_spec_properties))
 #hist(low_spec_properties, breaks=length(low_spec_properties))
