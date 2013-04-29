@@ -42,8 +42,8 @@ full_ppi_graph <- simplify(full_ppi_graph)
 
 #vertex_property <- degree(full_ppi_graph)
 #vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
-sh_paths = shortest.paths(full_ppi_graph)
-sh_paths[is.infinite(sh_paths)] = NA
+#sh_paths = shortest.paths(full_ppi_graph)
+#sh_paths[is.infinite(sh_paths)] = NA
 #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
 graph_knn <- graph.knn(full_ppi_graph)
 degrees <- degree(full_ppi_graph)
