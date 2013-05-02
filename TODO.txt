@@ -1,0 +1,47 @@
+The 20% proteins, only 9 are connected to another,
+
+ENSG00000025156
+ENSG00000143549
+ENSG00000146112
+ENSG00000159173
+ENSG00000171346
+ENSG00000171431
+ENSG00000175084
+ENSG00000176903
+ENSG00000185479
+
+
+there are 5 that form a connected component:
+
+ENSG00000146112
+ENSG00000171346
+ENSG00000171431
+ENSG00000175084
+ENSG00000185479
+
+Those are:
+
+
+ENSG00000146112
+		protein phosphatase 1
+	
+	
+Clustering in functional analysis:
+
+ENSG00000171346
+		keratin 15
+ENSG00000171431
+		keratin 20
+ENSG00000175084
+		desmin
+ENSG00000185479
+		keratin 6B
+
+
+
+TODO 
+- find out if (when taking 20% of random proteins) they ever cluster up soo much.
+- do they ever get such high scores for david?
+
+
+

@@ -1,4 +1,5 @@
-# TODO: Add comment
+# does random permutation tests and calculates assortativity
+# of various vertex properties
 # 
 # Author: flick
 ###############################################################################
@@ -27,88 +28,88 @@ ORDER BY CountHigh+CountMedium+CountLow ASC
 
 # load full PPI network
 source("ppi_network_functions.R", chdir=TRUE)
-
 full_ppi_graph <- load_ppi()
-
-
-
-# save as png
-#png("degree_distr.png", height=800, width=1024)
-
-
-old_rand_subset_property <- function(ppi_graph, genes)
-{
-	n <- length(genes)
-	# creates a random permutation of the genes
-	threshold <- 0.5
-	genes_subset <- sample(genes, floor(threshold*n))
-	
-	# get the induced subgraphs
-	sub_ppi <- subset_ppi(ppi_graph, genes_subset)
-	
-	# calculate property of random subset
-	#ass_total <- assortativity.degree(full_ppi_graph, directed=FALSE)
-	ass_subset <- assortativity.degree(sub_ppi, directed=FALSE)
-	return(ass_subset)
-}
-
 full_ppi_graph <- simplify(full_ppi_graph)
 
+########################################################
+# choose number of random samples (permutation test)
+#  -> more = more accurate, less = faster
+########################################################
+num_perm_tests <- 10000
+
+########################################################
+# choose vertex property to calculate statistics about
+########################################################
+
+# 1.) vertex degree
 vertex_property <- degree(full_ppi_graph)
+
+# 2.) betweenness centrality
 #vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
+
+# 3.) avg shortest path
 sh_paths = shortest.paths(full_ppi_graph)
 sh_paths[is.infinite(sh_paths)] = NA
 #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
+
+# 4.) average neighboor degree
 #graph_knn <- graph.knn(full_ppi_graph)
 #vertex_property <- graph_knn$knn
 
 
-threshold <- 0.10
 
+########################################################
+# choose thresholds
+########################################################
+
+thresholds <- c(0.2)
+
+
+par(mfcol=c(2,length(thresholds)))
+
+for (threshold in thresholds) {
+	
+	
 # get a random samples for assortativity
 ass_stat_t_low <- c()
 ass_stat_t_high <- c()
-for (i in 1:10000){
-    ass_stat_t_low <- c(ass_stat_t_low, rand_subset_property(full_ppi_graph, data$Gene, function(graph) assortativity(graph, types1=vertex_property[which(names(vertex_property) %in% V(graph)$name)], directed=FALSE)), subset_size=threshold)
-	ass_stat_t_high <-  c(ass_stat_t_high, rand_subset_property(full_ppi_graph, data$Gene, function(graph) assortativity(graph, types1=vertex_property[which(names(vertex_property) %in% V(graph)$name)], directed=FALSE)), subset_size=1-threshold)
+for (i in 1:num_perm_tests){
+    ass_stat_t_low <- c(ass_stat_t_low, rand_subset_property(full_ppi_graph, data$Gene, function(graph) assortativity(graph, types1=vertex_property[which(names(vertex_property) %in% V(graph)$name)], directed=FALSE), subset_size=threshold))
+	ass_stat_t_high <-  c(ass_stat_t_high, rand_subset_property(full_ppi_graph, data$Gene, function(graph) assortativity(graph, types1=vertex_property[which(names(vertex_property) %in% V(graph)$name)], directed=FALSE), subset_size=1-threshold))
     if (i %% 2000 == 0){
         print(i)
     }
 }
 
 
-#for (threshold in thresholds) {
-    
-    
-    n <- nrow(data)
-    # get the high and low specificity genes
-    high_specificity_genes <- data$Gene[1:floor(threshold*n)]
-    low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
-    
-    # get the induced subgraphs
-    low_spec_ppi <- subset_ppi(full_ppi_graph, low_specificity_genes)
-    high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
-    
-    # get node degrees of subgraphs
-    #degrees_high = degree(high_spec_ppi)
-    #degrees_low = degree(low_spec_ppi)
-    #list[degrees_high, degrees_low] <- subgraph_vertex_property(full_ppi_graph, high_specificity_genes, low_specificity_genes, property_function=function(graph) betweenness(graph, directed=FALSE), method="global")
-    
-    #ass <- assortativity.degree(full_ppi_graph, directed=FALSE)
-    ass_low <- assortativity(low_spec_ppi, types1=vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)], directed=FALSE)
-    ass_high <- assortativity(high_spec_ppi, types1=vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)], directed=FALSE)
-    print(list(global=ass,low=ass_low,high=ass_high))
-   
 
-par(mfrow=c(2,1))
 
-den_below <- density(ass_stat_t_low)
-den_above <- density(ass_stat_t_high)
+n <- nrow(data)
+# get the high and low specificity genes
+high_specificity_genes <- data$Gene[1:floor(threshold*n)]
+low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
+
+# get the induced subgraphs
+low_spec_ppi <- subset_ppi(full_ppi_graph, low_specificity_genes)
+high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
+
+# get the vertex property subsets for the two classes
+low_spec_properties = vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]
+high_spec_properties = vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]
+
+# get assortativity for the subgraphs given by the promiscuous and specific proteins
+ass_low <- assortativity(low_spec_ppi, types1=low_spec_properties, directed=FALSE)
+ass_high <- assortativity(high_spec_ppi, types1=high_spec_properties, directed=FALSE)
+
+den_below <- density(na.omit(ass_stat_t_low))
+den_above <- density(na.omit(ass_stat_t_high))
 
 xlims <- c(min(den_below$x,den_above$x, ass_low, ass_high), max(den_below$x,den_above$x, ass_low, ass_high))
 ylims <- c(min(den_below$y,den_above$y), max(den_below$y,den_above$y))
 
-plot(NaN, xlim=xlims, ylim=ylims, main="Assortativity of node degree for random permutations")
+
+# plot the density of the assortativity of the random sampling
+plot(NaN, xlim=xlims, ylim=ylims, main="Assortativity", xlab="Assortativity", ylab="density of random samples")
 lines(den_below, col="red")
 lines(den_above, col="blue")
 abline(v = ass_low, col="blue")
@@ -123,19 +124,20 @@ abline(v = ass_high, col="red")
 
 
 
-low_spec_properties = vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]
-high_spec_properties = vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]
 
 
-plot(density(high_spec_properties), col="red")#, log="xy")
-lines(density(low_spec_properties), col="blue")
+
+plot(density(na.omit(high_spec_properties)), main="Density", col="red")#, log="x")
+lines(density(na.omit(low_spec_properties)), col="blue")
 
 #par(mfrow=c(2,1))
 #hist(high_spec_properties, breaks=length(high_spec_properties))
 #hist(low_spec_properties, breaks=length(low_spec_properties))
 
 legend("topright",legend=c("High Specificity", "Low Specificity"), fill=c("red","blue"))
-#}
+
+
+}
 
 
 
