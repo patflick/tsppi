@@ -42,19 +42,19 @@ num_perm_tests <- 10000
 ########################################################
 
 # 1.) vertex degree
-vertex_property <- degree(full_ppi_graph)
+# vertex_property <- degree(full_ppi_graph)
 
 # 2.) betweenness centrality
-#vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
+# vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
 
 # 3.) avg shortest path
-sh_paths = shortest.paths(full_ppi_graph)
-sh_paths[is.infinite(sh_paths)] = NA
+#sh_paths = shortest.paths(full_ppi_graph)
+#sh_paths[is.infinite(sh_paths)] = NA
 #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
 
 # 4.) average neighboor degree
-#graph_knn <- graph.knn(full_ppi_graph)
-#vertex_property <- graph_knn$knn
+graph_knn <- graph.knn(full_ppi_graph)
+vertex_property <- graph_knn$knn
 
 
 
@@ -62,7 +62,7 @@ sh_paths[is.infinite(sh_paths)] = NA
 # choose thresholds
 ########################################################
 
-thresholds <- c(0.2)
+thresholds <- c(0.2, 0.3, 0.5)
 
 
 par(mfcol=c(2,length(thresholds)))

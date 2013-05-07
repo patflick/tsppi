@@ -20,14 +20,14 @@ WHERE
         a.Reliability = "Medium" 
     )
     )
-    /*
+    
     OR
     (
     a.[Expression.type] = "Staining"
     AND
 	a.Reliability = "Supportive"
     )
-    */
+    
 	
 GROUP BY Gene
 ;
