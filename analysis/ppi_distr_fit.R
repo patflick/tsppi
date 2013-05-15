@@ -4,27 +4,6 @@
 # Author: flick
 ###############################################################################
 
-# load utils
-source("utils.R", chdir=TRUE)
-
-# load sql config and get connection
-source("sql_config.R", chdir=TRUE)
-con <- get_sql_conn()
-
-data <- dbGetQuery(con, "
-SELECT
-    Gene,
-    CountHigh,
-    CountMedium,
-    CountLow,
-    CountExpressed,
-    CountTotal
-FROM hpa_gene_levels
-ORDER BY CountHigh+CountMedium+CountLow ASC
-
-")
-
-
 
 # load full PPI network
 source("ppi_network_functions.R", chdir=TRUE)
@@ -53,8 +32,8 @@ num_perm_tests <- 10000
 #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
 
 # 4.) average neighboor degree
-graph_knn <- graph.knn(full_ppi_graph)
-vertex_property <- graph_knn$knn
+ graph_knn <- graph.knn(full_ppi_graph)
+ vertex_property <- graph_knn$knn
 
 
 
@@ -63,6 +42,14 @@ vertex_property <- graph_knn$knn
 ########################################################
 
 thresholds <- c(0.2, 0.3, 0.5)
+
+
+
+# load the specific and promiscuous genes
+source("gene_spec_classification.R", chdir=TRUE)
+
+
+
 
 
 par(mfcol=c(2,length(thresholds)))
@@ -84,18 +71,20 @@ for (i in 1:num_perm_tests){
 
 
 
-n <- nrow(data)
 # get the high and low specificity genes
-high_specificity_genes <- data$Gene[1:floor(threshold*n)]
-low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
+#high_specificity_genes <- data$Gene[1:floor(threshold*n)]
+#low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
+list[low_specificity_genes, high_specificity_genes] <- get_genes_in_specificity_classes(threshold)
+
+# get the vertex property subsets for the two classes
+#low_spec_properties = vertex_property[which(names(vertex_property) %in% low_specific_genes)]
+#high_spec_properties = vertex_property[which(names(vertex_property) %in% high_specific_genes)]
+list[low_spec_properties, high_spec_properties] <- get_vertex_properties_in_spec_classes(vertex_property, threshold)
+
 
 # get the induced subgraphs
 low_spec_ppi <- subset_ppi(full_ppi_graph, low_specificity_genes)
 high_spec_ppi <- subset_ppi(full_ppi_graph, high_specificity_genes)
-
-# get the vertex property subsets for the two classes
-low_spec_properties = vertex_property[which(names(vertex_property) %in% V(low_spec_ppi)$name)]
-high_spec_properties = vertex_property[which(names(vertex_property) %in% V(high_spec_ppi)$name)]
 
 # get assortativity for the subgraphs given by the promiscuous and specific proteins
 ass_low <- assortativity(low_spec_ppi, types1=low_spec_properties, directed=FALSE)
@@ -123,12 +112,27 @@ abline(v = ass_high, col="red")
 #    lines(density(degrees_high),col="red")
 
 
+h_nbreaks = 7
+
+h_high <- hist(log10(high_spec_properties), breaks=h_nbreaks, plot=FALSE)
+h_low <- hist(log10(low_spec_properties), breaks=h_nbreaks, plot=FALSE)
+
+x_high <- 10**h_high$mids
+y_high <- h_high$counts/sum(h_high$counts)
+
+x_low <- 10**h_low$mids
+y_low <- h_low$counts/sum(h_low$counts)
 
 
 
 
-plot(density(na.omit(high_spec_properties)), main="Density", col="red")#, log="x")
-lines(density(na.omit(low_spec_properties)), col="blue")
+#plot(density(na.omit(high_spec_properties)), main="Density", col="red", log="xy")
+#lines(density(na.omit(low_spec_properties)), col="blue")
+plot(x_high, y_high, col="red", type="p", log="xy")
+abline(lm(log10(y_high)~log10(x_high)),col="red")
+lines(x_low, y_low, col="blue", type="p", log="xy")
+abline(lm(log10(y_low)~log10(x_low)),col="blue")
+
 
 #par(mfrow=c(2,1))
 #hist(high_spec_properties, breaks=length(high_spec_properties))

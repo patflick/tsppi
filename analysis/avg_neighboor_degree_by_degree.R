@@ -46,19 +46,19 @@ full_ppi_graph <- simplify(full_ppi_graph)
 #sh_paths[is.infinite(sh_paths)] = NA
 #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
 graph_knn <- graph.knn(full_ppi_graph)
-degrees <- degree(full_ppi_graph)
+#degrees <- degree(full_ppi_graph)
 
-non_nan_knn <- graph_knn$knn[!is.na(graph_knn$knn)]
-non_nan_degrees <- degrees[match(names(non_nan_knn), names(degrees))]
+vertex_property <- graph_knn$knn[!is.na(graph_knn$knn)]
+#non_nan_degrees <- degrees[match(names(non_nan_knn), names(degrees))]
 
 # TODO average per degree
 
 
-deg_knn <- as.data.frame(cbind(non_nan_degrees, non_nan_knn))
+#deg_knn <- as.data.frame(cbind(non_nan_degrees, non_nan_knn))
 
-knn_deg_means <- aggregate(deg_knn["non_nan_knn"], by = deg_knn["non_nan_degrees"], FUN=mean)
+#knn_deg_means <- aggregate(deg_knn["non_nan_knn"], by = deg_knn["non_nan_degrees"], FUN=mean)
 
-plot(non_nan_degrees, non_nan_knn)
+#plot(non_nan_degrees, non_nan_knn, log="xy")
 
 
 # TODO stddev of ALL data, meaning for every vertex, the degrees of all of his neighboors into a table
@@ -71,11 +71,22 @@ plot(non_nan_degrees, non_nan_knn)
 
 
 threshold <- 0.5
-n <- nrow(data)
 # get the high and low specificity genes
 high_specificity_genes <- data$Gene[1:floor(threshold*n)]
 low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
 
+# get promiscuous and specific genes
+source("gene_spec_classification.R", chdir=TRUE)
+list[promiscuous_properties, specific_properties] <- get_vertex_properties_in_spec_classes(vertex_property, threshold)
+
+# load plot function for plotting by degree
+source("plots/property_by_degree.R", chdir=TRUE)
+
+par(mfrow=c(3,1))
+
+scatterplot_by_degree(full_ppi_graph, promiscuous_properties, specific_properties, "Average neighboor degree")
+boxplot_by_degree(full_ppi_graph, promiscuous_properties, specific_properties, "Average neighboor degree")
+mean_log_lm_plot_by_degree(full_ppi_graph, promiscuous_properties, specific_properties, "Average neigboor degree")
 
 
 
@@ -93,7 +104,7 @@ low_specificity_genes <- data$Gene[(floor(threshold*n)+1):n]
 #hist(high_spec_properties, breaks=length(high_spec_properties))
 #hist(low_spec_properties, breaks=length(low_spec_properties))
 
-legend("topright",legend=c("High Specificity", "Low Specificity"), fill=c("red","blue"))
+#legend("topright",legend=c("High Specificity", "Low Specificity"), fill=c("red","blue"))
 #}
 
 
