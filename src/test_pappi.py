@@ -3,20 +3,20 @@
 import pappi
 import os
 
-DATABASE='/cygdrive/d/PPI/hpaDB.sqlite'
+#DATABASE='/cygdrive/d/PPI/hpaDB.sqlite'
+#
+#PPI_FILE='/cygdrive/d/PPI/string-db/human_protein.links.v9.0_700.csv'
+#HPA_FILE='/home/flick/dev/ppi/hpa/data/hpa_normal_tissue_v11.csv'
+#P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
+#HGNC_FILE='/home/flick/dev/ppi/hpa/data/hgnc_entrez_ensembl.txt'
+#CCSB_FILE='/home/flick/dev/ppi/hpa/data/HI_2012_PRE.tsv'
 
-PPI_FILE='/cygdrive/d/PPI/string-db/human_protein.links.v9.0_700.csv'
-HPA_FILE='/home/flick/dev/ppi/hpa/data/hpa_normal_tissue_v11.csv'
-P2G_FILE='/home/flick/dev/ppi/hpa/data/ensembl_ID_matching.csv'
-HGNC_FILE='/home/flick/dev/ppi/hpa/data/hgnc_entrez_ensembl.txt'
-CCSB_FILE='/home/flick/dev/ppi/hpa/data/HI_2012_PRE.tsv'
 
-
-#DATA_FOLDER='/home/patrick/dev/bio/data/'
-#HPA_FILE  = DATA_FOLDER + 'hpa_normal_tissue_v11.csv'
-#HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl.txt'
-#CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
-#DATABASE  = DATA_FOLDER + 'hpaDB.sqlite'
+DATA_FOLDER='/home/patrick/dev/bio/data/'
+HPA_FILE  = DATA_FOLDER + 'hpa_normal_tissue_v11.csv'
+HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl.txt'
+CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
+DATABASE  = DATA_FOLDER + 'hpaDB.sqlite'
 
 
 # output files

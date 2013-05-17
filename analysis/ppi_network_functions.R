@@ -39,6 +39,11 @@ subset_ppi <- function(ppi_graph, genes)
 
 rand_subset_property <- function(ppi_graph, genes, property_function=function(graph) assortativity.degree(graph, directed=FALSE),subset_size = 0.5)
 {
+    # TODO wtf mache ich mit dem hier? wieso klappt es nicht?
+#    ppi_merged <- subset_ppi(ppi_graph, genes)
+ #   genes <- V(ppi_merged)
+
+
 	n <- length(genes)
 	# creates a random permutation of the genes
 	genes_subset <- sample(genes, floor(subset_size*n))

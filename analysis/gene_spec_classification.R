@@ -11,6 +11,7 @@ source("utils.R", chdir=TRUE)
 # holds the HPA expression data as soon as it is loaded
 # making sure the data is only loaded once
 EXPRESSED_GENES_DATA <- 0
+EXPRESSED_GENES_LOADED <- FALSE
 
 # loads the expressed genes data from the database in
 # sorted order. then returns the data. if the data
@@ -18,7 +19,7 @@ EXPRESSED_GENES_DATA <- 0
 # database again. the data in memory is returned.
 load_expression_ordered_genes <- function()
 {
-    if (EXPRESSED_GENES_DATA == 0)
+    if (! EXPRESSED_GENES_LOADED)
     {
         # load sql config and get connection
         source("sql_config.R", chdir=TRUE)
@@ -35,6 +36,8 @@ load_expression_ordered_genes <- function()
         FROM hpa_gene_levels
         ORDER BY CountHigh+CountMedium+CountLow ASC
         ")
+
+        EXPRESSED_GENES_LOADED <<- TRUE
     
         dbDisconnect(con)
     }
@@ -61,6 +64,15 @@ get_genes_in_specificity_classes <- function(threshold=0.5)
 }
 
 
+get_all_hpa_genes <- function()
+{
+     # get the gene data
+    data <- load_expression_ordered_genes()
+
+    return(data$Gene)
+}
+
+
 # returns the given vertex properties of the network, classified into two
 # gene specificity classes as list[promiscuous_properties, specific_properties]
 # according to the classification threshold given.
@@ -70,8 +82,8 @@ get_vertex_properties_in_spec_classes <- function(vertex_property, threshold = 0
     list[promiscuous_genes, specific_genes] <- get_genes_in_specificity_classes(threshold)
 
     # get the low and high spec properties from the selected genes
-    promiscuous_properties = vertex_property[which(names(vertex_property) %in% promiscuous_genes)]
-    specific_properties = vertex_property[which(names(vertex_property) %in% specific_genes)]
+    promiscuous_properties = vertex_property[match(promiscuous_genes, names(vertex_property))]
+    specific_properties = vertex_property[match(specific_genes, names(vertex_property))]
     
     # return a list with the two gene vectors (promiscuous and specific)
     return(list(promiscuous_properties=promiscuous_properties, specific_properties=specific_properties))
