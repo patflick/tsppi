@@ -45,3 +45,15 @@ TODO
 
 
 
+TODO for quan:
+- p value for edge internalness random permutation test
+- funtional annotation for gene expression?
+
+
+Notes from meeting with quan:
+
+- use all HPA data, not only reliable, just to see what comes out
+- for edge internalness, don't consider specific-specific edges that are never expressed together (0 in the plot before)
+- random expectation for edge expression by tissue
+
+

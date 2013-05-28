@@ -18,8 +18,11 @@ plot_rand_perm_density_2class <- function(class1, class2, property_function, num
     threshold <- length(class1)/(length(all_items))
 
     # get the density for random permutation tests for the property
-    density_class1 <- rand_perm_test_density(all_items, property_function, num_perm_tests, threshold)
-    density_class2 <- rand_perm_test_density(all_items, property_function, num_perm_tests, 1-threshold)
+    rand_class1 <- rand_perm_test(all_items, property_function, num_perm_tests, threshold)
+    rand_class2 <- rand_perm_test(all_items, property_function, num_perm_tests, 1-threshold)
+
+    density_class1 <- density(rand_class1)
+    density_class2 <- density(rand_class2)
 
     # calc limits for the plot
     xlims <- range(density_class1$x,density_class2$x, property_class1, property_class2)
@@ -33,5 +36,23 @@ plot_rand_perm_density_2class <- function(class1, class2, property_function, num
     abline(v = property_class1, col="red")
     abline(v = property_class2, col="blue")
 
+
+    # calculate p values
+    sd_class1 = sd(rand_class1)
+    mean_class1 = mean(rand_class1)
+    #pvalue_class1 = 1-pnorm(property_class1, mean=mean_class1, sd=sd_class1)
+    pvalue_class1 = round(1-pnorm(abs(property_class1-mean_class1)/sd_class1), digits=4)
+    pvalue_class1_text = paste(c("p ~= ", pvalue_class1), sep="", collapse="")
+    # print(pvalue_class1_text)
+    text(property_class1, 0, pvalue_class1_text, pos=4, col="red")
+
+    # calculate p values
+    sd_class2 = sd(rand_class2)
+    mean_class2 = mean(rand_class2)
+    #pvalue_class2 = 2-pnorm(property_class2, mean=mean_class2, sd=sd_class2)
+    pvalue_class2 = round(1-pnorm(abs(property_class2-mean_class2)/sd_class2), digits=4)
+    pvalue_class2_text = paste(c("p ~= ", pvalue_class2), sep="", collapse="")
+    # print(pvalue_class2_text)
+    text(property_class2, 0, pvalue_class2_text, pos=2, col="blue")
 }
 

@@ -18,10 +18,15 @@ HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl.txt'
 CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
 DATABASE  = DATA_FOLDER + 'hpaDB.sqlite'
 
+# load hk and ts genes
+HK_FILE = DATA_FOLDER + 'chang_hk.csv'
+TS_FILE = DATA_FOLDER + 'chang_ts.csv'
+
+
 
 # output files
-CCSB_PPI_OUT_FILE='/cygdrive/d/PPI/ccsb_ppi.csv'
-HPA_GENE_LEVELS_OUT_FILE='/cygdrive/d/PPI/gene_levels.csv'
+CCSB_PPI_OUT_FILE= DATA_FOLDER + 'ccsb_ppi.csv'
+HPA_GENE_LEVELS_OUT_FILE=DATA_FOLDER + 'gene_levels.csv'
 
 # whether to use string-db or ccsb:
 USE_STRINGDB=False
@@ -40,25 +45,37 @@ USE_STRINGDB=False
 #    => How can I test for that?
 
 # first delete an old DB, to make sure everything is new
-if (os.path.exists(DATABASE)):
-    os.remove(DATABASE)
-
+# if (os.path.exists(DATABASE)):
+#     os.remove(DATABASE)
+# 
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
+# 
+# hpa_file = open(HPA_FILE)
+# pappi.hpa.import_tissue(hpa_file, con)
+# pappi.hpa.init_gene_levels(con)
+# 
+# if (USE_STRINGDB):
+#     ppi_file = open(PPI_FILE)
+#     p2g_file = open(P2G_FILE)
+#     pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
+# else:
+#     ccsb_file = open(CCSB_FILE)
+#     hgnc_file = open(HGNC_FILE)
+#     pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
+#     
 
-hpa_file = open(HPA_FILE)
-pappi.hpa.import_tissue(hpa_file, con)
-pappi.hpa.init_gene_levels(con)
+# TODO: may need to load entrez to ensembl database first (in case string db is used)
+hk_file = open(HK_FILE)
+pappi.housekeeping.import_entrez_file(hk_file, con, "hk_entrez")
+pappi.housekeeping.translate_entrez_2_ensembl(con, "hk_entrez", "hk_ensembl")
 
-if (USE_STRINGDB):
-    ppi_file = open(PPI_FILE)
-    p2g_file = open(P2G_FILE)
-    pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
-else:
-    ccsb_file = open(CCSB_FILE)
-    hgnc_file = open(HGNC_FILE)
-    pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
-    
+ts_file = open(TS_FILE)
+pappi.housekeeping.import_entrez_file(ts_file, con, "ts_entrez")
+pappi.housekeeping.translate_entrez_2_ensembl(con, "ts_entrez", "ts_ensembl")
+
+
+
 ppi_out_file = open(CCSB_PPI_OUT_FILE, 'w')
 pappi.sql.dump_csv(ppi_out_file, "ppi_genes", con)
 

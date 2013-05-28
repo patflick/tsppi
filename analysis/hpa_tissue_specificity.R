@@ -2,40 +2,21 @@
 # 
 # Author: flick
 ###############################################################################
-DATABASE_FILE = 'hpaDB.sqlite'
 
-if (.Platform$OS.type == "unix")
-{
-	setwd("/cygdrive/d/PPI/");
-} else {
-	setwd("D:\\PPI");
-}
+# load sql config and get connection
+source("sql_config.R", chdir=TRUE)
+con <- get_sql_conn()
 
-dbpath = file.path(getwd(), DATABASE_FILE)
-
-library('RSQLite')
-
-drv <- dbDriver("SQLite")
-con <- dbConnect(drv, dbname = dbpath)
 
 data <- dbGetQuery(con, "
 SELECT
-		Gene,
-		count(CASE WHEN Level='High' THEN 1 ELSE NULL END) as CountHigh,
-		count(CASE WHEN Level='Medium' THEN 1 ELSE NULL END) as CountMedium,
-		count(CASE WHEN Level='Low' THEN 1 ELSE NULL END) as CountLow
-	FROM hpa_normal_tissue
-WHERE
-    [Expression.type] = 'APE'
-	
-    AND
-    (
-        Reliability = 'High'
-        OR
-        Reliability = 'Medium' 
-    )
-	
-GROUP BY Gene
+            Gene,
+            CountHigh,
+            CountMedium,
+            CountLow,
+            CountExpressed,
+            CountTotal
+        FROM hpa_gene_levels
 ORDER BY CountHigh+CountMedium+CountLow ASC, CountHigh ASC
 
 ")
@@ -44,7 +25,7 @@ dbDisconnect(con)
 
 
 # save as png
-png("hpa_tissue specificity.png", height=800, width=800)
+#png("hpa_tissue specificity.png", height=800, width=800)
 
 # colors via http://colorschemedesigner.com/#3M11Tw0w0w0w0
 colors=rev(c("#06246F", "#2040D0", "#5080FF"))
@@ -57,4 +38,4 @@ polygon(c(data$CountHigh+data$CountMedium,0), col=colors[2], border=NA)
 polygon(c(data$CountHigh,0), col=colors[3], border=NA)
 
 # close png output
-dev.off()
+# dev.off()

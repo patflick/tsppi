@@ -15,34 +15,14 @@ full_ppi_graph <- simplify(full_ppi_graph)
 # choose number of random samples (permutation test)
 #  -> more = more accurate, less = faster
 ########################################################
-num_perm_tests <- 10000
-
-########################################################
-# choose vertex property to calculate statistics about
-########################################################
-
-# 1.) vertex degree
- vertex_property <- degree(full_ppi_graph)
-
-# 2.) betweenness centrality
-# vertex_property <- betweenness(full_ppi_graph, directed=FALSE)
-
-# 3.) avg shortest path
-#sh_paths = shortest.paths(full_ppi_graph)
-#sh_paths[is.infinite(sh_paths)] = NA
-#vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
-
-# 4.) average neighboor degree
-# graph_knn <- graph.knn(full_ppi_graph)
-# vertex_property <- graph_knn$knn
-
+num_perm_tests <- 1000
 
 
 ########################################################
 # choose thresholds
 ########################################################
 
-thresholds <- c(0.4)
+thresholds <- c(0.3)
 
 
 ########################################################
@@ -56,6 +36,12 @@ source("gene_spec_classification.R", chdir=TRUE)
 
 # get all genes for the random sampling
 all_genes <- get_all_hpa_genes()
+
+
+# calc vertex degree
+vertex_property <- degree(full_ppi_graph)
+
+
 
 
 # define a function for the assortativity of subsets of the full graph

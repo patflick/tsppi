@@ -20,8 +20,8 @@ dbDisconnect(con)
 
 plot(density(data$ExpressedFraction))
 
-h <- hist(data$ExpressedFraction, breaks=100, plot=FALSE)
-h$counts <- cumsum(h$counts)
-h$density <- cumsum(h$density)
-plot(h, col=rep(c("orange","lightblue"), each=50))
+h <- hist(data$ExpressedFraction, breaks=50, plot=FALSE)
+#h$counts <- cumsum(h$counts)
+#h$density <- cumsum(h$density)
+plot(h, col="lightblue", xlab="Edge expression", main="Histrogram of edge expression")
 
