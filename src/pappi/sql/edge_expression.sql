@@ -4,9 +4,9 @@
  * whether it is expressed or not (0: not expressed, 1: expressed,
  * no entry: no reliable data)
  */
-DROP TABLE IF EXISTS hpa_tissue_expr_all;
+DROP TABLE IF EXISTS hpa_tissue_expr;
 
-CREATE TABLE hpa_tissue_expr_all AS
+CREATE TABLE hpa_tissue_expr AS
 SELECT
 	Gene,
 	Tissue,
@@ -46,6 +46,7 @@ SELECT
 /* count each protein as expressed (==1) if
  * it is expressed in at least one cell type per tissue!
  */
+    /*
 DROP TABLE IF EXISTS hpa_tissue_expr;
 
 CREATE TABLE hpa_tissue_expr AS
@@ -57,7 +58,7 @@ FROM  hpa_tissue_expr_all
 GROUP BY Gene, Tissue
 
 ;
-
+*/
 
 /* create tissue/cell.type specific expression
  * counts for edges in the PPI
@@ -82,7 +83,7 @@ INNER JOIN hpa_tissue_expr AS b
 INNER JOIN hpa_tissue_expr AS c
 	ON a.Gene2 = c.Gene
 	AND b.Tissue = c.Tissue
-	/*AND b.[Cell.Type] = c.[Cell.Type]*/
+	AND b.[Cell.Type] = c.[Cell.Type]
 GROUP BY
 	a.Gene1, a.Gene2;
 
