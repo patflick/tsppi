@@ -60,15 +60,17 @@ def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_T
         - HGNC ID
         - Approved Symbol
         - Approved Name
+        - Status
         - Entrez Gene ID
         - Ensembl Gene ID
         (and from external sources)
-        - NCBI Entrez Gene ID
-        - Ensembl ID
+        - Entrez Gene ID (supplied by NCBI)
+        - UniProt ID (supplied by UniProt)
+        - Ensembl ID (supplied by Ensembl)
     Make sure to deselect (exclude) the status: "Entry and Symbol Withdrawn"
     
     Full URL to results:
-        http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&hgnc_dbtag=on&submit=submit
+    http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&hgnc_dbtag=on&submit=submit
         
     This should return all 19060 genes.
     
@@ -82,7 +84,7 @@ def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_T
     # create table for the raw HPA data:
     # HGNC ID    Approved Symbol    Approved Name    Entrez Gene ID    Ensembl Gene ID    Entrez Gene ID    Ensembl ID
     cur.execute('DROP TABLE IF EXISTS "' + table + '";');
-    cur.execute('CREATE TABLE "' + table + '" ("HGNC.ID" varchar(16), "HGNC.Symbol" varchar(16), "HGNC.Name" varchar(256), "HGNC.EntrezID" int, "HGNC.EnsemblID" varchar(16), "NCBI.EntrezID" int, "Ensembl.EnsemblID" varchar(16));')
+    cur.execute('CREATE TABLE "' + table + '" ("HGNC.ID" varchar(16), "HGNC.Symbol" varchar(16), "HGNC.Name" varchar(256), "HGNC.Status", "HGNC.EntrezID" int, "HGNC.EnsemblID" varchar(16), "NCBI.EntrezID" int, "UniprotID" varchar(10), "Ensembl.EnsemblID" varchar(16));')
     
     # get csv reader for the hpa file
     csv_reader = csv.reader(infile, delimiter='\t',quoting=csv.QUOTE_NONE)
@@ -90,7 +92,7 @@ def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_T
     csv_reader.next()
     
     # insert all lines
-    cur.executemany('INSERT INTO "' + table + '" VALUES (?,?,?,?,?,?,?)', csv_reader)
+    cur.executemany('INSERT INTO "' + table + '" VALUES (?,?,?,?,?,?,?,?,?)', csv_reader)
     
     # close cursor and commit
     cur.close()

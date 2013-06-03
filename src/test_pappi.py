@@ -14,7 +14,7 @@ import os
 
 DATA_FOLDER='/home/patrick/dev/bio/data/'
 HPA_FILE  = DATA_FOLDER + 'hpa_normal_tissue_v11.csv'
-HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl.txt'
+HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl_uniprot.txt'
 CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
 DATABASE  = DATA_FOLDER + 'hpaDB.sqlite'
 
@@ -50,20 +50,20 @@ USE_STRINGDB=False
 # 
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
-# 
-# hpa_file = open(HPA_FILE)
-# pappi.hpa.import_tissue(hpa_file, con)
-# pappi.hpa.init_gene_levels(con)
-# 
-# if (USE_STRINGDB):
-#     ppi_file = open(PPI_FILE)
-#     p2g_file = open(P2G_FILE)
-#     pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
-# else:
-#     ccsb_file = open(CCSB_FILE)
-#     hgnc_file = open(HGNC_FILE)
-#     pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
-#     
+
+hpa_file = open(HPA_FILE)
+pappi.hpa.import_tissue(hpa_file, con)
+pappi.hpa.init_gene_levels(con)
+
+if (USE_STRINGDB):
+    ppi_file = open(PPI_FILE)
+    p2g_file = open(P2G_FILE)
+    pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
+else:
+    ccsb_file = open(CCSB_FILE)
+    hgnc_file = open(HGNC_FILE)
+    pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
+    
 
 # TODO: may need to load entrez to ensembl database first (in case string db is used)
 hk_file = open(HK_FILE)

@@ -36,10 +36,11 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 		{
 			# permutate expression
 			expr_data$Expressed <- sample(expr_data$Expressed)
-			# write new table
-			dbWriteTable(con, "hpa_tissue_expr_rand", expr_data, overwrite=TRUE)
 		}
 		
+		# write new table
+		dbWriteTable(con, "hpa_tissue_expr_rand", expr_data, overwrite=TRUE)
+
 		# intersect with edges to get edge-expression
 		dbSendQuery(con, "DROP TABLE IF EXISTS ppi_edge_expr_rand")
 		dbSendQuery(con, "
@@ -97,7 +98,7 @@ edge_expr_data <- dbGetQuery(con, "
 #   RS-DBI driver: (expired SQLiteConnection)
 
 #edge_expr_frac_rand <- rand_edge_expr_frac(con, 1, TRUE)
-edge_expr_frac_glob_rand <- rand_edge_expr_frac(con, 10, FALSE)
+edge_expr_frac_glob_rand <- rand_edge_expr_frac(con, 1, TRUE)
 
 dbDisconnect(con)
 
