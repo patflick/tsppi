@@ -11,6 +11,7 @@ from sql import execute_script
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 PAPPI_HGNC_MAPPING_TABLE_NAME = 'hgnc_raw'
+PAPPI_BIOMART_MAPPING_TABLE_NAME = 'biomart_raw'
 
 def import_ENSG2ENSP_file(infile, sql_conn, table=PAPPI_ENSP2ENSG_TABLE_NAME):
     """
@@ -18,7 +19,7 @@ def import_ENSG2ENSP_file(infile, sql_conn, table=PAPPI_ENSP2ENSG_TABLE_NAME):
     
     Get the ensembl ID matching from
     http://www.ensembl.org/biomart/martview/
-    using homo sapiens version 70 database and output the attributes:
+    using homo sapiens version 71 database and output the attributes:
         - Ensembl Gene ID
         - Ensembl Protein ID
     with NO filters
@@ -49,6 +50,52 @@ def import_ENSG2ENSP_file(infile, sql_conn, table=PAPPI_ENSP2ENSG_TABLE_NAME):
     
 
 
+def import_biomart_file(infile, sql_conn, table=PAPPI_BIOMART_MAPPING_TABLE_NAME):
+    """
+    Imports the mapping table from biomart.
+    
+    Go to: http://www.ensembl.org/biomart/martview
+    
+    Choose "Ensembl Genes 71" and table "Homo sapiens genes"
+    
+    Include following fields for the table:
+        Ensembl Gene ID
+        Associated Gene Name
+        UniProt/SwissProt ID
+        HGNC ID(s)
+        EntrezGene ID
+    
+    Optional use these filters:
+        Status (gene) : KNOWN
+        Status (transcript) : KNOWN
+        Transcript count >= : 1
+        
+    Export the table as CSV (and choose "Unique results only")
+    
+    @param infile: The opened file handle of the file to be imported.
+    @param sql_conn: The SQL connection to be used.
+    @param table: The SQL table name into which the data is to be imported.
+    """
+    # initialize the cursor object
+    cur = sql_conn.cursor()
+    
+    # create table for the raw HPA data:
+    # Ensembl Gene ID    Associated Gene Name    UniProt/SwissProt ID    HGNC ID(s)    EntrezGene ID
+    cur.execute('DROP TABLE IF EXISTS "' + table + '";');
+    cur.execute('CREATE TABLE "' + table + '" ("Ensembl_GeneID" varchar(16), "Gene_Name" varchar(16), "UniprotID" varchar(16), "HGNC_ID" int, "EntrezID" int);')
+    
+    # get csv reader for the hpa file
+    csv_reader = csv.reader(infile, delimiter=',',quoting=csv.QUOTE_NONE)
+    # ignore header line
+    csv_reader.next()
+    
+    # insert all lines
+    cur.executemany('INSERT INTO "' + table + '" VALUES (?,?,?,?,?)', csv_reader)
+    
+    # close cursor and commit
+    cur.close()
+    sql_conn.commit()
+
 def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_TABLE_NAME):
     """
     Imports the HGNC table for protein-coding genes for mapping of Entrez Gene ID to
@@ -70,7 +117,7 @@ def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_T
     Make sure to deselect (exclude) the status: "Entry and Symbol Withdrawn"
     
     Full URL to results:
-    http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&hgnc_dbtag=on&submit=submit
+    http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&submit=submit
         
     This should return all 19060 genes.
     

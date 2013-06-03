@@ -18,7 +18,7 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 	result <- c()
 	
 	# iterate random permutations and edge expression calculation
-	for (i in 1:iterations)
+	for (k in 1:iterations)
 	{
 		# get tissue/cell.type expression data
 		expr_data <- dbGetQuery(con, "
@@ -100,7 +100,7 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 		result <- c(result, edge_expr_data_rand$ExpressedFraction)
 		
 		print("Done with:")
-		print(i)
+		print(k)
 	}
 	
 	# return all data
@@ -108,52 +108,24 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 }
 
 
+dbSendQuery(con,"DROP TABLE IF EXISTS edge_expr_rand_perm_results")
+dbSendQuery(con,"CREATE TABLE edge_expr_rand_perm_results ('Experiment' int, 'Results' float)")
 
 
-edge_expr_data <- dbGetQuery(con, "
-	SELECT * FROM ppi_edge_expr
-	ORDER BY ExpressedFraction")
 
-# Error in sqliteExecStatement(con, statement, bind.data) : 
-#   RS-DBI driver: (expired SQLiteConnection)
+batch_size <- 100
+for (batch_nr in 1:batch_size)
+{
+	edge_expr_frac_rand <- rand_edge_expr_frac(con, 1, TRUE)
+	new_data <- data.frame(Experiment=c(batch_nr),Results=edge_expr_frac_rand)
+	
+	dbWriteTable(con, "edge_expr_rand_perm_results", new_data[,c("Experiment","Results")], row.names=FALSE, append=TRUE)
+}
 
-#edge_expr_frac_rand <- rand_edge_expr_frac(con, 1, TRUE)
-edge_expr_frac_glob_rand <- rand_edge_expr_frac(con, 1, TRUE)
 
 dbDisconnect(con)
 
 
-
-#plot(density(data$ExpressedFraction))
-
-#h_rand <- hist(edge_expr_frac_rand, breaks=50, plot=FALSE)
-#h_real <- hist(edge_expr_data$ExpressedFraction, breaks=50, plot=FALSE)
-# 
-
-#h$counts <- cumsum(h$counts)
-#h$density <- cumsum(h$density)
-#plot(h_rand, col="lightblue", xlab="Edge expression", main="Histrogram of edge expression", xlim=c(0,1))
-#lines(h_real, col="orange")
-
-# load ggplot2
-library(ggplot2)
-
-# choose bin width
-binwidth <- 0.02
-
-#fig = ggplot(edge_expr_data_rand, aes(x=ExpressedFraction))
-# 
-fig = ggplot(xlim=c(0,1))
-#fig = fig + stat_bin(data=as.data.frame(edge_expr_frac_rand), binwidth=binwidth, fill="blue", alpha=0.5, aes(x=edge_expr_frac_rand, y=5*..count../sum(..count..)), position="identity")
-fig = fig + stat_bin(data=as.data.frame(edge_expr_frac_glob_rand), binwidth=binwidth, alpha=0.5, aes(x=edge_expr_frac_glob_rand, y=5*..count../sum(..count..), fill="Random Permutations"), position="identity")
-fig = fig + stat_bin(data=edge_expr_data, binwidth=binwidth, alpha=0.5, aes(x=ExpressedFraction, y=5*..count../sum(..count..), fill="Actual Data"), position="identity")
-fig = fig + ylab("Fraction")
-fig = fig + xlab("Edge Expression")
-fig = fig + labs(title="Histogram of Edge Expression")
-fig = fig + scale_fill_manual(name="Edge Expression for:",values=c("orange","blue"))
-fig = fig + theme(legend.position=c(1,1),legend.justification=c(1,1))
-#actually plot:
-fig
 
 
 

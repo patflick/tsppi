@@ -45,7 +45,7 @@ TODO
 
 
 
-TODO for quan:
+TODO for quan (ALL DONE!)
 - p value for edge internalness random permutation test
 - funtional annotation for gene expression?
 
