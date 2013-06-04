@@ -22,7 +22,7 @@ num_perm_tests <- 10000
 # choose thresholds
 ########################################################
 
-thresholds <- c(0.3)#, 0.4)
+thresholds <- c(0.3, 0.4)
 
 
 ########################################################
@@ -82,11 +82,11 @@ for (threshold in thresholds)
     title(main=paste("Avg. neighboor degree, threshold ", 100*threshold, " %", sep="", collapse=""))
 
 
-    sh_paths = shortest.paths(full_ppi_graph)
-    sh_paths[is.infinite(sh_paths)] = NA
-    vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
-    list[low_spec_properties, high_spec_properties] <- get_vertex_properties_in_spec_classes(vertex_property, threshold)
-    plot_log_hist(low_spec_properties, high_spec_properties, "Shortest path")
+    #sh_paths = shortest.paths(full_ppi_graph)
+    #sh_paths[is.infinite(sh_paths)] = NA
+    #vertex_property <- rowMeans(sh_paths, na.rm=TRUE)
+    #list[low_spec_properties, high_spec_properties] <- get_vertex_properties_in_spec_classes(vertex_property, threshold)
+    #plot_log_hist(low_spec_properties, high_spec_properties, "Shortest path")
 
 }
 

@@ -56,3 +56,4 @@ FROM hgnc_raw
 /* this looses 19060 - 18895 genes */
 /* TODO find out which ones, and how I can avoid this */
 WHERE EntrezID != '' AND EnsemblID != ''
+

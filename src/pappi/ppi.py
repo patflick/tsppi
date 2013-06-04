@@ -10,11 +10,14 @@ import re
 from . import matching
 from config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
 from config import PAPPI_SQL_CCSB_FILTER_SCRIPT
+from config import PAPPI_SQL_MMC_FILTER_SCRIPT
+from config import PAPPI_SQL_EDGE_EXPR_SCRIPT
 from sql import execute_script
 
 # TODO put all constants in an own module
 PAPPI_STRINGDB_RAW_TABLE_NAME = 'stringdb_raw'
 PAPPI_CCSB_RAW_TABLE_NAME = 'ccsb_raw'
+PAPPI_MMC_RAW_TABLE_NAME = 'mmc_raw'
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 
@@ -162,4 +165,72 @@ def import_ccsb(ccsb_file, hgnc_file, sql_conn):
     init_ccsb_ppi(sql_conn)
 
 
+#################################
+# Cell: human complex PPI
+#################################
 
+def import_mmc_file(infile, sql_conn, table=PAPPI_MMC_RAW_TABLE_NAME):
+    """
+    Imports the MMC (A Census of Human Soluble Protein Complexes, Havugimana et al.)
+     PPI network from the tab separated file. The PPI is imported
+    using the `sql_conn` SQL connection into a new table given by `table`.
+    
+    This imports the data from:
+        http://interactome.dfci.harvard.edu/H_sapiens/index.php?page=newrelease
+    
+    @param infile: The opened file handle of the file to be imported.
+    @param sql_conn: The SQL connection to be used.
+    @param table: The SQL table name into which the CCSB data is to be imported.
+    """
+    # initialize the cursor object
+    cur = sql_conn.cursor()
+    
+    # create table for the raw HPA data:
+    # GENE_IDA    SYMBOL_A    GENE_IDB    SYMBOL_B
+    cur.execute('DROP TABLE IF EXISTS "' + table + '";');
+    cur.execute('CREATE TABLE "' + table + '" ("Gene1" varchar(10), "Gene2" varchar(10))')
+    
+    # get csv reader for the CCSB file
+    csv_reader = csv.reader(infile, delimiter='\t',quoting=csv.QUOTE_NONE)
+    
+    # ignore header line
+    csv_reader.next()
+    
+    # insert all lines
+    cur.executemany('INSERT INTO "' + table + '" VALUES (?, ?)', csv_reader)
+
+    # close cursor and commit
+    cur.close()
+    sql_conn.commit()
+
+
+
+def import_mmc(mmc_file, sql_conn):
+    """
+    Imports and initializes the CCSB PPI network. Also the given HGNC mapping file
+    is imported, which is used for mapping the Entrez Gene IDs of the CCSB data
+    to Ensembl Gene IDs used in HPA.
+    
+    @param ppifile: The file handle for the PPI network file, downloaded from CCSB
+    @param ensg2ensp_file: The file handle for the ENSG<->ENSP mapping to be imported.
+    @param sql_conn: The SQL connection to be used.
+    """
+    # first import the file as table
+    import_mmc_file(mmc_file, sql_conn, PAPPI_MMC_RAW_TABLE_NAME)
+    
+    # run script that creates the PPI with HGNC symbols, rather than UniprotIDs
+    execute_script(PAPPI_SQL_MMC_FILTER_SCRIPT, sql_conn)
+
+
+
+#################################
+# Processing common to all PPIs
+#################################
+
+def init_edge_expression(sql_conn):
+    """
+    Creates tissue_expr and edge_expression tables for the current ppi.
+    
+    @param sql_conn: The SQL connection to be used.
+    """
+    execute_script(PAPPI_SQL_EDGE_EXPR_SCRIPT, sql_conn)

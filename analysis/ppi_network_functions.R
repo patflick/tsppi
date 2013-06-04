@@ -16,7 +16,7 @@ load_ppi <- function() {
 	SELECT
 		Gene1, Gene2
 	FROM
-		ppi_genes
+		ppi_hgnc
 	")
 
 	# disconnect from db

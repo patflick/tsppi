@@ -72,10 +72,10 @@ SELECT * FROM ensembl_to_hgnc_2
  */
 DROP TABLE IF EXISTS duplicates_ensembl;
 CREATE TABLE duplicates_ensembl AS
-select * FROM ensembl_to_hgnc
+select * FROM ensembl_to_hgnc_3
 WHERE EnsemblID IN
 (
-select EnsemblID FROM ensembl_to_hgnc
+select EnsemblID FROM ensembl_to_hgnc_3
 GROUP BY EnsemblID
 HAVING count() >= 2
 )

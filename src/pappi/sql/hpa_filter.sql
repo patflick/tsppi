@@ -1,6 +1,28 @@
 /* Filters the HPA data */
 DROP TABLE IF EXISTS hpa_ape_reliable_score;
 
+
+/* inserted at the top: replace all Ensembl ENSG IDs with HGNC Symbols */
+DROP TABLE IF EXISTS hpa_normal_tissue_raw;
+CREATE TABLE hpa_normal_tissue_raw AS
+SELECT * FROM hpa_normal_tissue;
+
+DROP TABLE hpa_normal_tissue;
+
+CREATE TABLE hpa_normal_tissue AS
+SELECT 
+    b.[HGNC.Symbol] as Gene,
+    a.Tissue,
+    a.[Cell.type],
+    a.Level,
+    a.[Expression.type],
+    a.Reliability
+FROM hpa_normal_tissue_raw as a
+INNER JOIN ensembl_to_hgnc as b
+	ON a.Gene = b.EnsemblID
+;
+
+
 /* create score mapping table */
 
 DROP TABLE IF EXISTS hpa_ape_score_mapping;

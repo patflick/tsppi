@@ -2,36 +2,42 @@
 # 
 # Author: flick
 ###############################################################################
-DATABASE_FILE = 'hpaDB.sqlite'
+DEFAULT_DATABASE_FILE = 'hpaDB.sqlite'
 
-# backup working directory
-prior_wd <- getwd()
 
-# sets the path of the sqlite3 database file
-if (.Platform$OS.type == "unix")
+
+
+get_sql_conn <- function(database_file=DEFAULT_DATABASE_FILE)
 {
-	#setwd("/home/patrick/dev/bio/data");
-	setwd("/cygdrive/d/PPI")
-} else {
-	setwd("D:\\PPI");
-}
-
-# adds the file to the path in a platform independent manner
-DATABASE_NAME = file.path(getwd(), DATABASE_FILE)
-
-# loads the sqlite3 database driver
-library('RSQLite')
-DATABASE_DRIVER <- dbDriver("SQLite")
-
-
-get_sql_conn <- function()
-{
+	# backup working directory
+	prior_wd <- getwd()
+	
+	# sets the path of the sqlite3 database file
+	if (.Platform$OS.type == "unix")
+	{
+		#setwd("/home/patrick/dev/bio/data");
+		setwd("/cygdrive/d/PPI")
+	} else {
+		setwd("D:\\PPI");
+	}
+	
+	# adds the file to the path in a platform independent manner
+	DATABASE_NAME = file.path(getwd(), database_file)
+	
+	# loads the sqlite3 database driver
+	library('RSQLite')
+	DATABASE_DRIVER <- dbDriver("SQLite")
+	
 	# connect
 	con <- dbConnect(DATABASE_DRIVER, dbname = DATABASE_NAME)
+	
+	# restore working directory
+	setwd(prior_wd)
+	
+	# return the connection object
 	return(con)
 }
 
 
 
-# restore working directory
-setwd(prior_wd)
+

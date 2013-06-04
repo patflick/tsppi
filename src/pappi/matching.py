@@ -7,6 +7,8 @@ Import operations for ID matching tables. (Ensembl ENSG<->ENSP and Ensembl ENSG 
 import csv
 
 from config import PAPPI_SQL_HGNC_FILTER_SCRIPT
+from config import PAPPI_SQL_ENSEMBL2HGNC_FILTER_SCRIPT
+from config import PAPPI_SQL_UNIPROT2HGNC_FILTER_SCRIPT
 from sql import execute_script
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
@@ -96,7 +98,7 @@ def import_biomart_file(infile, sql_conn, table=PAPPI_BIOMART_MAPPING_TABLE_NAME
     cur.close()
     sql_conn.commit()
 
-def import_hgnc_entrez2ensembl_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_TABLE_NAME):
+def import_hgnc_file(infile, sql_conn, table=PAPPI_HGNC_MAPPING_TABLE_NAME):
     """
     Imports the HGNC table for protein-coding genes for mapping of Entrez Gene ID to
     Ensembl Gene ID.
@@ -158,6 +160,34 @@ def init_entrez2ensembl(sql_conn):
     execute_script(PAPPI_SQL_HGNC_FILTER_SCRIPT, sql_conn)
 
 
+
+def import_mappings(hgnc_file, biomart_file, sql_conn):
+    """
+    @param hgnc_file:   The HGNC mapping file, see the documentation of
+                        the function import_hgnc_file() in this module.
+    @param biomart_file:    The Biomart mapping file, see the documentation
+                            of the import_biomart_file() function in this
+                            module.
+    @param sql_conn: The SQL connection to be used.
+    """
+    
+    # first import the hgnc file
+    import_hgnc_file(hgnc_file, sql_conn)
+    
+    # then import the biomart file
+    import_biomart_file(biomart_file, sql_conn)
+    
+    # then initialize all the mappings (creating mapping tables to hgnc from other IDs)
+    
+    # Ensembl -> HGNC 
+    execute_script(PAPPI_SQL_ENSEMBL2HGNC_FILTER_SCRIPT, sql_conn)
+    
+    # Uniprot -> HGNC
+    execute_script(PAPPI_SQL_UNIPROT2HGNC_FILTER_SCRIPT, sql_conn)
+    
+    # Entrez -> HGNC 
+    # TODO
+    
 
 def import_hgnc_entrez2ensembl(infile, sql_conn):
     """

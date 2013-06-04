@@ -76,7 +76,7 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 				ELSE 0 
 				END) AS ExpressedCount,
 			count() AS TotalCount
-		FROM ppi_genes AS a
+		FROM ppi_hgnc AS a
 		INNER JOIN hpa_tissue_expr_rand AS b
 			ON a.Gene1 = b.Gene
 		INNER JOIN hpa_tissue_expr_rand AS c
