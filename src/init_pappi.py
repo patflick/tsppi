@@ -10,8 +10,9 @@ import os
 
 # whether to use string-db or ccsb:
 #PPI_TO_USE="string-db"
-#PPI_TO_USE="CCSB"
-PPI_TO_USE="MMC"
+USE_STRINGDB_PPI=False
+USE_CCSB_PPI=True
+USE_MMC_PPI=True
 
 
 DUMP_PPI=False
@@ -26,7 +27,7 @@ DUMP_GENE_EXPR_LEVELS=False
 # internal drive for performance purposes
 
 # for easy of changing :)
-AT_THE_LAB=True
+AT_THE_LAB=False
 
 #
 if (AT_THE_LAB):
@@ -95,16 +96,18 @@ pappi.hpa.init_gene_levels(con)
 
 
 
-if (PPI_TO_USE == "string-db"):
+if (USE_STRINGDB_PPI):
     ppi_file = open(STRINGDB_FILE)
     p2g_file = open(P2G_FILE)
     print "Importing string-db data ..."
     pappi.ppi.import_stringdb(ppi_file, p2g_file, con)
-elif (PPI_TO_USE == "CCSB"):
+
+if (USE_CCSB_PPI):
     ccsb_file = open(CCSB_FILE)
     print "Importing CCSB data ..."
     pappi.ppi.import_ccsb(ccsb_file, hgnc_file, con)
-elif (PPI_TO_USE == "MMC"):
+
+if (USE_MMC_PPI):
     mmc_file = open(MMC_FILE)
     print "Importing MMC PPI data ..."
     pappi.ppi.import_mmc(mmc_file, con)

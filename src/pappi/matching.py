@@ -8,6 +8,7 @@ import csv
 
 from config import PAPPI_SQL_HGNC_FILTER_SCRIPT
 from config import PAPPI_SQL_ENSEMBL2HGNC_FILTER_SCRIPT
+from config import PAPPI_SQL_ENTREZ2HGNC_FILTER_SCRIPT
 from config import PAPPI_SQL_UNIPROT2HGNC_FILTER_SCRIPT
 from sql import execute_script
 
@@ -67,11 +68,6 @@ def import_biomart_file(infile, sql_conn, table=PAPPI_BIOMART_MAPPING_TABLE_NAME
         HGNC ID(s)
         EntrezGene ID
     
-    Optional use these filters:
-        Status (gene) : KNOWN
-        Status (transcript) : KNOWN
-        Transcript count >= : 1
-        
     Export the table as CSV (and choose "Unique results only")
     
     @param infile: The opened file handle of the file to be imported.
@@ -186,8 +182,8 @@ def import_mappings(hgnc_file, biomart_file, sql_conn):
     execute_script(PAPPI_SQL_UNIPROT2HGNC_FILTER_SCRIPT, sql_conn)
     
     # Entrez -> HGNC 
-    # TODO
-    
+    execute_script(PAPPI_SQL_ENTREZ2HGNC_FILTER_SCRIPT, sql_conn)
+
 
 def import_hgnc_entrez2ensembl(infile, sql_conn):
     """

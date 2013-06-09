@@ -6,18 +6,16 @@
 # load igraph library
 library(igraph)
 
-load_ppi <- function() {
+load_ppi <- function(table_name="ppi_hgnc") {
 	# load sql config and get connection
 	source("sql_config.R")
 	con <- get_sql_conn()
 	
 	# load ppi network from db
-	ppi_data <- dbGetQuery(con, "
+	ppi_data <- dbGetQuery(con, paste(c("
 	SELECT
 		Gene1, Gene2
-	FROM
-		ppi_hgnc
-	")
+	FROM ", table_name), sep="", collapse=""))
 
 	# disconnect from db
 	dbDisconnect(con)
