@@ -56,6 +56,8 @@ num_edges_high_spec <- c()
 num_vertices_low <- c()
 num_vertices_high <- c()
 
+print("test1")
+
 for (threshold in thresholds)
 {
     # get the high and low specificity genes
@@ -67,6 +69,7 @@ for (threshold in thresholds)
 	num_vertices_high <- c(num_vertices_high,  subgraph_number_vertices(full_ppi_graph, high_specificity_genes))
 }
 
+print("test2")
 
 library(ggplot2)
 

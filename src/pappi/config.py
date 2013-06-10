@@ -26,6 +26,8 @@ PAPPI_SQL_EDGE_EXPR_SCRIPT =  os.path.join(PAPPI_SQL_FOLDER_PATH,'edge_expressio
 # mapping initialization scripts (From other IDs to HGNC ID)
 PAPPI_SQL_ENSEMBL2HGNC_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'ensembl2hgnc.sql')
 PAPPI_SQL_UNIPROT2HGNC_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'uniprot2hgnc.sql')
+PAPPI_SQL_ENTREZ2HGNC_FILTER_SCRIPT = os.path.join(PAPPI_SQL_FOLDER_PATH,'entrez2hgnc.sql')
+
 
 # default SQLite database file
 PAPPI_SQLITE_DEFAULT_DB = 'pappiDB.sqlite'

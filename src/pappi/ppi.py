@@ -157,9 +157,6 @@ def import_ccsb(ccsb_file, hgnc_file, sql_conn):
     # first import the file as table
     import_ccsb_file(ccsb_file, sql_conn, PAPPI_CCSB_RAW_TABLE_NAME)
     
-    # import HGNC for Entrez<->ENSG mapping
-    matching.import_hgnc_entrez2ensembl(hgnc_file, sql_conn)
-    
     # then perform the entrez to ensembl mapping, returning the PPI network
     # that uses ENSG IDs (this is the same format that results from the string-db import & init functions)
     init_ccsb_ppi(sql_conn)

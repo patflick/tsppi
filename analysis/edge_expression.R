@@ -18,7 +18,7 @@ ORDER BY ExpressedFraction")
 
 dbDisconnect(con)
 
-plot(density(data$ExpressedFraction))
+#plot(density(data$ExpressedFraction))
 
 h <- hist(data$ExpressedFraction, breaks=50, plot=FALSE)
 #h$counts <- cumsum(h$counts)
