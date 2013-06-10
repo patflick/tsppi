@@ -55,9 +55,9 @@ h_mmc_frac <- h_mmc_expr$counts/sum(h_expr$counts)
 
 #
 fig = ggplot(xlim=c(0,1))
-fig = fig + geom_bar(data=data.frame(x=h_expr$mids, y=h_frac), alpha=0.5, aes(x=x,y=y, fill="All reliable HPA genes"),stat="identity")
+fig = fig + geom_bar(data=data.frame(x=h_expr$mids, y=h_frac), alpha=0.5, aes(x=x,y=y, fill="All reliable HPA proteins"),stat="identity")
 
-fig = fig + geom_bar(data=data.frame(x=h_ccsb_expr$mids, y=h_ccsb_frac), aes(x=x, y=y, fill="PPI genes"), stat="identity")
+fig = fig + geom_bar(data=data.frame(x=h_mmc_expr$mids, y=h_mmc_frac), aes(x=x, y=y, fill="MMC proteins"), stat="identity")
 
 #fig = fig + stat_bin(data=expr_data, alpha=0.5, aes(x=ExpressedFraction, y=5*..count../sum(..count..), fill="Actual Data"), position="identity")
 fig = fig + ylab("Fraction")
@@ -73,8 +73,10 @@ fig2 = fig2 + geom_point(aes(x=x, y=y1, color="CCSB"), shape=1)
 fig2 = fig2 + geom_smooth(aes(x=x, y=y1, color="CCSB"), method=lm)
 fig2 = fig2 + geom_point(aes(x=x, y=y2, color="MMC"), shape=2)
 fig2 = fig2 + geom_smooth(aes(x=x, y=y2, color="MMC"), method=lm)
-
-
+fig2 = fig2 + ylab("Protein coverage")
+fig2 = fig2 + labs(title="Protein coverage of PPIs")
+fig2 = fig2 + xlab("Fraction of cell types the protein is expressed")
+fig2 = fig2 + labs(color="PPI networks")
 
 par(mfrow=c(1,2))
 fig

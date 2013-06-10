@@ -60,20 +60,3 @@ fig = fig + scale_fill_manual(name="Edge Expression for:",values=c("orange","blu
 fig
 
 
-##fig = fig + stat_bin(data=as.data.frame(edge_expr_frac_rand), binwidth=binwidth, fill="blue", alpha=0.5, aes(x=edge_expr_frac_rand, y=5*..count../sum(..count..)), position="identity")
-##fig = fig + stat_bin(data=as.data.frame(edge_expr_frac_glob_rand), binwidth=binwidth, alpha=0.5, aes(x=edge_expr_frac_glob_rand, y=5*..count../sum(..count..), fill="Random Permutations"), position="identity")
-#fig = fig + stat_bin(data=edge_expr_data, binwidth=binwidth, alpha=0.5, aes(x=ExpressedFraction, y=5*..count../sum(..count..), fill="Actual Data"), position="identity")
-#fig = fig + ylab("Fraction")
-#fig = fig + xlab("Edge Expression")
-#fig = fig + labs(title="Histogram of Edge Expression")
-#fig = fig + scale_fill_manual(name="Edge Expression for:",values=c("orange","blue"))
-#fig = fig + theme(legend.position=c(1,1),legend.justification=c(1,1))
-##actually plot:
-#fig
-
-
-
-
-
-
-
