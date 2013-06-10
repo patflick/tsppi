@@ -12,7 +12,7 @@ import os
 #PPI_TO_USE="string-db"
 USE_STRINGDB_PPI=False
 USE_CCSB_PPI=True
-#USE_MMC_PPI=True
+USE_MMC_PPI=False
 
 
 DUMP_PPI=False
