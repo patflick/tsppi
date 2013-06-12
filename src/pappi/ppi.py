@@ -7,7 +7,7 @@ Import and filtering operations for PPI data.
 import csv
 import re
 
-from . import matching
+from . import mapping
 from config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
 from config import PAPPI_SQL_CCSB_FILTER_SCRIPT
 from config import PAPPI_SQL_MMC_FILTER_SCRIPT
@@ -87,8 +87,8 @@ def import_stringdb(ppifile, ensg2ensp_file, sql_conn):
     # first import the file as table
     import_stringdb_file(ppifile, sql_conn, PAPPI_STRINGDB_RAW_TABLE_NAME)
     
-    # import ENSG<->ENSP matching
-    matching.import_ENSG2ENSP_file(ensg2ensp_file, sql_conn, PAPPI_ENSP2ENSG_TABLE_NAME)
+    # import ENSG<->ENSP mapping
+    mapping.import_ENSG2ENSP_file(ensg2ensp_file, sql_conn, PAPPI_ENSP2ENSG_TABLE_NAME)
     
     # then perform the ENSG<->ENSP mapping, returning the PPI network
     # that uses ENSG IDs (this is the same format that results from the CCSB import & init functions)

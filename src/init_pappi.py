@@ -12,8 +12,13 @@ import os
 #PPI_TO_USE="string-db"
 USE_STRINGDB_PPI=False
 USE_CCSB_PPI=True
-USE_MMC_PPI=False
+USE_MMC_PPI=True
 
+IMPORT_HK_TS=True
+
+# whether to use chang or dezso housekeeping vs. tissue-specific classification
+HK_TS_FROM="chang"
+#HK_TS_FROM="dezso"
 
 DUMP_PPI=False
 DUMP_GENE_EXPR_LEVELS=False
@@ -27,7 +32,7 @@ DUMP_GENE_EXPR_LEVELS=False
 # internal drive for performance purposes
 
 # for easy of changing :)
-AT_THE_LAB=False
+AT_THE_LAB=True
 
 #
 if (AT_THE_LAB):
@@ -53,13 +58,17 @@ HPA_FILE  = DATA_FOLDER + 'hpa_normal_tissue_v11.csv'
 HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl_uniprot.txt'
 CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
 MMC_FILE = CHANG_DATA_FOLDER + 'cell_havugimana_ppi.tsv'
-P2G_FILE = DATA_FOLDER + 'ensembl_ID_matching.csv'
+P2G_FILE = DATA_FOLDER + 'ensembl_ID_mapping.csv'
 BIOMART_FILE = DATA_FOLDER + 'mart_export.csv'
 DATABASE  = DB_DATA_FOLDER + 'hpaDB.sqlite'
 
 # load hk and ts genes
-HK_FILE = CHANG_DATA_FOLDER + 'chang_hk.csv'
-TS_FILE = CHANG_DATA_FOLDER + 'chang_ts.csv'
+if (HK_TS_FROM=="chang"):
+    HK_FILE = CHANG_DATA_FOLDER + 'chang_hk.csv'
+    TS_FILE = CHANG_DATA_FOLDER + 'chang_ts.csv'
+elif (HK_TS_FROM=="dezso"):
+    HK_FILE = CHANG_DATA_FOLDER + 'dezso_hk.csv'
+    TS_FILE = CHANG_DATA_FOLDER + 'dezso_ts.csv'
 
 # output files
 CCSB_PPI_OUT_FILE= DATA_FOLDER + 'ccsb_ppi.csv'
@@ -81,10 +90,10 @@ if (os.path.exists(DATABASE)):
 con = pappi.sql.get_conn(DATABASE)
 
 
-print "Importing and initializing ID matching/mapping ..."
+print "Importing and initializing ID mapping/mapping ..."
 hgnc_file = open(HGNC_FILE)
 biomart_file = open(BIOMART_FILE)
-pappi.matching.import_mappings(hgnc_file, biomart_file, con)
+pappi.mapping.import_mappings(hgnc_file, biomart_file, con)
 
 
 print "Importing HPA data ..."
@@ -119,18 +128,15 @@ pappi.ppi.init_edge_expression(con)
 
 # TODO: may need to load entrez to ensembl database first (in case string db is used)
 
-if (False):
+if (IMPORT_HK_TS):
     print "Importing Chang HK/TS data ..."
-    hgnc_file = open(HGNC_FILE)
-    pappi.matching.import_hgnc_entrez2ensembl(hgnc_file, con)
-    
     hk_file = open(HK_FILE)
     pappi.housekeeping.import_entrez_file(hk_file, con, "hk_entrez")
-    pappi.housekeeping.translate_entrez_2_ensembl(con, "hk_entrez", "hk_ensembl")
+    pappi.housekeeping.translate_entrez_2_hgnc(con, "hk_entrez", "hk_hgnc")
     
     ts_file = open(TS_FILE)
     pappi.housekeeping.import_entrez_file(ts_file, con, "ts_entrez")
-    pappi.housekeeping.translate_entrez_2_ensembl(con, "ts_entrez", "ts_ensembl")
+    pappi.housekeeping.translate_entrez_2_hgnc(con, "ts_entrez", "ts_hgnc")
 
 
 if (DUMP_PPI):

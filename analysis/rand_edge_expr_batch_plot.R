@@ -11,7 +11,7 @@ source("sql_config.R", chdir=TRUE)
 
 
 # connect to the backup sqlite DB
-con <- get_sql_conn("edge_expr.sqlite")
+con <- get_sql_conn("mmc_edge_expr.sqlite")
 
 # get the real edge_expression
 edge_expr_data <- dbGetQuery(con, "
@@ -28,7 +28,7 @@ dbDisconnect(con)
 real_expr_data <- edge_expr_data$ExpressedFraction
 
 
-NUM_BREAKS <- 10
+NUM_BREAKS <- 50
 
 hist_breaks <- 0:NUM_BREAKS/NUM_BREAKS
 #hist_breaks <- c(0,0.18,0.72,1)
@@ -50,6 +50,8 @@ matrix_sd <- apply(batch_results_matrix,2,sd)
 matrix_ci <- 1.96*matrix_sd
 
 
+
+library(ggplot2)
 fig = ggplot(xlim=c(0,1))
 fig = fig + geom_bar(data=data.frame(x=h_real$mids, y=h_real_frac), aes(x=x,y=y, fill="Actual Data"),stat="identity")
 

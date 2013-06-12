@@ -10,6 +10,7 @@ SELECT
 		count(CASE WHEN a.Level='Low' OR a.Level="Weak" THEN 1 ELSE NULL END) as CountLow,
 		count() as CountTotal
 	FROM hpa_normal_tissue AS a
+	/*
 WHERE
 	(
     a.[Expression.type] = "APE"
@@ -28,7 +29,7 @@ WHERE
 	a.Reliability = "Supportive"
     )
     
-	
+	*/
 GROUP BY Gene
 ;
 

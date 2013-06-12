@@ -8,7 +8,7 @@ source("utils.R", chdir=TRUE)
 
 # load sql config and get connection
 source("sql_config.R", chdir=TRUE)
-con <- get_sql_conn()
+con <- get_sql_conn("mmc_edge_expr.sqlite")
 
 
 rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
@@ -76,7 +76,7 @@ rand_edge_expr_frac <- function(con, iterations=1, per_gene_permute=FALSE)
 				ELSE 0 
 				END) AS ExpressedCount,
 			count() AS TotalCount
-		FROM ppi_genes AS a
+		FROM ppi_hgnc AS a
 		INNER JOIN hpa_tissue_expr_rand AS b
 			ON a.Gene1 = b.Gene
 		INNER JOIN hpa_tissue_expr_rand AS c
@@ -113,7 +113,7 @@ dbSendQuery(con,"CREATE TABLE edge_expr_rand_perm_results ('Experiment' int, 'Re
 
 
 
-batch_size <- 100
+batch_size <- 200
 for (batch_nr in 1:batch_size)
 {
 	edge_expr_frac_rand <- rand_edge_expr_frac(con, 1, TRUE)

@@ -51,3 +51,18 @@ def translate_entrez_2_ensembl(sql_conn, src_table, dst_table):
     cur.close()
     sql_conn.commit()
 
+def translate_entrez_2_hgnc(sql_conn, src_table, dst_table):
+    """
+    takes the src_table which is a list of Entrez Gene ids and
+    creates dst_table with the corresponding Ensembl ids
+
+    @param sql_conn: The SQL connection to be used.
+    """
+
+    cur = sql_conn.cursor()
+
+    cur.execute("DROP TABLE IF EXISTS " + dst_table)
+    cur.execute("CREATE TABLE " + dst_table + " AS SELECT a.[HGNC.Symbol] as Gene FROM entrez_to_hgnc as a INNER JOIN " + src_table + " AS b ON a.EntrezID = b.Gene_ID")
+
+    cur.close()
+    sql_conn.commit()

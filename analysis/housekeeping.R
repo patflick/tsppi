@@ -18,10 +18,14 @@ SELECT
     CASE WHEN c.Gene IS NULL THEN 0 ELSE 1 END AS TS_Gene
     
     FROM hpa_gene_levels as a
-    LEFT OUTER JOIN hk_ensembl AS b
+	
+    LEFT OUTER JOIN hk_hgnc AS b
     ON a.Gene = b.Gene
-    LEFT OUTER JOIN ts_ensembl AS c
+    LEFT OUTER JOIN ts_hgnc AS c
     ON a.Gene = c.Gene
+	/* exclude duplicates from mapping to HGNC */
+	/* FIXME: fix the mapping itself */
+	WHERE a.CountTotal < 100
     ORDER BY CountHigh+CountMedium+CountLow ASC, CountHigh ASC
         ")
 
@@ -51,7 +55,7 @@ ts_cum <- cumsum(data$TS_Gene)/max(cumsum(data$TS_Gene))
 
 
 par(new=TRUE)
-plot(ts_data, col="red", type="l", lty=2, lwd=2, xaxt="n", xlim=x_range, yaxt="n", xlab="", ylab="", main="")
+plot(ts_data, col="red", type="l", lty=2, lwd=2, xaxt="n", xlim=x_range, yaxt="n", xlab="", ylab="", main="", ylim=range(ts_data$y, hk_data$y)*1.3)
 lines(hk_data, col="orange", type="l", lty=5, lwd=2)
 
 # draw 50% lines

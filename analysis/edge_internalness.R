@@ -22,7 +22,7 @@ num_perm_tests <- 10000
 
 thresholds <- c(0.2, 0.3, 0.4, 0.5)
 
-
+#thresholds <- 0.3
 ########################################################
 # Code starts here
 ########################################################
@@ -63,6 +63,10 @@ for (threshold in thresholds)
     # get the high and low specificity genes
     list[low_specificity_genes, high_specificity_genes] <- get_genes_in_specificity_classes(threshold)
 
+	# use only the genes in the graph for random permutations:
+	high_specificity_genes <- high_specificity_genes[which(high_specificity_genes %in% V(full_ppi_graph)$name)]
+	low_specificity_genes <- low_specificity_genes[which(low_specificity_genes %in% V(full_ppi_graph)$name)]
+	
     # load the random permutation test plots
     source("plots/rand_perm_density.R", chdir=TRUE)
     # do random permutation and plot it according to the assortativity subset function

@@ -12,6 +12,7 @@ SELECT
 	Tissue,
 	[Cell.Type],
 	CASE WHEN
+		/*
 		(
 		Reliability = "High"
         OR
@@ -19,7 +20,9 @@ SELECT
         OR
         Reliability = "Supportive"
         )
+        
         AND
+        */
         (
 	        NOT
 	        (
@@ -32,6 +35,7 @@ SELECT
         ELSE 0
     END as Expressed
     FROM hpa_normal_tissue
+    /*
     WHERE
 	(
 		Reliability = "High"
@@ -40,6 +44,7 @@ SELECT
         OR
         Reliability = "Supportive"
     )
+    */
     ;
     
 
