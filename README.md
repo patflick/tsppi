@@ -1,6 +1,28 @@
 PAPPI - Protein Atlas and protein-protein interaction networks
 ==============================================================
 
+The code consists of a python pipeline based on SQL (right now on SQLite in particular).
+
+The pipeline imports all the various different data files, mostly in `comma separated values (CSV)` or
+`tab separated values (TSV)` formats into a common SQL database. Then it performs
+mapping of gene IDs from Entrez, Uniprot and Ensembl to HGNC symbols (names).
+The HGNC symbols are used as main identifier in the further pipeline and analysis.
+
+A few genes are still lost in this pipeline approach, as they can not be mapped to
+any HGNC symbol.
+
+The python pipeline is in the `src/` folder. The `init_pappi.py` script has to be called
+in order to import all files. It is also there, that all the paths to the various
+data files is configured.
+
+Right now this script is still a bit messy and dependent from all the file paths (i.e. hardcoded filenames).
+
+
+The `analysis` folder contains R scripts for analysis of the data.
+
+Edit the sql_config.R file to point to the correct sqlite file.
+
+
 Get the data:
 ----------
 
