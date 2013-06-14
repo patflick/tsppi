@@ -55,8 +55,10 @@ Mapping files
 Get the ensembl ID mapping from
 http://www.ensembl.org/biomart/martview/
 using homo sapiens version 71 database and output the attributes:
-    - Ensembl Gene ID
-    - Ensembl Protein ID
+
+- Ensembl Gene ID
+- Ensembl Protein ID
+
 with NO filters
 
 
@@ -66,11 +68,12 @@ Go to: http://www.ensembl.org/biomart/martview
 Choose "Ensembl Genes 71" and table "Homo sapiens genes"
 
 Include following fields for the table:
-    - Ensembl Gene ID
-    - Associated Gene Name
-    - UniProt/SwissProt ID
-    - HGNC ID(s)
-    - EntrezGene ID
+
+- Ensembl Gene ID
+- Associated Gene Name
+- UniProt/SwissProt ID
+- HGNC ID(s)
+- EntrezGene ID
 
 Export the table as CSV (and choose "Unique results only")
 
@@ -82,16 +85,20 @@ A few files for Gene-ID mapping/matching need to be downloaded and imported as w
 Get data from: [http://www.genenames.org/cgi-bin/hgnc_stats]
 Goto `Locus Group`: "protein-coding gene" and click "Custom".
 Choose only the Columns:
-    - HGNC ID
-    - Approved Symbol
-    - Approved Name
-    - Status
-    - Entrez Gene ID
-    - Ensembl Gene ID
+
+- HGNC ID
+- Approved Symbol
+- Approved Name
+- Status
+- Entrez Gene ID
+- Ensembl Gene ID
+
 (and from external sources):
-    - Entrez Gene ID (supplied by NCBI)
-    - UniProt ID (supplied by UniProt)
-    - Ensembl ID (supplied by Ensembl)
+
+- Entrez Gene ID (supplied by NCBI)
+- UniProt ID (supplied by UniProt)
+- Ensembl ID (supplied by Ensembl)
+
 Make sure to deselect (exclude) the status: "Entry and Symbol Withdrawn"
 
 Full URL to results:
