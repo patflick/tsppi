@@ -47,7 +47,55 @@ repo, as I am currently unsure about the licencing of the PPI network from Havug
 
 
 
+Mapping files
+-------------
 
+### BioMart Gene<->Protein mapping
+
+Get the ensembl ID mapping from
+http://www.ensembl.org/biomart/martview/
+using homo sapiens version 71 database and output the attributes:
+    - Ensembl Gene ID
+    - Ensembl Protein ID
+with NO filters
+
+
+### BioMart Ensembl<->HGNC mapping
+Go to: http://www.ensembl.org/biomart/martview
+
+Choose "Ensembl Genes 71" and table "Homo sapiens genes"
+
+Include following fields for the table:
+    - Ensembl Gene ID
+    - Associated Gene Name
+    - UniProt/SwissProt ID
+    - HGNC ID(s)
+    - EntrezGene ID
+
+Export the table as CSV (and choose "Unique results only")
+
+
+### HGNC mapping
+
+A few files for Gene-ID mapping/matching need to be downloaded and imported as well.
+
+Get data from: [http://www.genenames.org/cgi-bin/hgnc_stats]
+Goto `Locus Group`: "protein-coding gene" and click "Custom".
+Choose only the Columns:
+    - HGNC ID
+    - Approved Symbol
+    - Approved Name
+    - Status
+    - Entrez Gene ID
+    - Ensembl Gene ID
+(and from external sources):
+    - Entrez Gene ID (supplied by NCBI)
+    - UniProt ID (supplied by UniProt)
+    - Ensembl ID (supplied by Ensembl)
+Make sure to deselect (exclude) the status: "Entry and Symbol Withdrawn"
+
+Full URL to results:
+[BioMart Mapping](http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&submit=submit)
 
   
 
