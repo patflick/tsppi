@@ -32,7 +32,7 @@ def import_entrez_file(infile, sql_conn, table):
     # close cursor and commit
     cur.close()
     sql_conn.commit()
-    
+
 
 def translate_entrez_2_ensembl(sql_conn, src_table, dst_table):
     """

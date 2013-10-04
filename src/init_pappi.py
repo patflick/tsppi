@@ -32,7 +32,7 @@ DUMP_GENE_EXPR_LEVELS=False
 # internal drive for performance purposes
 
 # for easy of changing :)
-AT_THE_LAB=True
+AT_THE_LAB=False
 
 #
 if (AT_THE_LAB):

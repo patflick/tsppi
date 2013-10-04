@@ -56,7 +56,7 @@ def import_stringdb_file(infile, sql_conn, table=PAPPI_STRINGDB_RAW_TABLE_NAME):
         p1 = p.match(row[0]).group(1)
         p2 = p.match(row[1]).group(1)
         # insert into table
-        cur.execute('INSERT INTO "' + table + '" (Protein1, Protein2, Score) VALUES (?, ?, ?)', (p1,p2,row[2]))
+        cur.execute('INSERT INTO "' + table + '" (Protein1, Protein2, Score) VALUES (?, ?, ?)', (p1, p2, row[2]))
 
     # close cursor and commit
     cur.close()
@@ -184,7 +184,7 @@ def import_mmc_file(infile, sql_conn, table=PAPPI_MMC_RAW_TABLE_NAME):
     
     # create table for the raw HPA data:
     # GENE_IDA    SYMBOL_A    GENE_IDB    SYMBOL_B
-    cur.execute('DROP TABLE IF EXISTS "' + table + '";');
+    cur.execute('DROP TABLE IF EXISTS "' + table + '";')
     cur.execute('CREATE TABLE "' + table + '" ("Gene1" varchar(10), "Gene2" varchar(10))')
     
     # get csv reader for the CCSB file
