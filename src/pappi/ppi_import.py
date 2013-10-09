@@ -7,12 +7,12 @@ Import and filtering operations for PPI data.
 import csv
 import re
 
-from . import mapping
-from config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
-from config import PAPPI_SQL_CCSB_FILTER_SCRIPT
-from config import PAPPI_SQL_MMC_FILTER_SCRIPT
-from config import PAPPI_SQL_EDGE_EXPR_SCRIPT
-from sql import execute_script
+#from . import mapping
+from .config import PAPPI_SQL_STRINGDB_FILTER_SCRIPT
+from .config import PAPPI_SQL_CCSB_FILTER_SCRIPT
+from .config import PAPPI_SQL_MMC_FILTER_SCRIPT
+from .config import PAPPI_SQL_EDGE_EXPR_SCRIPT
+from .sql import execute_script
 
 # TODO put all constants in an own module
 PAPPI_STRINGDB_RAW_TABLE_NAME = 'stringdb_raw'
@@ -123,7 +123,7 @@ def import_ccsb_file(infile, sql_conn, table=PAPPI_CCSB_RAW_TABLE_NAME):
     csv_reader = csv.reader(infile, delimiter='\t',quoting=csv.QUOTE_NONE)
     
     # ignore header line
-    csv_reader.next()
+    csv_reader.__next__()
     
     # insert all lines
     cur.executemany('INSERT INTO "' + table + '" VALUES (?, ?, ?, ?)', csv_reader)

@@ -7,7 +7,7 @@ such that the underlying database can easily be exchanged here.
 @author: Patrick Flick
 '''
 
-from config import PAPPI_SQLITE_DEFAULT_DB
+from .config import PAPPI_SQLITE_DEFAULT_DB
 import sqlite3
 import csv
 
@@ -15,6 +15,12 @@ PAPPI_SQL_CONN = None
 
 
 def execute_script(script_filename, sql_conn=PAPPI_SQL_CONN):
+    """
+    Executes the given file as a script for the given SQL connection.
+
+    @param script_filename: The file name of the script file to be executed.
+    @param sql_conn:        The SQL connection to be used.
+    """
     with open(script_filename, 'r') as script_file:
         # initialize the cursor object
         cur = sql_conn.cursor()
@@ -36,17 +42,16 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
     """
     Imports a CSV file into an SQL table.
 
-    Parameters:
-        - csv_filename:     The file name of the CSV file to be imported.
-        - table:            The name of the SQL table to be created.
-        - csv_delimiter:    The delimiter/seperator of the CSV file.
-        - has_header:       Whether the CSV file has a header row.
-        - column_names:     Names for the columns, if none are given either the
+    @param csv_filename:     The file name of the CSV file to be imported.
+    @param table:            The name of the SQL table to be created.
+    @param csv_delimiter:    The delimiter/seperator of the CSV file.
+    @param has_header:       Whether the CSV file has a header row.
+    @param column_names:     Names for the columns, if none are given either the
                             header row of the CSV file is used for column names
                             or general names are given: Column_i with i={1,..}
-        - column_types:     The SQL types of the columns. Default: varchar(16)
-        - csv_quoting:      Field-Quoting of the CSV file. Default: QUOTE_NONE
-        - sql_conn:         The SQL connection to be used. Default: current
+    @param column_types:     The SQL types of the columns. Default: varchar(16)
+    @param csv_quoting:      Field-Quoting of the CSV file. Default: QUOTE_NONE
+    @param sql_conn:         The SQL connection to be used. Default: current
                             connection.
     """
     # check parameters
@@ -82,7 +87,7 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
         else:
             if has_header:
                 # ignore header
-                csv_reader.next()
+                csv_reader.__next__()
 
         # if no column types are given, use the default for all
         default_col_type = "varchar(16)"
@@ -130,6 +135,45 @@ def dump_csv(outfile, table, sql_conn=PAPPI_SQL_CONN):
 
     cur.close()
     sql_conn.commit()
+
+
+def table_exists(table, sql_conn=PAPPI_SQL_CONN):
+    """
+    Returns whether a table with the given name exists in the SQL database
+    given by the SQL connection.
+
+    @param table:       The name of the SQL table to be checked for.
+    @param sql_conn:    The SQl Connection object to be used.
+                        Default: current connection.
+    @return             Boolean, whether the table with the given name exits.
+    """
+    cur = sql_conn.cursor()
+    # the general SQL version
+    #cur.execute('SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES '
+                #'WHERE TABLE_NAME = "' + table + '"')
+    # for SQLite:
+    cur.execute('SELECT COUNT(*) FROM sqlite_master '
+                'WHERE type="table" AND name="' + table + '"')
+    result = cur.fetchone()[0]
+    return result > 0
+
+
+def get_column_names(table, sql_conn=PAPPI_SQL_CONN):
+    """
+    Returns the names of all columns in the given table.
+
+    @param table:       The table which columns are to be returned.
+    @param sql_conn:    The SQL connection object.
+    @Returns            A list of names of the columns.
+    """
+    # source for this:
+    # http://stackoverflow.com/questions/7831371/is-there-a-way-to-get-a-list-of-column-names-in-sqlite
+    cur = sql_conn.cursor()
+    cur.execute('SELECT * FROM ' + table)
+    names = list(map(lambda x: x[0], cur.description))
+    cur.close()
+    # return the result
+    return names
 
 
 def get_conn(db=PAPPI_SQLITE_DEFAULT_DB):
