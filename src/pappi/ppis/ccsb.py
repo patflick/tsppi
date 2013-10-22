@@ -2,6 +2,11 @@ from . import ppi
 
 
 class CCSB(ppi.PPI):
+    """
+    The PPI network HI-2012-Pre from CCSB at
+    Dana Farber / Harvard Medical School
+    http://interactome.dfci.harvard.edu/H_sapiens/index.php?page=download
+    """
 
     def __init__(self, filename, sql_connection):
         """

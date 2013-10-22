@@ -1,8 +1,8 @@
 import pappi.id_mapping
 import pappi.sql
 #import pappi.ppi_import
-from pappi.ppi.ppi import PPI
 from pappi.ppi.ccsb import CCSB
+from pappi.ppi.bossi_lehner import Bossi_Lehner
 import os
 
 DATA_FOLDER = '/home/patrick/dev/bio/data/'
@@ -11,6 +11,7 @@ HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl_uniprot.txt'
 BIOMART_FILE = DATA_FOLDER + 'mart_export.csv'
 DATABASE = DATA_FOLDER + 'test_matching.sqlite'
 CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
+BOSSI_FILE = DATA_FOLDER + 'CRG.integrated.human.interactome.txt'
 
 # first delete an old DB, to make sure everything is new
 if (os.path.exists(DATABASE)):
@@ -36,3 +37,8 @@ pappi.id_mapping.import_hgnc_file(HGNC_FILE, con)
 
 ccsb_ppi = CCSB(CCSB_FILE, con)
 ccsb_ppi.init_ppi(True)
+
+print("trying with bossi lehner PPI")
+bossi_ppi = Bossi_Lehner(BOSSI_FILE, con)
+#bossi_ppi.import_raw_file()
+bossi_ppi.init_ppi(True)

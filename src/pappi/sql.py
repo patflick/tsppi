@@ -36,6 +36,16 @@ def execute_script(script_filename, sql_conn=PAPPI_SQL_CONN):
         sql_conn.commit()
 
 
+def extend_row_iterator(base_iterator, num):
+    for row in base_iterator:
+        if len(row) == num:
+            yield row
+        else:
+            row += [""]*(num - len(row))
+            yield row
+    return
+
+
 def import_csv(csv_filename, table, csv_delimiter, has_header,
                column_names=None, column_types=None,
                csv_quoting=None, sql_conn=PAPPI_SQL_CONN):
@@ -105,7 +115,7 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
         # insert all lines
         vals = ", ".join(['?'] * len(column_names))
         cur.executemany('INSERT INTO "' + table + '" VALUES (' + vals + ')',
-                        csv_reader)
+                        extend_row_iterator(csv_reader, len(column_names)))
 
         # close cursor and commit
         cur.close()
