@@ -42,16 +42,16 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
     """
     Imports a CSV file into an SQL table.
 
-    @param csv_filename:     The file name of the CSV file to be imported.
-    @param table:            The name of the SQL table to be created.
-    @param csv_delimiter:    The delimiter/seperator of the CSV file.
-    @param has_header:       Whether the CSV file has a header row.
-    @param column_names:     Names for the columns, if none are given either the
+    @param csv_filename:    The file name of the CSV file to be imported.
+    @param table:           The name of the SQL table to be created.
+    @param csv_delimiter:   The delimiter/seperator of the CSV file.
+    @param has_header:      Whether the CSV file has a header row.
+    @param column_names:    Names for the columns, if none are given either the
                             header row of the CSV file is used for column names
                             or general names are given: Column_i with i={1,..}
-    @param column_types:     The SQL types of the columns. Default: varchar(16)
-    @param csv_quoting:      Field-Quoting of the CSV file. Default: QUOTE_NONE
-    @param sql_conn:         The SQL connection to be used. Default: current
+    @param column_types:    The SQL types of the columns. Default: varchar(16)
+    @param csv_quoting:     Field-Quoting of the CSV file. Default: QUOTE_NONE
+    @param sql_conn:        The SQL connection to be used. Default: current
                             connection.
     """
     # check parameters
@@ -73,12 +73,12 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
             column_names = []
             if has_header:
                 # read header
-                row = csv_reader.next()
+                row = csv_reader.__next__()
                 for item in row:
                     # replace spaces with underscores and add to column names
                     column_names.append(item.replace(" ", "_"))
             else:
-                row = csv_reader.next()
+                row = csv_reader.__next__()
                 for i in range(1, len(row) + 1):
                     column_names.append("Column_" + str(i))
                 # reset the csv_reader object

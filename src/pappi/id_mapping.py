@@ -258,6 +258,7 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
 
     # run the inner join
     cur.execute('DROP TABLE IF EXISTS ' + to_table)
+    print("SQL QUERY: " + sqlquery)
     cur.execute('CREATE TABLE ' + to_table + ' AS ' + sqlquery)
 
     # verbose debug output: get table and statistics of non-matched rows
@@ -302,9 +303,6 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
         cur.execute('SELECT COUNT(*) FROM ' + to_table + '_unmatched_ids')
         num_unmatched_ids = cur.fetchone()[0]
 
-        if (nrows_from - nrows_to != nrows_unmatched):
-            raise RuntimeError("Implementation Error - numbers don't match up.")
-
         # print out all the statistics
         print("Matched Table '" + from_table + "' -> '" + to_table + "'")
         print("    Matched " + str(num_from_ids) + " " + from_id + " to "
@@ -319,6 +317,9 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
             print("    Unmatched identfiers ( = " + str(num_unmatched_ids)
                   + " ) are now available in the SQL table `" + to_table
                   + "_unmatched_ids`")
+
+        if (nrows_from - nrows_to != nrows_unmatched):
+            raise RuntimeError("Implementation Error - numbers don't match up.")
 
         # clean up somewhat
         cur.execute('DROP TABLE ' + from_table + '_orig_ids')
