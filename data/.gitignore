@@ -5,11 +5,39 @@
 # The temporary download folder:
 tmp/
 
+# the actual download folder:
+download/
+
 
 ################
 #  PPIs
 #################
 
-#  Bossi & Lehner PPI file
+# Bossi & Lehner PPI file
+#    can be easily downloaded, thus no need to mirror this huge file on repo
 ppis/CRG.integrated.human.interactome.txt
+
+# Dana Farber CCSB Human Interactome HI-2012-PRE
+#    these are preliminary results and can only be downloaded when
+#    registered without permission to distribute (so mirroring on repo)
+ppis/HI_2012_PRE.tsv
+
+
+
+########################
+# expression data sets 
+########################
+# ignore downloadable expression data sets:
+
+# EBI hosted RNAseq Illumina Body Map data
+expr/E-MTAB-513.tsv
+
+# GeneAtlas (Su Al et al. 2009) and it's annotation table
+expr/U133AGNF1B.gcrma.avg.csv
+expr/gnf1h.annot2007.tsv
+
+# downloadable HPA data
+expr/normal_tissue.csv
+expr/subcellular_location.csv
+
 

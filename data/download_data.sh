@@ -7,11 +7,12 @@
 
 # A few settings
 TMP_FOLDER=tmp
-
+DOWNLOAD_FOLDER=download
 
 # make tmp folder
 rm -R $TMP_FOLDER
 mkdir -p $TMP_FOLDER
+mkdir -p $DOWNLOAD_FOLDER
 
 
 ####################
@@ -20,10 +21,134 @@ mkdir -p $TMP_FOLDER
 
 # 1.) Bossi & Lehner:
 BOSSI_URL=http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2683721/bin/msb200917-s2.zip
-BOSSI_ZIP=$TMP_FOLDER/bossi-lehner-suppl.zip
+BOSSI_ZIP=$DOWNLOAD_FOLDER/bossi-lehner-suppl.zip
 
-curl -o $BOSSI_ZIP $BOSSI_URL
+if [ -f $BOSSI_ZIP ]
+then
+	echo "Bossi & Lehner file already exists, skipping download"
+else
+	echo "Downloading Bossi & Lehner PPI network"
+	curl -o $BOSSI_ZIP $BOSSI_URL
+fi
+
 unzip $BOSSI_ZIP -d $TMP_FOLDER
 cp $TMP_FOLDER/CRG-human-interactome/CRG.integrated.human.interactome.txt ppis/
 
+# 2.) CCSB (only HI-2011, the HI-2012-Pre is not yet available)
+
+# TODO when HI-2012 becomes publicly available
+
+# 3.) string-db
+STRING_VERSION=9.05
+STRING_URL=http://string-db.com/newstring_download/protein.links.v$STRING_VERSION.txt.gz
+STRING_GZ=$DOWNLOAD_FOLDER/protein.links.v$STRING_VERSION.txt.gz
+
+if [ -f $STRING_GZ ]
+then
+	echo "string-db file already exists, skipping download"
+else
+	echo "Downloading string-db file"
+	curl -o $STRING_GZ $STRING_URL
+fi
+
+# TODO: pre-filter string-db
+
+
+########################
+# expression data sets
+########################
+
+# 1.) Human Protein Atlas data
+# expression data
+HPA_URL=http://www.proteinatlas.org/download/normal_tissue.csv.zip
+HPA_ZIP=normal_tissue.csv.zip
+HPA_FILE=normal_tissue.csv
+
+# localization data
+HPA_LOC_URL=http://www.proteinatlas.org/download/subcellular_location.csv.zip
+HPA_LOC_ZIP=subcellular_location.csv.zip
+HPA_LOC_FILE=subcellular_location.csv
+
+if [ -f $DOWNLOAD_FOLDER/$HPA_ZIP ]
+then
+	echo "HPA normal_tissue file already exists, skipping download"
+else
+	echo "Downloading HPA normal_tissue data"
+	curl -o $DOWNLOAD_FOLDER/$HPA_ZIP $HPA_URL
+fi
+
+
+if [ -f $DOWNLOAD_FOLDER/$HPA_LOC_ZIP ]
+then
+	echo "HPA subcellular_location file already exists, skipping download"
+else
+	echo "Downloading HPA subcellular_location data"
+	curl -o $DOWNLOAD_FOLDER/$HPA_LOC_ZIP $HPA_LOC_URL
+fi
+
+# unzip and move the files to the expr folder
+if [ ! -f expr/$HPA_FILE ]
+then
+	unzip $DOWNLOAD_FOLDER/$HPA_ZIP -d $TMP_FOLDER
+	mv $TMP_FOLDER/$HPA_FILE expr/
+fi
+
+if [ ! -f expr/$HPA_LOC_FILE ]
+then
+	unzip $DOWNLOAD_FOLDER/$HPA_LOC_ZIP -d $TMP_FOLDER
+	mv $TMP_FOLDER/$HPA_LOC_FILE expr/
+fi
+
+
+# 2.) Gene Atlas (Su Al et al. 2009) from BioGPS
+# expression file
+GNF1H_URL=http://plugins.biogps.org/download/gnf1h-gcrma.zip
+GNF1H_ZIP=gnf1h-gcrma.zip
+GNF1H_FILE=U133AGNF1B.gcrma.avg.csv
+# gene annotations
+GNF1H_ANN_URL=http://plugins.biogps.org/download/gnf1h-anntable.zip
+GNF1H_ANN_ZIP=gnf1h-anntable.zip
+GNF1H_ANN_FILE=gnf1h.annot2007.tsv
+
+if [ -f $DOWNLOAD_FOLDER/$GNF1H_ZIP ]
+then
+	echo "GeneAtlas GNF1H file already exists, skipping download"
+else
+	echo "Downloading GeneAtlas GNF1H file"
+	curl -o $DOWNLOAD_FOLDER/$GNF1H_ZIP $GNF1H_URL
+fi
+
+if [ -f $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP ]
+then
+	echo "GeneAtlas GNF1H annotations file already exists, skipping download"
+else
+	echo "Downloading GeneAtlas GNF1H annotations file"
+	curl -o $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP $GNF1H_ANN_URL
+fi
+
+# unpack files and move/copy to data/expr folder
+if [ ! -f expr/$GNF1H_FILE ]
+then
+	unzip $DOWNLOAD_FOLDER/$GNF1H_ZIP -d $TMP_FOLDER
+	mv $TMP_FOLDER/$GNF1H_FILE expr/
+fi
+
+if [ ! -f expr/$GNF1H_ANN_FILE ]
+then
+	unzip $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP -d $TMP_FOLDER
+	mv $TMP_FOLDER/$GNF1H_ANN_FILE expr/
+fi
+
+# 3.) RNAseq Illumina Body Map from EBI
+
+EBI_MTAB_URL="http://www-test.ebi.ac.uk/gxa/experiments/E-MTAB-513.tsv?cutoff=0&geneQuery="
+EBI_MTAB_FILE=expr/E-MTAB-513.tsv
+
+if [ -f $EBI_MTAB_FILE ]
+then
+	echo "EBI MTAB file already exists, skipping download"
+else
+	echo "Downloading EBI E-MTAB-513 file"
+	curl -o $EBI_MTAB_FILE EBI_MTAB_URL
+fi
 
