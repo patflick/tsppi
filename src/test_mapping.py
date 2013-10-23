@@ -1,17 +1,22 @@
 import pappi.id_mapping
 import pappi.sql
-#import pappi.ppi_import
-from pappi.ppi.ccsb import CCSB
-from pappi.ppi.bossi_lehner import Bossi_Lehner
+#import pappi.ppis_import
+from pappi.ppis.ccsb import CCSB
+from pappi.ppis.bossi_lehner import Bossi_Lehner
+from pappi.ppis.havu import Havugimana
 import os
 
 DATA_FOLDER = '/home/patrick/dev/bio/data/'
+INT_DATA_FOLDER = '/home/patrick/dev/bio/pappi/data/'
 
 HGNC_FILE = DATA_FOLDER + 'hgnc_entrez_ensembl_uniprot.txt'
 BIOMART_FILE = DATA_FOLDER + 'mart_export.csv'
 DATABASE = DATA_FOLDER + 'test_matching.sqlite'
 CCSB_FILE = DATA_FOLDER + 'HI_2012_PRE.tsv'
 BOSSI_FILE = DATA_FOLDER + 'CRG.integrated.human.interactome.txt'
+
+HAVU_FILE = INT_DATA_FOLDER + 'cell_havugimana_ppi.tsv'
+
 
 # first delete an old DB, to make sure everything is new
 if (os.path.exists(DATABASE)):
@@ -30,7 +35,7 @@ pappi.id_mapping.import_hgnc_file(HGNC_FILE, con)
 
 #ccsb_file = open(CCSB_FILE)
 #print("Importing CCSB data ...")
-#pappi.ppi_import.import_ccsb_file(ccsb_file, con, 'ccsb')
+#pappi.ppis_import.import_ccsb_file(ccsb_file, con, 'ccsb')
 
 #pappi.id_mapping.map_identifier('ccsb', ['Gene_IDA', 'Gene_IDB'], 'entrez',
 #                                'ccsb_hgnc1', 'hgnc', con, True)
@@ -42,3 +47,6 @@ print("trying with bossi lehner PPI")
 bossi_ppi = Bossi_Lehner(BOSSI_FILE, con)
 #bossi_ppi.import_raw_file()
 bossi_ppi.init_ppi(True)
+
+havu_ppi = Havugimana(HAVU_FILE, con)
+havu_ppi.init_ppi(True)
