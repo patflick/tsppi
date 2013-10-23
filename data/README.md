@@ -56,3 +56,41 @@ Direct download link (for version 9.05): [here](http://string-db.org/newstring_d
 Save this file into the `data/download` folder, and then run
 the `download_data.sh` script, which will pre-filter the
 string-db interactions for human interactions with score >= 0.7
+
+
+
+
+Protein Expression data sets
+----------------------------
+
+These are all downloaded and unpacked automatically via the
+`download_data.sh` script. The following just describes the
+data sources.
+
+
+### Human Protein Atlas (HPA)
+
+From the [Human Protein Atlas](http://www.proteinatlas.org/) version 11 
+the `normal_tissue.csv` and `subcellular_location.csv` files are used.
+
+Manual download [here](http://www.proteinatlas.org/about/download)
+
+
+### GeneAtlas (now BioGPS)
+
+This is RNA micro-array data from Su Al et al. 2009.
+It can be downloaded from BioGPS [here](http://biogps.org/downloads/).
+
+The files `gnf1h-gcrma.zip` and `gnf1h-anntable.zip` are needed, where
+the first is the actual expression data while the second holds the annotation
+for the genes.
+
+
+### Illumina Body Map RNAseq
+
+The RNAseq data from Illumina Body Map can be downloaded from EBI
+[here](http://www-test.ebi.ac.uk/gxa/experiments/E-MTAB-513).
+
+The automatic script removes all filters (no gene selection, especially not only protein coding genes; and a cutoff of 0).
+
+
