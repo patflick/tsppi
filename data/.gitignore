@@ -1,1 +1,15 @@
+# This gitignore contains all those data files, which are not kept on the repo
+# and thus have to be downloaded automatically or manually (in case registration
+# or journal access is needed)
+
+# The temporary download folder:
+tmp/
+
+
+################
+#  PPIs
+#################
+
+#  Bossi & Lehner PPI file
+ppis/CRG.integrated.human.interactome.txt
 
