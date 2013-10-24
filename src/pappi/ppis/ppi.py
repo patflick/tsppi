@@ -1,22 +1,21 @@
 import csv
 from .. import sql
 from .. import id_mapping
+from ..table_manager import TableManager
 
 # TODO maybe put this into a config file
 UNIFYING_ID = "hgnc"
 
 
-class PPI:
+class PPI(TableManager):
     """ An interface to all PPI networks. """
 
     # default parameters for the raw file
     file_has_header = True
     file_field_seperator = '\t'
     file_quoting = csv.QUOTE_NONE
-    ppi_name = "no_name"
-    tmp_table_idx = 0
 
-    def __init__(self, filename, sql_connection, ppi_name,
+    def __init__(self, filename, sql_connection, name,
                  gene1_colname, gene2_colname, orig_id):
         """
         Creates a new PPI network. This MUST explicitly be called
@@ -28,7 +27,7 @@ class PPI:
             - sql_connection:   SQL connection object for the database,
                                 into which the PPI network is to be
                                 imported.
-            - ppi_name:         The name for the PPI network. This is
+            - name:             The name for the PPI network. This is
                                 used for example for the names of the
                                 SQL tables.
             - gene1_colname:    The name of the column of the first gene
@@ -38,10 +37,12 @@ class PPI:
             - orig_id:          The gene identifier type (e.g. 'uniprot',
                                 'ensembl', ...) of the gene columns.
         """
+        # call constructor of super-class
+        TableManager.__init__(self, name, sql_connection)
         # copy references into the new instance
         self.filename = filename
         self.sql_conn = sql_connection
-        self.ppi_name = ppi_name
+        self.name = name
         self.gene1_colname = gene1_colname
         self.gene2_colname = gene2_colname
         self.orig_id = orig_id
@@ -54,7 +55,7 @@ class PPI:
         normalizing the PPI network to a common format.
         """
         if verbose:
-            print("Initializing PPI '" + self.ppi_name + "'")
+            print("Initializing PPI '" + self.name + "'")
             print("    importing raw file")
         self.import_raw_file()
         if verbose:
@@ -70,40 +71,11 @@ class PPI:
             print("    normalizing graph")
         self.normalize_graph()
 
-    def get_cur_tmp_table(self):
-        """
-        Returns the name of the temporary SQL table with the results of
-        the current step in the pre-processing.
-
-        This function is needed, because subclasses of PPI might decide
-        to skip a few pre-processing steps in case they are not necessary
-        for that specific PPI. In that case fewer temporary tables
-        are needed to complete the pre-processing.
-
-        All subclasses MUST NOT overwrite this function and must make
-        use of it to get the names for temporary tables.
-        """
-        if self.tmp_table_idx == 0:
-            return self.ppi_name + "_raw"
-        else:
-            return self.ppi_name + "_tmp_" + str(self.tmp_table_idx)
-
-    def next_tmp_table(self):
-        """
-        Creates a new temporary SQL table name and returns that new name.
-        The next call to get_cur_tmp_table() will return this name.
-
-        All subclasses MUST NOT overwrite this function and must make
-        use of it to get the names for temporary tables.
-        """
-        self.tmp_table_idx += 1
-        return self.get_cur_tmp_table()
-
     def import_raw_file(self):
         """
         Imports a PPI file in csv format into the SQL database.
         """
-        table_name = self.ppi_name + "_raw"
+        table_name = self.name + "_raw"
         sql.import_csv(self.filename, table_name, self.file_field_seperator,
                        self.file_has_header, csv_quoting=self.file_quoting,
                        sql_conn=self.sql_conn)
@@ -163,7 +135,7 @@ class PPI:
         src_table = self.get_cur_tmp_table()
         # this is the last step in the PPI pre-processing,
         # thus the result does not get put into a temporary table
-        dst_table = self.ppi_name
+        dst_table = self.name
         cur = self.sql_conn.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS ' + dst_table + ' AS '
                     'SELECT DISTINCT '

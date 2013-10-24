@@ -25,6 +25,10 @@ MAPPED_IDS = [COL_ENSEMBL_ID, COL_ENTREZ, COL_HGNC_SYMB, COL_UNIPROT]
 HGNC_MAPPING_TABLE_NAME = 'hgnc'
 BIOMART_MAPPING_TABLE_NAME = 'biomart'
 
+# The Gene ID that is used throughout the project,
+# all other Gene IDs are mapped to this one
+UNIFYING_ID = "hgnc"
+
 
 PAPPI_ENSP2ENSG_TABLE_NAME = 'ensg_to_ensp'
 
