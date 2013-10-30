@@ -14,6 +14,8 @@ rm -R $TMP_FOLDER
 mkdir -p $TMP_FOLDER
 mkdir -p $DOWNLOAD_FOLDER
 
+mkdir ppis
+mkdir expr
 
 ####################
 #   PPI networks 
@@ -149,6 +151,7 @@ then
 	echo "EBI MTAB file already exists, skipping download"
 else
 	echo "Downloading EBI E-MTAB-513 file"
-	curl -o $EBI_MTAB_FILE EBI_MTAB_URL
+	curl -o $EBI_MTAB_FILE $EBI_MTAB_URL
 fi
+
 

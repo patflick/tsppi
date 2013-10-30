@@ -36,6 +36,44 @@ def execute_script(script_filename, sql_conn=PAPPI_SQL_CONN):
         sql_conn.commit()
 
 
+def new_table_from_query(new_table, query, sql_conn=PAPPI_SQL_CONN,
+                         overwrite=True):
+    """
+    Executes the given query and creates a new table with name `new_table` from
+    the output query. In case the table with the given name exists, the
+    `overwrite` variable decides what happens. If it is set to `True`, the
+    existing table is deleted/overwritten. Otherwise the table is not
+    overwritten and nothing happens.
+
+    @param new_table:       The name for the new table to be created.
+    @param query:           The SQL query to create the new table with.
+    @param sql_conn:        The SQL connection to be used for the operation.
+    @param overwrite:       Whether or not an existing table with name
+                            `new_table` is to be overwritten.
+    """
+    # NOTE: this function is just for conveniance, because the pattern
+    # implemented here existed all over the project. This way only one
+    # convenient call has to be made.
+
+    # get SQl cursor
+    cur = sql_conn.cursor()
+
+    # depending on the `overwrite` parameter: drop table and set correct
+    # CREATE statement
+    if overwrite:
+        cur.execute('DROP TABLE IF EXISTS ' + new_table)
+        sql_prefix = 'CREATE TABLE "' + new_table + '" AS '
+    else:
+        sql_prefix = 'CREATE TABLE IF NOT EXISTS "' + new_table + '" AS '
+
+    # execute the query and save in the new table
+    cur.execute(sql_prefix + query)
+
+    # close cursor and commit to server
+    cur.close()
+    sql_conn.commit()
+
+
 def extend_row_iterator(base_iterator, num):
     for row in base_iterator:
         if len(row) == num:
@@ -48,7 +86,7 @@ def extend_row_iterator(base_iterator, num):
 
 def import_csv(csv_filename, table, csv_delimiter, has_header,
                column_names=None, column_types=None,
-               csv_quoting=None, sql_conn=PAPPI_SQL_CONN):
+               csv_quoting=None, sql_conn=PAPPI_SQL_CONN, skip_rows=0):
     """
     Imports a CSV file into an SQL table.
 
@@ -70,6 +108,11 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
 
     # open the input file
     with open(csv_filename, 'r') as csv_file:
+        # in case rows are supposed to be skipped -> skip them:
+        if skip_rows > 0:
+            for i in range(0, skip_rows):
+                l = csv_file.readline()
+
         # initialize the cursor object
         cur = sql_conn.cursor()
 
@@ -120,6 +163,29 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
         # close cursor and commit
         cur.close()
         sql_conn.commit()
+
+
+def linearize_table(src_table, excl_columns, cat_col_name, val_col_name,
+                    dst_table, con=PAPPI_SQL_CONN):
+    col_names = get_column_names(src_table, con)
+
+    transpose_cols = [x for x in col_names if not x in excl_columns]
+
+    remaining_cols = ", ".join(excl_columns)
+
+    select_stmts = ['SELECT ' + remaining_cols + ' , \'' + x + '\' AS '
+                    + cat_col_name + ', ' + x + ' AS ' + val_col_name
+                    + ' FROM ' + src_table for x in transpose_cols]
+    union = " UNION ".join(select_stmts)
+
+    # get SQL cursor
+    cur = con.cursor()
+    cur.execute('DROP TABLE IF EXISTS ' + dst_table)
+    cur.execute('CREATE TABLE ' + dst_table + ' AS ' + union)
+
+    # commit SQl changes
+    cur.close()
+    con.commit()
 
 
 def dump_csv(outfile, table, sql_conn=PAPPI_SQL_CONN):

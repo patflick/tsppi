@@ -21,6 +21,15 @@ class GeneExpression(TableManager):
         self.sql_conn = sql_connection
         self.name = dataset_name
 
+    def init_data(self):
+        # TODO re-evaluate which order is best ... !?
+        self.import_raw_file()
+        self.linearize_table()
+        self.id_mapping()
+        self.filter()
+        self.normalize_table()
+        self.classify()
+
     def import_raw_file(self):
         """
         Imports the expression file in raw format into the SQL database
@@ -32,10 +41,18 @@ class GeneExpression(TableManager):
                        self.file_has_header, csv_quoting=self.file_quoting,
                        sql_conn=self.sql_conn)
 
+    def linearize_table(self):
+        """
+        In case the table structure is [Gene] x [Tissue/Cell-Type], the table
+        needs to be linearized to a column structure
+        [Gene],[Tissue/Cell-Type],[Expr]
+        """
+        pass
+
     def filter(self):
         """
         Filters the expression data for genes with certain
-        reliablilities/confidences.
+        reliablilities or confidences.
         """
         pass
 
@@ -58,6 +75,20 @@ class GeneExpression(TableManager):
         Thresholds or classifies genes into either expressed ( = 1)
         or non-expressed (= 0).
         """
-        raise NotImplementedError("The classify method has to be "
-                                  "implemented by all subclasses")
-
+        if not hasattr(self, 'classify_cond'):
+            raise NotImplementedError("The classify method has to be "
+                                      "implemented by all subclasses, or "
+                                      "the self.classify_cond attribute set")
+        # get the src and dest table, assuming they are in normalized format,
+        # create the expression-classified version of the table
+        src_table = self.get_cur_tmp_table()
+        dst_table = self.name
+        cur = self.sql_conn.cursor()
+        cur.execute('DROP TABLE IF EXISTS ' + dst_table)
+        cur.execute('CREATE TABLE ' + dst_table + ' AS '
+                    'SELECT Gene, Type, '
+                    ' CASE WHEN ExpressionValue ' + self.classify_cond + ' '
+                    ' THEN 1 ELSE 0 END AS Expressed '
+                    'FROM ' + src_table)
+        cur.close()
+        self.sql_conn.commit()

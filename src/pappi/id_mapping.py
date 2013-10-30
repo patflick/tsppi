@@ -199,6 +199,23 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
         print("Matching Table '" + from_table + "' -> '" + to_table + "' "
               "by mapping identifiers " + from_id + " -> " + to_id)
 
+    # get a SQl cursor object
+    cur = sql_conn.cursor()
+
+    # in case both identifiers are the same, don't map
+    # TODO: create table of unmapped identifiers (which probably are
+    # deprecated ids)
+    # TODO: or maybe remove all lines with ids that don't exist in
+    # the mapping tables
+    if from_id == to_id:
+        if verbose:
+            print("Mapping same identifiers (" + from_id + " -> " + to_id
+                  + "), " + "thus just copy table")
+        cur.execute('DROP TABLE IF EXISTS ' + to_table)
+        cur.execute('CREATE TABLE ' + to_table + ' AS '
+                    'SELECT * FROM ' + from_table)
+        return
+
     # check if the needed mapping table is already present
     # otherwise first create it
     mapping_table = from_id + '_2_' + to_id
@@ -212,9 +229,6 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
     # get all the column names in order to be able to generate the
     # SQL statement
     col_names = sql.get_column_names(from_table, sql_conn)
-
-    # get a SQl cursor object
-    cur = sql_conn.cursor()
 
     # get data type of the from_id of the mapping table
     # for data conversions (if the according column in the from_table is
