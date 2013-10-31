@@ -6,8 +6,6 @@ Import operations for ID mapping tables. (Ensembl ENSG<->ENSP and Ensembl ENSG
 '''
 # TODO list for this file:
 #  - ensg <-> ensp mapping directly via the biomart table
-#  - (maybe) replace all the DROP TABLE IF EXISTS; CREATE TABLE
-#            with CREATE TABLE IF NOT EXISTS
 #  - find rationale for MIN(id) to resolve ambiguties
 #  - idk what else yet
 
@@ -53,8 +51,9 @@ def import_ENSG2ENSP_file(infile, sql_conn, table=PAPPI_ENSP2ENSG_TABLE_NAME):
 
     # create table for the raw HPA data:
     # "Gene","Tissue","Cell type","Level","Expression type","Reliability"
-    cur.execute('DROP TABLE IF EXISTS "' + table + '";')
-    cur.execute('CREATE TABLE "' + table + '" ("ENSG" varchar(16), "ENSP" varchar(256));')
+    cur.execute('DROP TABLE IF EXISTS "' + table + '"')
+    cur.execute('CREATE TABLE "' + table + '" ("ENSG" varchar(16), '
+                '"ENSP" varchar(256));')
 
     # get csv reader for the hpa file
     csv_reader = csv.reader(infile, delimiter=',', quoting=csv.QUOTE_ALL)
@@ -91,17 +90,15 @@ def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
     @param table: The SQL table name into which the data is to be imported.
     """
     # import the CSV input as table
-    cols = [COL_ENSEMBL_ID, COL_HGNC_SYMB, COL_UNIPROT, COL_HGNC_ID, COL_ENTREZ]
+    cols = [COL_ENSEMBL_ID, COL_HGNC_SYMB, COL_UNIPROT,
+            COL_HGNC_ID, COL_ENTREZ]
     sql.import_csv(filename, table + '_raw', ',', True, column_names=cols,
                    column_types=["varchar(16)"]*5, csv_quoting=None,
                    sql_conn=sql_conn)
 
     # remove the _HUMAN postfix from the Uniprot ID to get BioMart into the
     # same format as the HGNC data
-    cur = sql_conn.cursor()
-    cur.execute('DROP TABLE IF EXISTS ' + table)
-    cur.execute('CREATE TABLE ' + table + ' AS '
-                'SELECT '
+    sqlquery = ('SELECT '
                 '' + COL_HGNC_ID + ', '
                 '' + COL_HGNC_SYMB + ', '
                 '' + COL_ENSEMBL_ID + ', '
@@ -110,6 +107,7 @@ def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
                 'replace(' + COL_UNIPROT + ',"_HUMAN","") AS '
                 '' + COL_UNIPROT + ' '
                 'FROM ' + table + '_raw')
+    sql.new_table_from_query(table, sqlquery, sql_conn)
 
 
 def import_hgnc_file(filename, sql_conn, table=HGNC_MAPPING_TABLE_NAME):
@@ -152,11 +150,7 @@ def import_hgnc_file(filename, sql_conn, table=HGNC_MAPPING_TABLE_NAME):
 
     # bring into "normal" form (i.e merge the two providers for ensembl and
     # entrez
-    cur = sql_conn.cursor()
-
-    cur.execute('DROP TABLE IF EXISTS "' + table + '"')
-    query = ('CREATE TABLE ' + table + ' AS '
-             'SELECT '
+    query = ('SELECT '
              '' + COL_HGNC_ID + ', '
              '' + COL_HGNC_SYMB + ', '
              # prefer the Ensembl supplied Ensembl ID
@@ -171,9 +165,7 @@ def import_hgnc_file(filename, sql_conn, table=HGNC_MAPPING_TABLE_NAME):
              'END AS ' + COL_ENTREZ + ', '
              '' + COL_UNIPROT + ' '
              'FROM ' + table + '_raw')
-    cur.execute(query)
-    cur.close()
-    sql_conn.commit()
+    sql.new_table_from_query(table, query, sql_conn)
 
 
 def map_identifier(from_table, from_cols, from_id, to_table, to_id,
@@ -211,9 +203,8 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
         if verbose:
             print("Mapping same identifiers (" + from_id + " -> " + to_id
                   + "), " + "thus just copy table")
-        cur.execute('DROP TABLE IF EXISTS ' + to_table)
-        cur.execute('CREATE TABLE ' + to_table + ' AS '
-                    'SELECT * FROM ' + from_table)
+        sql.new_table_from_query(to_table, 'SELECT * FROM ' + from_table,
+                                 sql_conn)
         return
 
     # check if the needed mapping table is already present
@@ -252,7 +243,8 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
             # construct the result field statement (e.g. map1.hgnc AS gene1)
             result_fields.append(map_alias + '.' + to_id + ' AS ' + col)
             # construct the inner join statement
-            # (e.g. INNER JOIN entrez_2_hgnc AS map1 ON map1.entrez = src.gene1)
+            # (e.g. INNER JOIN entrez_2_hgnc AS map1
+            #       ON map1.entrez = src.gene1)
             join_commands.append('INNER JOIN ' + mapping_table + ' AS '
                                  + map_alias + ' ON ' + map_alias + '.'
                                  # CAST the col to the type of the mapping
@@ -275,9 +267,7 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
                 + '_index ON ' + mapping_table + '(' + from_id + ')')
 
     # run the inner join
-    cur.execute('DROP TABLE IF EXISTS ' + to_table)
-    print("SQL QUERY: " + sqlquery)
-    cur.execute('CREATE TABLE ' + to_table + ' AS ' + sqlquery)
+    sql.new_table_from_query(to_table, sqlquery, sql_conn)
 
     # verbose debug output: get table and statistics of non-matched rows
     if verbose:
@@ -285,25 +275,24 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
         union_of_ids = " UNION ".join('SELECT ' + c + ' AS id FROM '
                                       + from_table
                                       for c in from_cols)
-        cur.execute('DROP TABLE IF EXISTS ' + from_table + '_orig_ids')
-        cur.execute('CREATE TABLE ' + from_table + '_orig_ids AS '
-                    'SELECT DISTINCT id FROM (' + union_of_ids + ')')
+        sqlquery = ('SELECT DISTINCT id FROM (' + union_of_ids + ')')
+        sql.new_table_from_query(from_table + '_orig_ids', sqlquery, sql_conn)
 
         # create table of non-matched ids
-        cur.execute('DROP TABLE IF EXISTS ' + to_table + '_unmatched_ids')
-        cur.execute('CREATE TABLE ' + to_table + '_unmatched_ids AS '
-                    'SELECT DISTINCT id FROM ' + from_table + '_orig_ids '
+        sqlquery = ('SELECT DISTINCT id FROM ' + from_table + '_orig_ids '
                     'WHERE id NOT IN ('
                     '   SELECT ' + from_id + ' FROM ' + mapping_table + ')')
+        sql.new_table_from_query(to_table + '_unmatched_ids', sqlquery,
+                                 sql_conn)
 
         # create table made of rows which did not map
         where_or = ") OR (".join(c + ' IN (SELECT id FROM ' + to_table
                                  + '_unmatched_ids)' for c in from_cols)
         where_cond = "(" + where_or + ")"
-        cur.execute('DROP TABLE IF EXISTS ' + to_table + '_unmatched_rows')
-        cur.execute('CREATE TABLE ' + to_table + '_unmatched_rows AS '
-                    'SELECT * FROM ' + from_table + ' '
+        sqlquery = ('SELECT * FROM ' + from_table + ' '
                     'WHERE ' + where_cond)
+        sql.new_table_from_query(to_table + '_unmatched_rows', sqlquery,
+                                 sql_conn)
 
         # get statistics (number of matched and unmatched rows and ids)
         cur.execute('SELECT COUNT(*) FROM ' + from_table)
@@ -337,7 +326,7 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
                   + "_unmatched_ids`")
 
         if (nrows_from - nrows_to != nrows_unmatched):
-            raise RuntimeError("Implementation Error - numbers don't match up.")
+            raise RuntimeError("Implementation Error: numbers don't match up.")
 
         # clean up somewhat
         cur.execute('DROP TABLE ' + from_table + '_orig_ids')
@@ -380,11 +369,10 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
         print("    Creating pairwise table from: " + table1)
 
     # create first simple pairwise mapping table
-    cur.execute('DROP TABLE IF EXISTS ' + table_name + "_pairwise")
-    cur.execute('CREATE TABLE ' + table_name + '_pairwise AS '
-                'SELECT ' + from_id + ', ' + to_id + ' '
+    sqlquery = ('SELECT ' + from_id + ', ' + to_id + ' '
                 'FROM ' + table1 + ' '
                 'WHERE ' + from_id + '!="" AND ' + to_id + '!=""')
+    sql.new_table_from_query(table_name + '_pairwise', sqlquery, sql_conn)
 
     # insert pairwise matchings for those identifiers
     # in the other mapping tables, that have not yet been matched
@@ -414,11 +402,10 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
     if verbose:
         print("    Removing duplicate and ambiguous matchings")
 
-    cur.execute('DROP TABLE IF EXISTS ' + table_name + '_single')
-    cur.execute('CREATE TABLE ' + table_name + '_single AS '
-                'SELECT MIN(' + to_id + ') AS ' + to_id + ', ' + from_id + ' '
+    sqlquery = ('SELECT MIN(' + to_id + ') AS ' + to_id + ', ' + from_id + ' '
                 'FROM ' + table_name + '_pairwise '
                 'GROUP BY ' + from_id)
+    sql.new_table_from_query(table_name + '_single', sqlquery, sql_conn)
 
     # get statistic for #matched/#unique-ids
     if verbose:
@@ -430,21 +417,19 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
                         'FROM ' + table_name + '_single')
 
             # get all distinct identifier from all tables
-            cur.execute('DROP TABLE IF EXISTS ' + i + '_all_ids')
             union_of_ids = " UNION ".join('SELECT ' + i + ' FROM ' + t
                                           + ' WHERE ' + i + ' != "" '
                                           for t in tables)
-            cur.execute('CREATE TABLE ' + i + '_all_ids AS '
-                        'SELECT DISTINCT ' + i + ' FROM '
+            sqlquery = ('SELECT DISTINCT ' + i + ' FROM '
                         '(' + union_of_ids + ')')
+            sql.new_table_from_query(i + '_all_ids', sqlquery, sql_conn)
 
             # create table of unmatched identifiers
-            cur.execute('DROP TABLE IF EXISTS ' + table_name + '_unmatched_'
-                        + i + ' ')
-            cur.execute('CREATE TABLE ' + table_name + '_unmatched_' + i + ' '
-                        'AS SELECT * FROM ' + i + '_all_ids '
+            new_table = table_name + '_unmatched_' + i
+            sqlquery = ('SELECT * FROM ' + i + '_all_ids '
                         'WHERE ' + i + ' NOT IN '
                         '( SELECT * FROM ' + table_name + '_' + i + ')')
+            sql.new_table_from_query(new_table, sqlquery, sql_conn)
 
             # get count of all
             cur.execute('SELECT COUNT() FROM ' + i + '_all_ids')
@@ -480,11 +465,10 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
                   + table_name + "_unmatched_" + i + "` SQL table.")
 
     # create the real mapping table
-    cur.execute('DROP TABLE IF EXISTS ' + table_name)
-    cur.execute('CREATE TABLE ' + table_name + ' AS '
-                'SELECT ' + from_id + ', ' + to_id + ' '
+    sqlquery = ('SELECT ' + from_id + ', ' + to_id + ' '
                 'FROM ' + table_name + '_single '
                 'ORDER BY ' + from_id)
+    sql.new_table_from_query(table_name, sqlquery, sql_conn)
 
     # close cursor and commit changes to SQL server
     cur.close()

@@ -83,12 +83,8 @@ class GeneExpression(TableManager):
         # create the expression-classified version of the table
         src_table = self.get_cur_tmp_table()
         dst_table = self.name
-        cur = self.sql_conn.cursor()
-        cur.execute('DROP TABLE IF EXISTS ' + dst_table)
-        cur.execute('CREATE TABLE ' + dst_table + ' AS '
-                    'SELECT Gene, Type, '
+        sqlquery = ('SELECT Gene, Type, '
                     ' CASE WHEN ExpressionValue ' + self.classify_cond + ' '
                     ' THEN 1 ELSE 0 END AS Expressed '
                     'FROM ' + src_table)
-        cur.close()
-        self.sql_conn.commit()
+        sql.new_table_from_query(
