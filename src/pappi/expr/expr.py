@@ -36,7 +36,7 @@ class GeneExpression(TableManager):
         If the specific datasets need some kind of raw pre-processing,
         then this function MUST be overwritten.
         """
-        table_name = self.name + "_raw"
+        table_name = self.next_tmp_table("raw")
         sql.import_csv(self.filename, table_name, self.file_field_seperator,
                        self.file_has_header, csv_quoting=self.file_quoting,
                        sql_conn=self.sql_conn)
@@ -82,9 +82,9 @@ class GeneExpression(TableManager):
         # get the src and dest table, assuming they are in normalized format,
         # create the expression-classified version of the table
         src_table = self.get_cur_tmp_table()
-        dst_table = self.name
+        dst_table = self.next_tmp_table("")
         sqlquery = ('SELECT Gene, Type, '
                     ' CASE WHEN ExpressionValue ' + self.classify_cond + ' '
                     ' THEN 1 ELSE 0 END AS Expressed '
                     'FROM ' + src_table)
-        sql.new_table_from_query(
+        sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)

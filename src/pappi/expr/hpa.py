@@ -31,7 +31,7 @@ class HPA(GeneExpression):
         Filters out all unreliable values
         """
         src_table = self.get_cur_tmp_table()
-        dst_table = self.next_tmp_table()
+        dst_table = self.next_tmp_table('filtered')
         sqlquery = ('SELECT Gene, Tissue, Cell_Type, Level, Expression_type '
                     'FROM ' + src_table + ' '
                     'WHERE (Expression_type = "APE" AND '
@@ -46,7 +46,7 @@ class HPA(GeneExpression):
         [ExpressionValue], ...
         """
         src_table = self.get_cur_tmp_table()
-        dst_table = self.next_tmp_table()
+        dst_table = self.next_tmp_table('normalized')
         sqlquery = ('SELECT Gene, Tissue || " - " || Cell_Type AS Type, '
                     'Tissue, Cell_Type, Level AS ExpressionValue '
                     'FROM ' + src_table)

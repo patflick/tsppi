@@ -36,9 +36,5 @@ class Bossi_Lehner(PPI):
         """
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table()
-        cur = self.sql_conn.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS ' + dst_table + ' AS '
-                    'SELECT Gene1, Gene2 FROM ' + src_table)
-
-        cur.close()
-        self.sql_conn.commit()
+        sqlquery = 'SELECT Gene1, Gene2 FROM ' + src_table
+        sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)

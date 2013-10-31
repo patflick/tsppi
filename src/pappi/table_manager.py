@@ -6,12 +6,11 @@ class TableManager:
     expression data sets.
     """
     tmp_table_idx = 0
+    cur_tmp_name = None
 
     def __init__(self, table_name, sql_connection):
         self.name = table_name
         self.sql_conn = sql_connection
-        # set the table index WHAT TAH FAAACK?
-        self.tmp_table_idx = 42
 
     def get_cur_tmp_table(self):
         """
@@ -26,12 +25,12 @@ class TableManager:
         All subclasses MUST NOT overwrite this function and must make
         use of it to get the names for temporary tables.
         """
-        if self.tmp_table_idx == 0:
-            return self.name + "_raw"
+        if self.cur_tmp_name:
+            return self.cur_tmp_name
         else:
-            return self.name + "_tmp_" + str(self.tmp_table_idx)
+            return next_tmp_table()
 
-    def next_tmp_table(self):
+    def next_tmp_table(self, suffix=None):
         """
         Creates a new temporary SQL table name and returns that new name.
         The next call to get_cur_tmp_table() will return this name.
@@ -40,4 +39,14 @@ class TableManager:
         use of it to get the names for temporary tables.
         """
         self.tmp_table_idx += 1
+        if suffix is None:
+            suffix = str(self.tmp_table_idx)
+
+        # set new table name
+        if suffix == "":
+            self.cur_tmp_name = self.name
+        else:
+            self.cur_tmp_name = self.name + '_' + suffix
+
+        # return via the current table function
         return self.get_cur_tmp_table()

@@ -23,7 +23,7 @@ class Emtab(GeneExpression):
         have to be removed. Thus this function overwrites the base
         class function.
         """
-        table_name = self.name + "_raw"
+        table_name = self.next_tmp_table("raw")
         sql.import_csv(self.filename, table_name, self.file_field_seperator,
                        self.file_has_header, csv_quoting=self.file_quoting,
                        sql_conn=self.sql_conn, skip_rows=3)
@@ -34,7 +34,7 @@ class Emtab(GeneExpression):
         be linearized before continuing.
         """
         src_table = self.get_cur_tmp_table()
-        dst_table = self.next_tmp_table()
+        dst_table = self.next_tmp_table('linear')
         sql.linearize_table(src_table, ["Gene_ID", "Gene_Name"], "Tissue",
                             "ExpressionValue", dst_table, self.sql_conn)
 
@@ -57,7 +57,7 @@ class Emtab(GeneExpression):
         Puts the table into the format: [Gene], [Tissue], [ExpressionValue]
         """
         src_table = self.get_cur_tmp_table()
-        dst_table = self.next_tmp_table()
+        dst_table = self.next_tmp_table('normalized')
         sqlquery = ('SELECT Gene_Name as Gene, Tissue AS Type, Tissue, '
                     'ExpressionValue '
                     'FROM ' + src_table)

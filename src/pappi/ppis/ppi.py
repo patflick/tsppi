@@ -75,7 +75,7 @@ class PPI(TableManager):
         """
         Imports a PPI file in csv format into the SQL database.
         """
-        table_name = self.name + "_raw"
+        table_name = self.next_tmp_table("raw")
         sql.import_csv(self.filename, table_name, self.file_field_seperator,
                        self.file_has_header, csv_quoting=self.file_quoting,
                        sql_conn=self.sql_conn)
@@ -111,17 +111,12 @@ class PPI(TableManager):
         # ID columns and put them into a new table with column names
         # Gene1 and Gene2
         src_table = self.get_cur_tmp_table()
-        dst_table = self.next_tmp_table()
-        cur = self.sql_conn.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS ' + dst_table + ' AS '
-                    'SELECT '
+        dst_table = self.next_tmp_table('normalized')
+        sqlquery = ('SELECT '
                     '' + self.gene1_colname + ' AS Gene1, '
                     '' + self.gene2_colname + ' AS Gene2 '
                     'FROM ' + src_table)
-        # TODO drop table only in production mode
-        #cur.execute('DROP TABLE ' + src_table)
-        cur.close()
-        self.sql_conn.commit()
+        sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
     def normalize_graph(self):
         """
@@ -135,10 +130,8 @@ class PPI(TableManager):
         src_table = self.get_cur_tmp_table()
         # this is the last step in the PPI pre-processing,
         # thus the result does not get put into a temporary table
-        dst_table = self.name
-        cur = self.sql_conn.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS ' + dst_table + ' AS '
-                    'SELECT DISTINCT '
+        dst_table = self.next_tmp_table("")
+        sqlquery = ('SELECT DISTINCT '
                     'CASE WHEN Gene1 > Gene2 '
                     '  THEN Gene2 ELSE Gene1 '
                     'END AS Gene1, '
@@ -146,6 +139,4 @@ class PPI(TableManager):
                     '  THEN Gene1 ELSE Gene2 '
                     'END AS Gene2 '
                     'FROM ' + src_table)
-        # close cursor and commit changes
-        cur.close()
-        self.sql_conn.commit()
+        sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
