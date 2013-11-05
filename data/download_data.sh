@@ -141,6 +141,7 @@ then
 	mv $TMP_FOLDER/$GNF1H_ANN_FILE expr/
 fi
 
+
 # 3.) RNAseq Illumina Body Map from EBI
 
 EBI_MTAB_URL="http://www-test.ebi.ac.uk/gxa/experiments/E-MTAB-513.tsv?cutoff=0&geneQuery="
@@ -155,3 +156,14 @@ else
 fi
 
 
+# 4.) RNA Seq Atlas from medicalgenomics.org
+RNASEQ_ATLAS_URL="http://medicalgenomics.org/rna_seq_atlas/download?download_revision1=1"
+RNASEQ_ATLAS_FILE=expr/RNA_Seq_Atlas_rev1.txt
+
+if [ -f $RNASEQ_ATLAS_FILE ]
+then
+	echo "RNA Seq Atlas file already exists, skipping download"
+else
+	echo "Downloading RNA Seq Atlas file"
+	curl -o $RNASEQ_ATLAS_FILE $RNASEQ_ATLAS_URL
+fi

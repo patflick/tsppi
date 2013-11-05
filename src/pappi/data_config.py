@@ -29,3 +29,4 @@ HAVU_FILE = os.path.join(PPI_DATA_FOLDER, 'cell_havugimana_ppi.tsv')
 # import expression data sets
 HPA_FILE = os.path.join(EXPR_DATA_FOLDER, 'normal_tissue.csv')
 EMTAB_FILE = os.path.join(EXPR_DATA_FOLDER, 'E-MTAB-513.tsv')
+RNASEQ_ATLAS_FILE = os.path.join(EXPR_DATA_FOLDER, 'RNA_Seq_Atlas_rev1.txt')
