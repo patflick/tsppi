@@ -23,6 +23,8 @@ MAPPED_IDS = [COL_ENSEMBL_ID, COL_ENTREZ, COL_HGNC_SYMB, COL_UNIPROT]
 HGNC_MAPPING_TABLE_NAME = 'hgnc'
 BIOMART_MAPPING_TABLE_NAME = 'biomart'
 
+MAPPING_STATS_TABLE = 'mapping_stats'
+
 # The Gene ID that is used throughout the project,
 # all other Gene IDs are mapped to this one
 UNIFYING_ID = "hgnc"
@@ -187,12 +189,19 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
                         may result in an elongated run time (due to
                         calculating statistics). Default: False
     """
+    # get a SQl cursor object
+    cur = sql_conn.cursor()
+
     if verbose:
         print("Matching Table '" + from_table + "' -> '" + to_table + "' "
               "by mapping identifiers " + from_id + " -> " + to_id)
-
-    # get a SQl cursor object
-    cur = sql_conn.cursor()
+        if not sql.table_exists(MAPPING_STATS_TABLE, sql_conn):
+            # create the mapping stats table
+            cur.execute('CREATE TABLE ' + MAPPING_STATS_TABLE + ' '
+                        '(mapped_table varchar(32), from_id varchar(16), '
+                        ' to_id varchar(16), total_ids int, matched_ids int, '
+                        ' unmatched_ids int, total_rows int,'
+                        ' matched_rows int, unmatched_rows int)')
 
     # in case both identifiers are the same, don't map
     # TODO: create table of unmapped identifiers (which probably are
@@ -324,6 +333,16 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
             print("    Unmatched identfiers ( = " + str(num_unmatched_ids)
                   + " ) are now available in the SQL table `" + to_table
                   + "_unmatched_ids`")
+
+        # insert all the ID mapping stats into the table
+        cur.execute('INSERT INTO ' + MAPPING_STATS_TABLE + ' '
+                    '(mapped_table, from_id, to_id, total_ids, '
+                    ' matched_ids, unmatched_ids, total_rows, '
+                    ' matched_rows, unmatched_rows) VALUES '
+                    '(?,?,?,?,?,?,?,?,?)',
+                    [from_table, from_id, to_id, num_from_ids,
+                    num_from_ids - num_unmatched_ids, num_unmatched_ids,
+                    nrows_from, nrows_to, nrows_unmatched])
 
         if (nrows_from - nrows_to != nrows_unmatched):
             raise RuntimeError("Implementation Error: numbers don't match up.")

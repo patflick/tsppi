@@ -1,5 +1,6 @@
 # import the module for the super-class PPI
 from .ppi import PPI
+from .. import sql
 
 
 class Bossi_Lehner(PPI):

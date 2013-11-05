@@ -41,8 +41,6 @@ class PPI(TableManager):
         TableManager.__init__(self, name, sql_connection)
         # copy references into the new instance
         self.filename = filename
-        self.sql_conn = sql_connection
-        self.name = name
         self.gene1_colname = gene1_colname
         self.gene2_colname = gene2_colname
         self.orig_id = orig_id
