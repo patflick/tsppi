@@ -9,14 +9,14 @@ import os
 cur_folder = os.path.dirname(__file__)
 base_folder = os.path.join(cur_folder, '..', '..')
 
-# TODO add these files into the repo data folder !?
 EXT_DATA_FOLDER = os.path.join(base_folder, '..', 'data')
 DATA_FOLDER = os.path.join(base_folder, 'data')
 
 PPI_DATA_FOLDER = os.path.join(DATA_FOLDER, 'ppis')
 EXPR_DATA_FOLDER = os.path.join(DATA_FOLDER, 'expr')
 
-HGNC_FILE = os.path.join(EXT_DATA_FOLDER, 'hgnc_entrez_ensembl_uniprot.txt')
+# TODO add these files into the repo data folder !?
+HGNC_FILE = os.path.join(EXT_DATA_FOLDER, 'hgnc_downloads.txt')
 BIOMART_FILE = os.path.join(EXT_DATA_FOLDER, 'mart_export.csv')
 DATABASE = os.path.join(EXT_DATA_FOLDER, 'test_matching.sqlite')
 

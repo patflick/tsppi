@@ -212,71 +212,82 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
         if verbose:
             print("Mapping same identifiers (" + from_id + " -> " + to_id
                   + "), " + "thus just copy table")
+
         sql.new_table_from_query(to_table, 'SELECT * FROM ' + from_table,
                                  sql_conn)
-        return
 
-    # check if the needed mapping table is already present
-    # otherwise first create it
-    mapping_table = from_id + '_2_' + to_id
-    if not sql.table_exists(mapping_table, sql_conn):
+        # get some stats
         if verbose:
-            print("    Mapping table for " + from_id + " -> " + to_id
-                  + " doesn't yet exists.")
-        # create new mapping table
-        create_mapping_table(from_id, to_id, sql_conn, verbose)
+            if not sql.table_exists(from_id + "_all_ids", sql_conn):
+                create_all_id_table(from_id, sql_conn)
+            # set the mapping table to this, so that the mapping
+            # stats are also generated for this mapping
+            mapping_table = from_id + "_all_ids"
 
-    # get all the column names in order to be able to generate the
-    # SQL statement
-    col_names = sql.get_column_names(from_table, sql_conn)
+    else:
+        # check if the needed mapping table is already present
+        # otherwise first create it
+        mapping_table = from_id + '_2_' + to_id
+        if not sql.table_exists(mapping_table, sql_conn):
+            if verbose:
+                print("    Mapping table for " + from_id + " -> " + to_id
+                      + " doesn't yet exists.")
+            # create new mapping table
+            create_mapping_table(from_id, to_id, sql_conn, verbose)
 
-    # get data type of the from_id of the mapping table
-    # for data conversions (if the according column in the from_table is
-    # not converted to the same data type, then the indexes are not used,
-    # resulting in very very poor performance)
-    cur.execute('SELECT TYPEOF(' + from_id + ') FROM ' + mapping_table)
-    from_id_type = cur.fetchone()[0]
+        # get all the column names in order to be able to generate the
+        # SQL statement
+        col_names = sql.get_column_names(from_table, sql_conn)
 
-    # construct the fields for the result table and
-    # the JOIN statement composed of INNER JOINs
-    mapped_col_count = 0
-    result_fields = []
-    join_commands = []
-    for col in col_names:
-        if col in from_cols:
-            # create map alias in the form of map1, map2, map3, ...
-            # for the join statements and the correct selection
-            # of the field
-            mapped_col_count += 1
-            map_alias = 'map' + str(mapped_col_count)
-            # construct the result field statement (e.g. map1.hgnc AS gene1)
-            result_fields.append(map_alias + '.' + to_id + ' AS ' + col)
-            # construct the inner join statement
-            # (e.g. INNER JOIN entrez_2_hgnc AS map1
-            #       ON map1.entrez = src.gene1)
-            join_commands.append('INNER JOIN ' + mapping_table + ' AS '
-                                 + map_alias + ' ON ' + map_alias + '.'
-                                 # CAST the col to the type of the mapping
-                                 # table (otherwise INDEX is not used)
-                                 + from_id + ' = ' + 'CAST(src.' + col + ' AS '
-                                 + from_id_type + ')')
-        else:
-            # construct result field stmt (e.g. src.descr AS descr)
-            result_fields.append('src.' + col + ' AS ' + col)
+        # get data type of the from_id of the mapping table
+        # for data conversions (if the according column in the from_table is
+        # not converted to the same data type, then the indexes are not used,
+        # resulting in very very poor performance)
+        cur.execute('SELECT TYPEOF(' + from_id + ') FROM ' + mapping_table)
+        from_id_type = cur.fetchone()[0]
 
-    # contruct the SQL query to do the inner joins
-    sqlquery = ('SELECT '
-                + ", ".join(result_fields) + ' '
-                'FROM ' + from_table + ' AS src '
-                + " ".join(join_commands))
+        # construct the fields for the result table and
+        # the JOIN statement composed of INNER JOINs
+        mapped_col_count = 0
+        result_fields = []
+        join_commands = []
+        for col in col_names:
+            if col in from_cols:
+                # create map alias in the form of map1, map2, map3, ...
+                # for the join statements and the correct selection
+                # of the field
+                mapped_col_count += 1
+                map_alias = 'map' + str(mapped_col_count)
+                # construct the result field statement (e.g. map1.hgnc
+                # AS gene1)
+                result_fields.append(map_alias + '.' + to_id + ' AS ' + col)
+                # construct the inner join statement
+                # (e.g. INNER JOIN entrez_2_hgnc AS map1
+                #       ON map1.entrez = src.gene1)
+                join_commands.append('INNER JOIN ' + mapping_table + ' AS '
+                                     + map_alias + ' ON ' + map_alias + '.'
+                                     # CAST the col to the type of the mapping
+                                     # table (otherwise INDEX is not used)
+                                     + from_id + ' = ' + 'CAST(src.' + col
+                                     + ' AS ' + from_id_type + ')')
+            else:
+                # construct result field stmt (e.g. src.descr AS descr)
+                result_fields.append('src.' + col + ' AS ' + col)
 
-    # for performance reasons: create an index for the from_id column of the
-    # mapping table (in case it does not yet exist)
-    cur.execute('CREATE INDEX IF NOT EXISTS ' + mapping_table + '_' + from_id
-                + '_index ON ' + mapping_table + '(' + from_id + ')')
+        # contruct the SQL query to do the inner joins
+        sqlquery = ('SELECT '
+                    + ", ".join(result_fields) + ' '
+                    'FROM ' + from_table + ' AS src '
+                    + " ".join(join_commands))
 
-    # run the inner join
-    sql.new_table_from_query(to_table, sqlquery, sql_conn)
+        # for performance reasons: create an index for the from_id column of
+        # the mapping table (in case it does not yet exist)
+        cur.execute('CREATE INDEX IF NOT EXISTS ' + mapping_table + '_'
+                    + from_id + '_index ON ' + mapping_table + '('
+                    + from_id + ')')
+
+        # run the inner join
+        sql.new_table_from_query(to_table, sqlquery, sql_conn)
 
     # verbose debug output: get table and statistics of non-matched rows
     if verbose:
@@ -341,11 +352,8 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
                     ' matched_rows, unmatched_rows) VALUES '
                     '(?,?,?,?,?,?,?,?,?)',
                     [from_table, from_id, to_id, num_from_ids,
-                    num_from_ids - num_unmatched_ids, num_unmatched_ids,
-                    nrows_from, nrows_to, nrows_unmatched])
-
-        if (nrows_from - nrows_to != nrows_unmatched):
-            raise RuntimeError("Implementation Error: numbers don't match up.")
+                     num_from_ids - num_unmatched_ids, num_unmatched_ids,
+                     nrows_from, nrows_to, nrows_unmatched])
 
         # clean up somewhat
         cur.execute('DROP TABLE ' + from_table + '_orig_ids')
@@ -353,6 +361,29 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
     # close cursor and commit to server
     cur.close()
     sql_conn.commit()
+
+
+def create_all_id_table(id_type, sql_conn, verbose=False):
+    """
+    Creates the the table `id_type`_all_ids (i.e. hgnc_all_ids) containing
+    all ids of the type `id_type` from the mapping tables.
+    """
+    if not id_type in MAPPED_IDS:
+        raise ValueError("id_type must be in " + str(MAPPED_IDS))
+
+    # name for the result table
+    table_name = id_type + "_all_ids"
+
+    # TODO (for here and the next function), a general approach to mapping
+    # tables (i.e. no more hardcoding table names in the methods)
+    tables = ["hgnc", "biomart"]
+
+    # construct the query to get the ids from all mapping tables
+    union_of_ids = " UNION ".join("SELECT " + id_type + " AS id FROM " + table
+                                  for table in tables)
+    sqlquery = "SELECT DISTINCT id FROM (" + union_of_ids + ")"
+    # create the new table
+    sql.new_table_from_query(table_name, sqlquery, sql_conn)
 
 
 def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
@@ -372,6 +403,7 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
         print("Creating mapping table for " + from_id + " -> " + to_id + ":")
 
     # if either `to` or `from` is HGNC, then use HGNC as primary table
+    # TODO global table management !?
     if to_id == COL_HGNC_SYMB or from_id == COL_HGNC_SYMB:
         tables = ["hgnc", "biomart"]
     else:
@@ -379,7 +411,6 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
 
     # TODO maybe check if the tables even exists and quit with an error if not
 
-    #tables = ["hgnc"]
     table1 = tables[0]
 
     cur = sql_conn.cursor()
