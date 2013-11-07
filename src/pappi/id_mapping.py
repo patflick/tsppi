@@ -19,9 +19,13 @@ COL_ENTREZ = "entrez"
 COL_HGNC_SYMB = "hgnc"
 COL_HGNC_ID = "hgnc_id"
 COL_UNIPROT = "uniprot"
-MAPPED_IDS = [COL_ENSEMBL_ID, COL_ENTREZ, COL_HGNC_SYMB, COL_UNIPROT]
+COL_GNF1H = 'gnf1h_annot'
+MAPPED_IDS = [COL_ENSEMBL_ID, COL_ENTREZ, COL_HGNC_SYMB, COL_UNIPROT,
+              COL_GNF1H]
 HGNC_MAPPING_TABLE_NAME = 'hgnc'
 BIOMART_MAPPING_TABLE_NAME = 'biomart'
+GNF1H_MAPPING_TABLE_NAME = 'gnf1h'
+U133A_MAPPING_TABLE_NAME = 'u133a'
 
 MAPPING_STATS_TABLE = 'mapping_stats'
 
@@ -68,6 +72,34 @@ def import_ENSG2ENSP_file(infile, sql_conn, table=PAPPI_ENSP2ENSG_TABLE_NAME):
     # close cursor and commit
     cur.close()
     sql_conn.commit()
+
+
+def import_gnf1h_annot_file(filename, sql_conn,
+                            table=GNF1H_MAPPING_TABLE_NAME):
+    """
+    Imports the mapping table from BioGPS GeneAtlas named gnf1h.annot2007
+    into the database given by `sql_conn` and normalizes the table.
+    """
+    sql.import_csv(filename, table + '_raw', '\t', True, csv_quoting=None,
+                   sql_conn=sql_conn)
+    # normalize the table
+    sqlquery = ('SELECT ProbesetID AS chip_annot, Symbol AS hgnc FROM '
+                + table + '_raw')
+    sql.new_table_from_query(table, sqlquery, sql_conn)
+
+
+def import_u133a_annot_file(filename, sql_conn,
+                            table=U133A_MAPPING_TABLE_NAME):
+    """
+    Imports the mapping table for Affimetrix U133a chip data needed for the
+    BioGPS GeneAtlas dataset.
+    """
+    sql.import_csv(filename, table + '_raw', '\t', True, csv_quoting=None,
+                   sql_conn=sql_conn, import_columns=[0, 10, 11], skip_rows=16)
+    # normalize the table
+    sqlquery = ('SELECT ID AS chip_annot, Gene_Symbol AS hgnc,'
+                'ENTREZ_GENE_ID AS entrez FROM ' + table + '_raw')
+    sql.new_table_from_query(table, sqlquery, sql_conn)
 
 
 def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
@@ -147,8 +179,8 @@ def import_hgnc_file(filename, sql_conn, table=HGNC_MAPPING_TABLE_NAME):
             COL_ENSEMBL_ID, COL_ENTREZ+"_2", COL_UNIPROT, COL_ENSEMBL_ID+"_2"]
     col_types = ["varchar(16)"]*9
     col_types[2] = "varchar(256)"
-    sql.import_csv(filename, table + "_raw", '\t', True, cols, col_types,
-                   None, sql_conn)
+    sql.import_csv(filename, table + "_raw", '\t', True, column_names=cols,
+                   column_types=col_types, csv_quoting=None, sql_conn=sql_conn)
 
     # bring into "normal" form (i.e merge the two providers for ensembl and
     # entrez
@@ -386,7 +418,8 @@ def create_all_id_table(id_type, sql_conn, verbose=False):
     sql.new_table_from_query(table_name, sqlquery, sql_conn)
 
 
-def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
+def create_mapping_table(from_id, to_id, sql_conn, verbose=False,
+                         mapping_tables=None):
     """
     Creates the table `from_id`_2_`to_id` as an Identifier mapping table.
     Each unique identifier on the `from_id` side maps only to one identifier
@@ -404,11 +437,13 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False):
 
     # if either `to` or `from` is HGNC, then use HGNC as primary table
     # TODO global table management !?
-    if to_id == COL_HGNC_SYMB or from_id == COL_HGNC_SYMB:
-        tables = ["hgnc", "biomart"]
+    if mapping_tables is None:
+        if to_id == COL_HGNC_SYMB or from_id == COL_HGNC_SYMB:
+            tables = ["hgnc", "biomart"]
+        else:
+            tables = ["biomart", "hgnc"]
     else:
-        tables = ["biomart", "hgnc"]
-
+        tables = mapping_tables
     # TODO maybe check if the tables even exists and quit with an error if not
 
     table1 = tables[0]

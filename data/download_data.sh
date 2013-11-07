@@ -27,10 +27,10 @@ BOSSI_ZIP=$DOWNLOAD_FOLDER/bossi-lehner-suppl.zip
 
 if [ -f $BOSSI_ZIP ]
 then
-	echo "Bossi & Lehner file already exists, skipping download"
+    echo "Bossi & Lehner file already exists, skipping download"
 else
-	echo "Downloading Bossi & Lehner PPI network"
-	curl -o $BOSSI_ZIP $BOSSI_URL
+    echo "Downloading Bossi & Lehner PPI network"
+    curl -o $BOSSI_ZIP $BOSSI_URL
 fi
 
 unzip $BOSSI_ZIP -d $TMP_FOLDER
@@ -47,10 +47,10 @@ STRING_GZ=$DOWNLOAD_FOLDER/protein.links.v$STRING_VERSION.txt.gz
 
 if [ -f $STRING_GZ ]
 then
-	echo "string-db file already exists, skipping download"
+    echo "string-db file already exists, skipping download"
 else
-	echo "Downloading string-db file"
-	curl -o $STRING_GZ $STRING_URL
+    echo "Downloading string-db file"
+    curl -o $STRING_GZ $STRING_URL
 fi
 
 # TODO: pre-filter string-db
@@ -73,32 +73,32 @@ HPA_LOC_FILE=subcellular_location.csv
 
 if [ -f $DOWNLOAD_FOLDER/$HPA_ZIP ]
 then
-	echo "HPA normal_tissue file already exists, skipping download"
+    echo "HPA normal_tissue file already exists, skipping download"
 else
-	echo "Downloading HPA normal_tissue data"
-	curl -o $DOWNLOAD_FOLDER/$HPA_ZIP $HPA_URL
+    echo "Downloading HPA normal_tissue data"
+    curl -o $DOWNLOAD_FOLDER/$HPA_ZIP $HPA_URL
 fi
 
 
 if [ -f $DOWNLOAD_FOLDER/$HPA_LOC_ZIP ]
 then
-	echo "HPA subcellular_location file already exists, skipping download"
+    echo "HPA subcellular_location file already exists, skipping download"
 else
-	echo "Downloading HPA subcellular_location data"
-	curl -o $DOWNLOAD_FOLDER/$HPA_LOC_ZIP $HPA_LOC_URL
+    echo "Downloading HPA subcellular_location data"
+    curl -o $DOWNLOAD_FOLDER/$HPA_LOC_ZIP $HPA_LOC_URL
 fi
 
 # unzip and move the files to the expr folder
 if [ ! -f expr/$HPA_FILE ]
 then
-	unzip $DOWNLOAD_FOLDER/$HPA_ZIP -d $TMP_FOLDER
-	mv $TMP_FOLDER/$HPA_FILE expr/
+    unzip $DOWNLOAD_FOLDER/$HPA_ZIP -d $TMP_FOLDER
+    mv $TMP_FOLDER/$HPA_FILE expr/
 fi
 
 if [ ! -f expr/$HPA_LOC_FILE ]
 then
-	unzip $DOWNLOAD_FOLDER/$HPA_LOC_ZIP -d $TMP_FOLDER
-	mv $TMP_FOLDER/$HPA_LOC_FILE expr/
+    unzip $DOWNLOAD_FOLDER/$HPA_LOC_ZIP -d $TMP_FOLDER
+    mv $TMP_FOLDER/$HPA_LOC_FILE expr/
 fi
 
 
@@ -111,34 +111,44 @@ GNF1H_FILE=U133AGNF1B.gcrma.avg.csv
 GNF1H_ANN_URL=http://plugins.biogps.org/download/gnf1h-anntable.zip
 GNF1H_ANN_ZIP=gnf1h-anntable.zip
 GNF1H_ANN_FILE=gnf1h.annot2007.tsv
+# more annotations from U133A
+U133A_ANN_URL="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?mode=raw&is_datatable=true&acc=GPL96&id=15653&db=GeoDb_blob82"
+U133A_ANN_FILE=GPL96-15653.txt
 
 if [ -f $DOWNLOAD_FOLDER/$GNF1H_ZIP ]
 then
-	echo "GeneAtlas GNF1H file already exists, skipping download"
+    echo "GeneAtlas GNF1H file already exists, skipping download"
 else
-	echo "Downloading GeneAtlas GNF1H file"
-	curl -o $DOWNLOAD_FOLDER/$GNF1H_ZIP $GNF1H_URL
+    echo "Downloading GeneAtlas GNF1H file"
+    curl -o $DOWNLOAD_FOLDER/$GNF1H_ZIP $GNF1H_URL
 fi
 
 if [ -f $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP ]
 then
-	echo "GeneAtlas GNF1H annotations file already exists, skipping download"
+    echo "GeneAtlas GNF1H annotations file already exists, skipping download"
 else
-	echo "Downloading GeneAtlas GNF1H annotations file"
-	curl -o $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP $GNF1H_ANN_URL
+    echo "Downloading GeneAtlas GNF1H annotations file"
+    curl -o $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP $GNF1H_ANN_URL
 fi
 
 # unpack files and move/copy to data/expr folder
 if [ ! -f expr/$GNF1H_FILE ]
 then
-	unzip $DOWNLOAD_FOLDER/$GNF1H_ZIP -d $TMP_FOLDER
-	mv $TMP_FOLDER/$GNF1H_FILE expr/
+    unzip $DOWNLOAD_FOLDER/$GNF1H_ZIP -d $TMP_FOLDER
+    # prepend the file with the column name for the first column (which is empty)
+    echo -n "Gene_ID" | cat - $TMP_FOLDER/$GNF1H_FILE > ./expr/$GNF1H_FILE
 fi
 
 if [ ! -f expr/$GNF1H_ANN_FILE ]
 then
-	unzip $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP -d $TMP_FOLDER
-	mv $TMP_FOLDER/$GNF1H_ANN_FILE expr/
+    unzip $DOWNLOAD_FOLDER/$GNF1H_ANN_ZIP -d $TMP_FOLDER
+    mv $TMP_FOLDER/$GNF1H_ANN_FILE expr/
+fi
+
+# download the U133A annotation file
+if [ ! -f ./expr/$U133A_ANN_FILE ]
+then
+    curl -o expr/$U133A_ANN_FILE $U133A_ANN_URL
 fi
 
 
@@ -149,21 +159,22 @@ EBI_MTAB_FILE=expr/E-MTAB-513.tsv
 
 if [ -f $EBI_MTAB_FILE ]
 then
-	echo "EBI MTAB file already exists, skipping download"
+    echo "EBI MTAB file already exists, skipping download"
 else
-	echo "Downloading EBI E-MTAB-513 file"
-	curl -o $EBI_MTAB_FILE $EBI_MTAB_URL
+    echo "Downloading EBI E-MTAB-513 file"
+    curl -o $EBI_MTAB_FILE $EBI_MTAB_URL
 fi
 
 
 # 4.) RNA Seq Atlas from medicalgenomics.org
 RNASEQ_ATLAS_URL="http://medicalgenomics.org/rna_seq_atlas/download?download_revision1=1"
-RNASEQ_ATLAS_FILE=expr/RNA_Seq_Atlas_rev1.txt
+RNASEQ_ATLAS_FILE=RNA_Seq_Atlas_rev1.txt
 
-if [ -f $RNASEQ_ATLAS_FILE ]
+if [ -f expr/$RNASEQ_ATLAS_FILE ]
 then
-	echo "RNA Seq Atlas file already exists, skipping download"
+    echo "RNA Seq Atlas file already exists, skipping download"
 else
-	echo "Downloading RNA Seq Atlas file"
-	curl -o $RNASEQ_ATLAS_FILE $RNASEQ_ATLAS_URL
+    echo "Downloading RNA Seq Atlas file"
+    curl -o expr/$RNASEQ_ATLAS_FILE $RNASEQ_ATLAS_URL
 fi
+

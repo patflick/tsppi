@@ -20,6 +20,8 @@ HGNC_FILE = os.path.join(EXT_DATA_FOLDER, 'hgnc_downloads.txt')
 BIOMART_FILE = os.path.join(EXT_DATA_FOLDER, 'mart_export.csv')
 DATABASE = os.path.join(EXT_DATA_FOLDER, 'test_matching.sqlite')
 
+GNF1H_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'gnf1h.annot2007.tsv')
+U133A_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'GPL96-15653.txt')
 
 # paths to PPIs
 CCSB_FILE = os.path.join(PPI_DATA_FOLDER, 'HI_2012_PRE.tsv')
@@ -30,3 +32,4 @@ HAVU_FILE = os.path.join(PPI_DATA_FOLDER, 'cell_havugimana_ppi.tsv')
 HPA_FILE = os.path.join(EXPR_DATA_FOLDER, 'normal_tissue.csv')
 EMTAB_FILE = os.path.join(EXPR_DATA_FOLDER, 'E-MTAB-513.tsv')
 RNASEQ_ATLAS_FILE = os.path.join(EXPR_DATA_FOLDER, 'RNA_Seq_Atlas_rev1.txt')
+GENE_ATLAS_FILE = os.path.join(EXPR_DATA_FOLDER, 'U133AGNF1B.gcrma.avg.csv')

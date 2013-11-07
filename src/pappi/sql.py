@@ -10,6 +10,7 @@ such that the underlying database can easily be exchanged here.
 from .config import PAPPI_SQLITE_DEFAULT_DB
 import sqlite3
 import csv
+import re
 
 PAPPI_SQL_CONN = None
 
@@ -74,8 +75,10 @@ def new_table_from_query(new_table, query, sql_conn=PAPPI_SQL_CONN,
     sql_conn.commit()
 
 
-def extend_row_iterator(base_iterator, num):
+def extend_row_iterator(base_iterator, num, indices=None):
     for row in base_iterator:
+        if not indices is None:
+            row = [row[i] for i in indices]
         if len(row) == num:
             yield row
         else:
@@ -85,6 +88,7 @@ def extend_row_iterator(base_iterator, num):
 
 
 def import_csv(csv_filename, table, csv_delimiter, has_header,
+               import_columns=None,
                column_names=None, column_types=None,
                csv_quoting=None, sql_conn=PAPPI_SQL_CONN, skip_rows=0):
     """
@@ -94,6 +98,9 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
     @param table:           The name of the SQL table to be created.
     @param csv_delimiter:   The delimiter/seperator of the CSV file.
     @param has_header:      Whether the CSV file has a header row.
+    @param import_columns:  A list of column indeces of columns to import into
+                            the SQL database. If this is not set (=None), then
+                            by default ALL columns are imported.
     @param column_names:    Names for the columns, if none are given either the
                             header row of the CSV file is used for column names
                             or general names are given: Column_i with i={1,..}
@@ -129,7 +136,8 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
                 row = csv_reader.__next__()
                 for item in row:
                     # replace spaces with underscores and add to column names
-                    column_names.append(item.replace(" ", "_"))
+                    col_name = re.sub('[^0-9a-zA-Z_]+', '_', item)
+                    column_names.append(col_name)
             else:
                 row = csv_reader.__next__()
                 for i in range(1, len(row) + 1):
@@ -137,6 +145,9 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
                 # reset the csv_reader object
                 csv_reader = csv.reader(csv_file, delimiter=csv_delimiter,
                                         quoting=csv_quoting)
+            # use only those wanted
+            if not import_columns is None:
+                column_names = [column_names[i] for i in import_columns]
         else:
             if has_header:
                 # ignore header
@@ -158,7 +169,8 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
         # insert all lines
         vals = ", ".join(['?'] * len(column_names))
         cur.executemany('INSERT INTO "' + table + '" VALUES (' + vals + ')',
-                        extend_row_iterator(csv_reader, len(column_names)))
+                        extend_row_iterator(csv_reader, len(column_names),
+                                            import_columns))
 
         # close cursor and commit
         cur.close()
@@ -174,7 +186,7 @@ def linearize_table(src_table, excl_columns, cat_col_name, val_col_name,
     remaining_cols = ", ".join(excl_columns)
 
     select_stmts = ['SELECT ' + remaining_cols + ' , \'' + x + '\' AS '
-                    + cat_col_name + ', ' + x + ' AS ' + val_col_name
+                    + cat_col_name + ', [' + x + '] AS ' + val_col_name
                     + ' FROM ' + src_table for x in transpose_cols]
     union = " UNION ".join(select_stmts)
 

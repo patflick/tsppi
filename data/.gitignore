@@ -35,6 +35,7 @@ expr/E-MTAB-513.tsv
 # GeneAtlas (Su Al et al. 2009) and it's annotation table
 expr/U133AGNF1B.gcrma.avg.csv
 expr/gnf1h.annot2007.tsv
+expr/GPL96-15653.txt
 
 # downloadable HPA data
 expr/normal_tissue.csv

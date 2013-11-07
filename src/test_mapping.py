@@ -48,6 +48,7 @@ havu_ppi.init_ppi(True)
 from pappi.expr.hpa import HPA
 from pappi.expr.emtab import Emtab
 from pappi.expr.rnaseq_atlas import RnaSeqAtlas
+from pappi.expr.gene_atlas import GeneAtlas
 
 hpa_expr = HPA(HPA_FILE, con)
 hpa_expr.init_data()
@@ -57,3 +58,6 @@ emtab_expr.init_data()
 
 rnaseq_atlas = RnaSeqAtlas(RNASEQ_ATLAS_FILE, con)
 rnaseq_atlas.init_data()
+
+gene_atlas = GeneAtlas(GENE_ATLAS_FILE, con)
+gene_atlas.init_data()
