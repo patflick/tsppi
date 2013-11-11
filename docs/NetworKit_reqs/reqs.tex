@@ -1,0 +1,134 @@
+\documentclass{article}
+\title{Analysis of tissue/cell type specific protein-protein interaction networks}
+\author{Patrick Flick}
+
+\begin{document}
+
+\maketitle
+
+\section{Short introduction}
+
+\subsection{A very short introduction to protein-protein interaction networks}
+
+Proteins are large macromolecules which can perform a variety of
+biological and chemical functions.
+In order to fulfill their function, proteins bind to other substances
+(molecules, ions, DNA, etc.) or to other proteins.
+
+A protein-protein interaction network (short \emph{PPI} network) is a graph
+where each protein is represented by a node and each interaction
+between two proteins is represented by an edge. 
+
+A number of databases of these protein-protein interactions are available,
+most of which are publicly accessible. The source of the interaction 
+information comes from very different experiments. Some PPI networks
+are the result of high-throughput lab experiments, which test whether
+the proteins interact in vivo or in vitro. Other PPI networks are
+literature curated (taken from many small scale experiments and literature
+based knowledge), while yet others are purely computational predicted
+interactions. A few PPIs exists, where a number of available PPI networks
+are combined and each interaction is labeled with a reliability score
+depending on the source (and number of agreeing sources) of the
+interactions.
+
+
+\subsection{A very short introduction to protein expression}
+
+The human organism is made up of many different cell and tissue types,
+for example skin cells, liver cells, neural cells etc.
+Not all proteins exist in all cell and tissue types. On the contrary,
+many proteins have specific functions and only exists in one class
+of cells or tissues. A protein is called \emph{expressed} in a certain cell
+or tissue type if it is present in that cell or tissue type. Accordingly, a
+protein is called \emph{non-expressed} in a certain cell or tissue type
+if it does not exist in that cell or tissue type.
+
+A protein expression database (of which there are many different kinds)
+supplies this kind of information. For each protein and tissue or cell type
+such a database holds an expression value, which is mostly supplied as
+a data source specific expression level. This expression level is then
+classified into either \emph{expressed} or \emph{non-expressed}.
+
+The resulting binary (expressed vs non-expressed) expression pattern
+combined with a PPI network, implicitly defines sub-networks/sub-graphs
+of the \emph{global} PPI network.
+
+
+\subsection{A formal definition}
+
+Let $\mathcal{P}$ be the set of all proteins with
+$\left| \mathcal{P} \right| = n$. A PPI network is the graph $G=(V,E)$ with
+$V = \mathcal{P}$ and the edges $E$ given by the protein interactions,
+i.e. $(p_i, p_j) \in E \Leftrightarrow p_i$ interacts with $p_j$.
+
+In order to formalize the expression data, each protein $p \in \mathcal{P}$
+gets associated with a binary expression vector
+$expr(p) = (e_0, e_1, e_2, \ldots, e_{k-1})$ where $e_t \in \{0,1\}$
+and $k$ is the number of tissues or cell types in the current expression data
+set, and $e_t = 1 \Leftrightarrow $ the protein $p$ is expressed in the
+tissue/cell type $t$.
+
+The tissue/cell type specific PPI network $G_t$ of the tissue/cell type $t$ is
+defined as the graph $G_t = (V_t, E_t)$, where
+$p_i \in V_t \Leftrightarrow expr(p_i) = 1$
+and
+$(p_i, p_j) \in E_t \Leftrightarrow expr(p_i) = 1 \wedge expr(p_j) = 1$.
+I.e. a protein is part of the tissue/cell type specific PPI network if it is
+expressed in that tissue/cell type and an edge is part of the specific PPI
+if both interacting proteins are expressed in that tissue/cell type.
+In other words, nodes that represent non-expressed proteins are deleted
+from the graph.
+
+
+\section{Adaptions/optimizations to network analysis}
+
+\subsection{Network/Graph analysis}
+
+In order to answer biological questions and to find new insights,
+network analysis and clustering algorithms are used on the global
+and tissue/cell type specific networks.
+
+A straightforward way of doing this is to generate a subgraph from the global
+graph for each tissue/cell type and analyze this graph.
+
+A more efficient approach would be to use the binary expression profile
+($expr(p) = (e_0, e_1, e_2, \ldots, e_{k-1})$) as node labels and adapt
+the analysis algorithms to use those labels to analyse the all subgraphs
+concurrently. This for one saves the generation of all subgraphs and can
+reduce the total number of iterations through the graph that are needed.
+
+\subsection{Clustering}
+
+In order to identify modules/communities of proteins in the PPI network,
+graph clustering and community detection can be used. Previous research
+\cite{ChanWang:functional_modules}
+has shown that \emph{clique percolation clustering} finds more functionally
+related (verified via GO-terms) clusters in the tissue/cell type specific
+network in comparison to the global network.
+
+Instead of clustering only in the specific networks, it might be interesting
+to cluster in the global network but with regard to the proteins expression
+patterns (the binary vector). This means that proteins with similar expression
+pattern are clustered together with higher priority than proteins with
+much different expression patterns. The exact definition of what \emph{similar}
+and \emph{higher priority} can mean in this context has yet to be made/developed.
+
+The graph analysis and clustering tool \emph{NetworKit} could be a
+good starting point for such adaptions.
+
+The output of the clustering algorithm should be small local clusters, that
+are in themselves highly connected and expressed similarly. Hopefully these
+clusters are more functionally related than the results of clustering
+in the global network and in the specific PPI networks.
+
+
+%\subsubsection{Possible co-expression scores}
+%
+%So far I have come up with the following possibilities to ``score''
+%how similar two proteins are expressed (i.e. their co-expression).
+%
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+\end{document}
