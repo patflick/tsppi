@@ -6,3 +6,6 @@ reqs.pdf: reqs.tex biblio.bib
 	bibtex reqs.aux
 	pdflatex reqs.tex
 	pdflatex reqs.tex
+
+clean:
+	rm *.pdf *.aux *.bbl *.blg *.dvi *.log
