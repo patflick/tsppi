@@ -61,3 +61,16 @@ rnaseq_atlas.init_data()
 
 gene_atlas = GeneAtlas(GENE_ATLAS_FILE, con)
 gene_atlas.init_data()
+
+
+##############################
+# run overlap analyses
+##############################
+
+from pappi import overlap_analysis
+
+overlap_analysis.calc_ppi_edge_overlap(con)
+overlap_analysis.calc_ppi_id_overlap(con)
+overlap_analysis.calc_expr_overlap(con)
+
+# phyper(8019, n*(n-1)/2 - k*(k-1)/2, k*(k-1)/2,13943)

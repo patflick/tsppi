@@ -411,9 +411,9 @@ def create_all_id_table(id_type, sql_conn, verbose=False):
     tables = ["hgnc", "biomart"]
 
     # construct the query to get the ids from all mapping tables
-    union_of_ids = " UNION ".join("SELECT " + id_type + " AS id FROM " + table
+    union_of_ids = " UNION ".join("SELECT " + id_type + " FROM " + table
                                   for table in tables)
-    sqlquery = "SELECT DISTINCT id FROM (" + union_of_ids + ")"
+    sqlquery = "SELECT DISTINCT " + id_type + " FROM (" + union_of_ids + ")"
     # create the new table
     sql.new_table_from_query(table_name, sqlquery, sql_conn)
 

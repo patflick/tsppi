@@ -21,7 +21,7 @@ class CCSB(ppi.PPI):
         """
         # copy references into the new instance
         ppi.PPI.__init__(self, filename, sql_connection, "ccsb",
-                         "GENE_IDA", "GENE_IDB", "entrez")
+                         "SYMBOL_A", "SYMBOL_B", "hgnc")
 
         # init custom fields
         self.has_header = True
