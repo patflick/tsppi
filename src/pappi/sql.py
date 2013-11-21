@@ -90,7 +90,8 @@ def extend_row_iterator(base_iterator, num, indices=None):
 def import_csv(csv_filename, table, csv_delimiter, has_header,
                import_columns=None,
                column_names=None, column_types=None,
-               csv_quoting=None, sql_conn=PAPPI_SQL_CONN, skip_rows=0):
+               csv_quoting=None, sql_conn=PAPPI_SQL_CONN, skip_rows=0,
+               row_iterator_wrapper=None):
     """
     Imports a CSV file into an SQL table.
 
@@ -168,8 +169,12 @@ def import_csv(csv_filename, table, csv_delimiter, has_header,
 
         # insert all lines
         vals = ", ".join(['?'] * len(column_names))
+        if row_iterator_wrapper is None:
+            row_iter = csv_reader
+        else:
+            row_iter = row_iterator_wrapper(csv_reader)
         cur.executemany('INSERT INTO "' + table + '" VALUES (' + vals + ')',
-                        extend_row_iterator(csv_reader, len(column_names),
+                        extend_row_iterator(row_iter, len(column_names),
                                             import_columns))
 
         # close cursor and commit

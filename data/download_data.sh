@@ -39,11 +39,15 @@ cp $TMP_FOLDER/CRG-human-interactome/CRG.integrated.human.interactome.txt ppis/
 # 2.) CCSB (only HI-2011, the HI-2012-Pre is not yet available)
 
 # TODO when HI-2012 becomes publicly available
+#      at the moment the HI-2012-Pre has to be downloaded manually (requires
+#      an account to download)
 
 # 3.) string-db
 STRING_VERSION=9.05
+STRING_CUTOFF=500 # cutoff at a reliability of 700 for import
 STRING_URL=http://string-db.com/newstring_download/protein.links.v$STRING_VERSION.txt.gz
 STRING_GZ=$DOWNLOAD_FOLDER/protein.links.v$STRING_VERSION.txt.gz
+STRING_FILE=./ppis/protein.links.v$STRING_VERSION.$STRING_CUTOFF.txt
 
 if [ -f $STRING_GZ ]
 then
@@ -53,7 +57,11 @@ else
     curl -o $STRING_GZ $STRING_URL
 fi
 
-# TODO: pre-filter string-db
+# pre-filter string-db from the gz into an importable text file
+if [ ! -f $STRING_FILE ]
+then
+    zgrep ^"9606\." $STRING_GZ | awk -v score=$STRING_CUTOFF '($3 >= score) {print}' > $STRING_FILE
+fi
 
 
 ########################

@@ -4,6 +4,8 @@ Defines the file paths for all data files
 
 # for getting the current file path
 import os
+# for getting all PSICQUIC files
+import re
 
 # go two folders up
 cur_folder = os.path.dirname(__file__)
@@ -27,6 +29,13 @@ U133A_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'GPL96-15653.txt')
 CCSB_FILE = os.path.join(PPI_DATA_FOLDER, 'HI_2012_PRE.tsv')
 BOSSI_FILE = os.path.join(PPI_DATA_FOLDER, 'CRG.integrated.human.interactome.txt')
 HAVU_FILE = os.path.join(PPI_DATA_FOLDER, 'cell_havugimana_ppi.tsv')
+STRING_FILE = os.path.join(PPI_DATA_FOLDER, 'protein.links.v9.05.700.txt')
+
+# PSICQUIC PPIs:
+PSICQUIC_FILES = [os.path.join(PPI_DATA_FOLDER, f)
+                  for f in os.listdir(PPI_DATA_FOLDER)
+                  if re.search('PSICQUIC', f)]
+
 
 # import expression data sets
 HPA_FILE = os.path.join(EXPR_DATA_FOLDER, 'normal_tissue.csv')

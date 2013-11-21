@@ -15,13 +15,14 @@ from . import sql
 
 
 COL_ENSEMBL_ID = "ensembl"
+COL_ENSP_ID = "ensp"
 COL_ENTREZ = "entrez"
 COL_HGNC_SYMB = "hgnc"
 COL_HGNC_ID = "hgnc_id"
 COL_UNIPROT = "uniprot"
 COL_GNF1H = 'gnf1h_annot'
 MAPPED_IDS = [COL_ENSEMBL_ID, COL_ENTREZ, COL_HGNC_SYMB, COL_UNIPROT,
-              COL_GNF1H]
+              COL_GNF1H, COL_ENSP_ID]
 HGNC_MAPPING_TABLE_NAME = 'hgnc'
 BIOMART_MAPPING_TABLE_NAME = 'biomart'
 GNF1H_MAPPING_TABLE_NAME = 'gnf1h'
@@ -108,10 +109,11 @@ def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
 
     Go to: http://www.ensembl.org/biomart/martview
 
-    Choose "Ensembl Genes 71" and table "Homo sapiens genes"
+    Choose "Ensembl Genes 73" and table "Homo sapiens genes"
 
     Include following fields for the table:
         Ensembl Gene ID
+        Ensembl Protein ID
         Associated Gene Name
         UniProt/SwissProt ID
         HGNC ID(s)
@@ -124,10 +126,10 @@ def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
     @param table: The SQL table name into which the data is to be imported.
     """
     # import the CSV input as table
-    cols = [COL_ENSEMBL_ID, COL_HGNC_SYMB, COL_UNIPROT,
+    cols = [COL_ENSEMBL_ID, COL_ENSP_ID, COL_HGNC_SYMB, COL_UNIPROT,
             COL_HGNC_ID, COL_ENTREZ]
     sql.import_csv(filename, table + '_raw', ',', True, column_names=cols,
-                   column_types=["varchar(16)"]*5, csv_quoting=None,
+                   column_types=["varchar(16)"]*6, csv_quoting=None,
                    sql_conn=sql_conn)
 
     # remove the _HUMAN postfix from the Uniprot ID to get BioMart into the
@@ -136,6 +138,7 @@ def import_biomart_file(filename, sql_conn, table=BIOMART_MAPPING_TABLE_NAME):
                 '' + COL_HGNC_ID + ', '
                 '' + COL_HGNC_SYMB + ', '
                 '' + COL_ENSEMBL_ID + ', '
+                '' + COL_ENSP_ID + ', '
                 '' + COL_ENTREZ + ', '
                 # remove the postfix "_HUMAN" from the Uniprot identifier
                 'replace(' + COL_UNIPROT + ',"_HUMAN","") AS '
@@ -438,7 +441,11 @@ def create_mapping_table(from_id, to_id, sql_conn, verbose=False,
     # if either `to` or `from` is HGNC, then use HGNC as primary table
     # TODO global table management !?
     if mapping_tables is None:
-        if to_id == COL_HGNC_SYMB or from_id == COL_HGNC_SYMB:
+        if to_id == COL_ENSP_ID or from_id == COL_ENSP_ID:
+            # in case ENSP (ensembl protein ids) are used -> only use biomart
+            # TODO until a proper table mapping is implemented
+            tables = ["biomart"]
+        elif to_id == COL_HGNC_SYMB or from_id == COL_HGNC_SYMB:
             tables = ["hgnc", "biomart"]
         else:
             tables = ["biomart", "hgnc"]

@@ -22,7 +22,11 @@ ppis/CRG.integrated.human.interactome.txt
 #    registered without permission to distribute (so mirroring on repo)
 ppis/HI_2012_PRE.tsv
 
+# string-db
+ppis/protein.links*
 
+# PSICQUIC
+ppis/PSICQUIC_*
 
 ########################
 # expression data sets 

@@ -3,8 +3,8 @@ from .. import sql
 from .. import id_mapping
 from ..table_manager import TableManager
 
-# TODO maybe put this into a config file
-UNIFYING_ID = "hgnc"
+# import the UNIFYING ID variable
+from ..id_mapping import UNIFYING_ID
 
 
 class PPI(TableManager):
