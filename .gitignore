@@ -3,3 +3,7 @@
 # ignore all swap files
 *~
 *.swp
+
+figs/
+
+
