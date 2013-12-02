@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import urllib.request
 import os.path
 import re
@@ -56,6 +57,19 @@ def download_all_ppis(folder, basename):
         # get filename for output
         outfilename = os.path.join(folder, basename + "_" + service_name
                                    + ".tsv")
+        # in case the file already exists
+        if os.path.exists(outfilename):
+            # check that all interactions are there
+            with open(outfilename, "r") as f:
+                num_lines = sum(1 for line in f)
+            if num_lines == count:
+                # skip this specific PPI
+                print("PPI file already exists, skipping download.")
+                continue
+            else:
+                # remove the file
+                os.remove(outfilename)
+
         CHUNK_SIZE = 4*1024
         # open url and write out, chunk-by-chunk
         with urllib.request.urlopen(tab25_url) as tab25_f:

@@ -29,7 +29,7 @@ U133A_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'GPL96-15653.txt')
 CCSB_FILE = os.path.join(PPI_DATA_FOLDER, 'HI_2012_PRE.tsv')
 BOSSI_FILE = os.path.join(PPI_DATA_FOLDER, 'CRG.integrated.human.interactome.txt')
 HAVU_FILE = os.path.join(PPI_DATA_FOLDER, 'cell_havugimana_ppi.tsv')
-STRING_FILE = os.path.join(PPI_DATA_FOLDER, 'protein.links.v9.05.700.txt')
+STRING_FILE = os.path.join(PPI_DATA_FOLDER, 'protein.links.v9.05.500.txt')
 
 # PSICQUIC PPIs:
 PSICQUIC_FILES = [os.path.join(PPI_DATA_FOLDER, f)

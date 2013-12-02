@@ -36,7 +36,7 @@ fi
 unzip $BOSSI_ZIP -d $TMP_FOLDER
 cp $TMP_FOLDER/CRG-human-interactome/CRG.integrated.human.interactome.txt ppis/
 
-# 2.) CCSB (only HI-2011, the HI-2012-Pre is not yet available)
+# 2.) CCSB (only HI-2011, the HI-2012-Pre is not yet publically available)
 
 # TODO when HI-2012 becomes publicly available
 #      at the moment the HI-2012-Pre has to be downloaded manually (requires
