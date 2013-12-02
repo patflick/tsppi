@@ -2,9 +2,9 @@ import itertools
 
 from . import sql
 
-#PPIS_TO_ANALYZE = ['bossi', 'ccsb', 'havu', 'string', 'psicquic_all']
-PPIS_TO_ANALYZE = ['psicquic_dip', 'psicquic_i2d_imex', 'psicquic_innatedb_imex', 'psicquic_intact', 'psicquic_matrixdb', 'psicquic_mbinfo', 'psicquic_mint', 'psicquic_molcon', 'psicquic_mpidb', 'psicquic_uniprot']
-EXPRS_TO_ANALYZE = ['emtab', 'gene_atlas', 'hpa', 'rnaseq_atlas']
+PPIS_TO_ANALYZE = ['bossi', 'ccsb', 'havu', 'string', 'psicquic_all']
+#PPIS_TO_ANALYZE = ['psicquic_dip', 'psicquic_i2d_imex', 'psicquic_innatedb_imex', 'psicquic_intact', 'psicquic_matrixdb', 'psicquic_mbinfo', 'psicquic_mint', 'psicquic_molcon', 'psicquic_mpidb', 'psicquic_uniprot']
+EXPRS_TO_ANALYZE = ['emtab', 'gene_atlas', 'hpa', 'hpa_all', 'rnaseq_atlas']
 
 
 def create_ppi_all_ids_table(ppi, sql_conn):

@@ -4,7 +4,7 @@
 # Needs the package 'Vennerable', install with:
 #   source("http://bioconductor.org/biocLite.R")
 #   biocLite(c("graph", "RBGL", "gtools", "xtable"))
-#   install.packages("Vennerable", repos="http://R-Forge.R-project.org") 
+#   install.packages("Vennerable", repos="http://R-Forge.R-project.org")
 ######################################################################
 
 
@@ -23,7 +23,7 @@ plot_venn_diagram <- function(agg_table)
 
     # disconnect from db
     dbDisconnect(con)
-    
+
     ## get all columns to use in the venn diagram
     cols <- colnames(venn_data)
     cols <- cols[which(cols != "count")]
@@ -43,7 +43,7 @@ plot_venn_diagram <- function(agg_table)
 
     # needs the package venneuler
     #library(venneuler)
-    
+
     #vd <- venneuler(venn_combs, venn_counts)
     #plot(vd)
 
@@ -128,7 +128,7 @@ plot_pairwise_table <- function(src_table)
     # TODO generalize the heatmap table into a separate function
     p <- ggplot(plot_data, aes(expr, ppi)) +
             geom_tile(aes(fill=value)) +
-            scale_fill_gradient2("Percent", low="grey80", mid="red", high="white", limits=c(0,100)) + 
+            scale_fill_gradient2("Percent", low="grey80", mid="red", high="white", limits=c(0,100)) +
             scale_color_gradient2(low="grey40", mid="black", high="black", limits=c(0,100), guide='none') +
             geom_text(aes(label=label, colour=value)) +
             xlab('') + ylab('') +
@@ -146,15 +146,15 @@ plot_pairwise_table <- function(src_table)
 
 # plot everything as PDF, for vectorized graphics
 
-# plot the ppi and expr overlap (ID overlap) 
-pdf("../figs/overlap_pairwise_expr_ppi.pdf", width=6, height=3)
+# plot the ppi and expr overlap (ID overlap)
+pdf("../figs/overlap_pairwise_expr_ppi.pdf", width=7, height=3)
 p <- plot_pairwise_table("overlap_pairwise_expr_ppi")
 p <- p + labs(title="PPI protein coverage by expression data sets")
 plot(p)
 dev.off()
 
 
-pdf("../figs/overlap_pairwise_expr_ppi_edges.pdf", width=6, height=3)
+pdf("../figs/overlap_pairwise_expr_ppi_edges.pdf", width=7, height=3)
 p <- plot_pairwise_table("overlap_pairwise_expr_ppi_edges")
 p <- p + labs(title="PPI edge coverage by expression data sets")
 plot(p)
