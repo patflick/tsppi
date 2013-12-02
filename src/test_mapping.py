@@ -71,12 +71,16 @@ psicquic_all_ppi.init_ppi(True)
 ##############################
 
 from pappi.expr.hpa import HPA
+from pappi.expr.hpa_all import HPA_All
 from pappi.expr.emtab import Emtab
 from pappi.expr.rnaseq_atlas import RnaSeqAtlas
 from pappi.expr.gene_atlas import GeneAtlas
 
 hpa_expr = HPA(HPA_FILE, con)
 hpa_expr.init_data()
+
+hpa_all_expr = HPA_All(HPA_FILE, con)
+hpa_all_expr.init_data()
 
 emtab_expr = Emtab(EMTAB_FILE, con)
 emtab_expr.init_data()
@@ -97,5 +101,13 @@ from pappi import overlap_analysis
 overlap_analysis.calc_ppi_edge_overlap(con)
 overlap_analysis.calc_ppi_id_overlap(con)
 overlap_analysis.calc_expr_overlap(con)
+# overlap of ppis and expression data sets (protein coverage of ppis by expr)
+overlap_analysis.calc_pairwise_expr_ppi_id_overlap(con)
+overlap_analysis.calc_pairwise_expr_ppi_edge_overlap(con)
+
+# overlap of PPIs with each other (both IDs and edges)
+overlap_analysis.calc_pairwise_ppi_id_overlap(con)
+overlap_analysis.calc_pairwise_ppi_edge_overlap(con)
+
 
 # phyper(8019, n*(n-1)/2 - k*(k-1)/2, k*(k-1)/2,13943)
