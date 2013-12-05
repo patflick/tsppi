@@ -138,3 +138,46 @@ class PPI(TableManager):
                     'END AS Gene2 '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
+
+    def create_all_ids_table(self):
+        """
+        Creates a table named `ppi_name`_ids that holds all the distinct IDs
+        used in the ppi network.
+        """
+        cur = self.sql_conn.cursor()
+        if not sql.table_exists(self.name + '_ids', self.sql_conn):
+            cur.execute('CREATE TABLE IF NOT EXISTS `' + self.name + '_ids` '
+                        '(id integer primary key autoincrement, '
+                        'Gene varchar(16))')
+            sqlquery = ('SELECT Gene1 as Gene FROM ' + self.name + ' UNION '
+                        'SELECT Gene2 as Gene FROM ' + self.name)
+            cur.execute('INSERT INTO `' + self.name + '_ids` (Gene) '
+                        + sqlquery)
+        # create an index for fast merging
+        cur.execute('DROP INDEX IF EXISTS ' + self.name + '_ids_index')
+        cur.execute('CREATE UNIQUE INDEX ' + self.name + '_ids_index '
+                    'ON ' + self.name + '_ids (Gene)')
+        cur.close()
+        self.sql_conn.commit()
+
+    def export_to_edge_list(self, filename):
+        """
+        Exports the network from the SQL table into an edge list of IDs
+        in the range [1,#IDs] and saves the resulting list into a tab
+        separated file.
+        """
+        # check if ids table exists (if not -> create it)
+        if not sql.table_exists(self.name + '_ids', self.sql_conn):
+            self.create_all_ids_table()
+        # merge PPI network  with unique integer ids (node-ids)
+        cur = self.sql_conn.cursor()
+        cur.execute('SELECT b.id AS Gene1, c.id AS Gene2 '
+                    'FROM ' + self.name + ' AS a '
+                    'INNER JOIN ' + self.name + '_ids AS b '
+                    ' ON a.Gene1 = b.Gene '
+                    'INNER JOIN ' + self.name + '_ids AS c '
+                    ' ON a.Gene2 = c.Gene ')
+        # save results to file
+        with open(filename, "w") as f:
+            for row in cur.fetchall():
+                f.write("%i\t%i\n" % (row[0], row[1]))

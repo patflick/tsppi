@@ -3,18 +3,27 @@ import itertools
 from . import sql
 
 PPIS_TO_ANALYZE = ['bossi', 'ccsb', 'havu', 'string', 'psicquic_all']
-#PPIS_TO_ANALYZE = ['psicquic_dip', 'psicquic_i2d_imex', 'psicquic_innatedb_imex', 'psicquic_intact', 'psicquic_matrixdb', 'psicquic_mbinfo', 'psicquic_mint', 'psicquic_molcon', 'psicquic_mpidb', 'psicquic_uniprot']
+#PPIS_TO_ANALYZE = ['psicquic_dip', 'psicquic_i2d_imex',
+#                   'psicquic_innatedb_imex', 'psicquic_intact',
+#                   'psicquic_matrixdb', 'psicquic_mbinfo', 'psicquic_mint',
+#                   'psicquic_molcon', 'psicquic_mpidb', 'psicquic_uniprot']
 EXPRS_TO_ANALYZE = ['emtab', 'gene_atlas', 'hpa', 'hpa_all', 'rnaseq_atlas']
 
 
+# TODO put these two next functions (create all ids) to the outside
 def create_ppi_all_ids_table(ppi, sql_conn):
     """
     Creates a table named `ppi`_ids that holds all the distinct IDs used
     in the ppi network.
     """
+    cur = sql_conn.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS `' + ppi + '_ids` '
+                '(id integer primary key autoincrement, Gene varchar(16))')
     sqlquery = ('SELECT Gene1 as Gene FROM ' + ppi + ' UNION '
                 'SELECT Gene2 as Gene FROM ' + ppi)
-    sql.new_table_from_query(ppi + '_ids', sqlquery, sql_conn)
+    cur.execute('INSERT INTO `' + ppi + '_ids` (Gene) ' + sqlquery)
+    cur.close()
+    sql_conn.commit()
 
 
 def create_expr_all_ids_table(expr, sql_conn):
@@ -22,8 +31,13 @@ def create_expr_all_ids_table(expr, sql_conn):
     Creates a table named `expr`_ids that holds all the distinct IDs used
     in the expression data set.
     """
+    cur = sql_conn.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS `' + expr + '_ids` '
+                '(id integer primary key autoincrement, Gene varchar(16))')
     sqlquery = ('SELECT DISTINCT Gene FROM ' + expr)
-    sql.new_table_from_query(expr + '_ids', sqlquery, sql_conn)
+    cur.execute('INSERT INTO `' + expr + '_ids` (Gene) ' + sqlquery)
+    cur.close()
+    sql_conn.commit()
 
 
 def get_binary_fields(fields, src_field):
