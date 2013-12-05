@@ -41,3 +41,11 @@ next steps (week of 18.11.)
      programmatically via python or somehow use a custom GROUP BY operator
      that concatenates strings with a definable seperator
      somehow use a configurable value for NULL (no match in outer join)
+
+
+SELECT a.Gene, 
+group_concat(CASE WHEN a.Expressed IS NULL THEN '-' ELSE a.Expressed END, '|')
+FROM hpa_tissues as b
+LEFT OUTER JOIN hpa AS a
+ON a.Type = b.Type
+GROUP BY a.Gene
