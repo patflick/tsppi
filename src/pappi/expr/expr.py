@@ -106,3 +106,22 @@ class GeneExpression(TableManager):
                     ' SUM(Expressed) AS ExpressedCount '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
+
+    def create_tissue_table(self):
+        """
+        Creates a table `name`_tissues with all unique tissue/cell types in the
+        expression data set in sorted order..
+        """
+        if sql.table_exists(self.name + '_tissues', self.sql_conn):
+            return
+        sqlquery = ('SELECT DISTINCT Type FROM ' + self.name + ' '
+                    'ORDER BY Type')
+        sql.new_table_from_query(self.name + '_tissues', sqlquery,
+                                 self.sql_conn)
+
+    def export_node_labels(self, node_ids_tbl):
+        """
+        Exports binary expression node labels for the given Node-IDs table
+        which must be of the form (id, Gene).
+        """
+        self.create_tissue_table()
