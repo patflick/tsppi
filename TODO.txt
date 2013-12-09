@@ -43,7 +43,7 @@ next steps (week of 18.11.)
      somehow use a configurable value for NULL (no match in outer join)
 
 
-SELECT a.Gene, 
+SELECT a.Gene,
 group_concat(CASE WHEN a.Expressed IS NULL THEN '-' ELSE a.Expressed END, '|')
 FROM hpa_tissues as b
 LEFT OUTER JOIN hpa AS a
