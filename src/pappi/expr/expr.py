@@ -30,6 +30,10 @@ class GeneExpression(TableManager):
         self.normalize_table()
         self.classify()
 
+        # summarize the genes/proteins with stats of how much
+        # they are expressed (expressed_count / total_count)
+        self.expr_counts()
+
     def import_raw_file(self):
         """
         Imports the expression file in raw format into the SQL database
@@ -86,5 +90,19 @@ class GeneExpression(TableManager):
         sqlquery = ('SELECT Gene, Type, '
                     ' CASE WHEN ExpressionValue ' + self.classify_cond + ' '
                     ' THEN 1 ELSE 0 END AS Expressed '
+                    'FROM ' + src_table)
+        sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
+
+    def expr_counts(self):
+        """
+        Creates a table with the total counts and expressed counts of each
+        gene/protein in the expression data set. This is a precursor for
+        tissue-specific v.s. housekeeping classifications.
+        """
+        src_table = self.get_cur_tmp_table()
+        dst_table = self.next_tmp_table("expr_counts")
+        sqlquery = ('SELECT Gene, '
+                    ' COUNT(Type) AS TotalCount, '
+                    ' SUM(Expressed) AS ExpressedCount '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
