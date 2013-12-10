@@ -10,7 +10,7 @@ next steps (week of 18.11.)
  x check pdf document again (what needs to be added) and then send around
  - classify proteins into hk and ts and none-of-the-above
     - (use different classifications)
-    - (design the software to be able to handle any classification, 
+    - (design the software to be able to handle any classification,
        or somehow multiples in parallel (so the pipeline doesn't
        have to be re run every single time the classification is changed)
  - checkout algohub networkit repo, look at algorithm, look at how to
@@ -33,19 +33,25 @@ next steps (week of 18.11.)
  - read gatto's paper
  x start with networkit stuff (see meyerhenke's email)
 
- - create node label (tissue specificity) output/export
+ x create node label (tissue specificity) output/export
   POSSIBILITIES:
-   - create list of all possible tissues, outer join to each single protein
+   x create list of all possible tissues, outer join to each single protein
      (-> so that all are in the same exact order (even if some are missing)
      then either read out by single protein and combine expressed values
      programmatically via python or somehow use a custom GROUP BY operator
      that concatenates strings with a definable seperator
      somehow use a configurable value for NULL (no match in outer join)
 
-
-SELECT a.Gene,
-group_concat(CASE WHEN a.Expressed IS NULL THEN '-' ELSE a.Expressed END, '|')
-FROM hpa_tissues as b
-LEFT OUTER JOIN hpa AS a
-ON a.Type = b.Type
-GROUP BY a.Gene
+NetworKit stuff:
+----------------
+    - only export (sub-)graph of PPI that is covered by expr
+    - use only those tissues and proteins so that everything is covered!?
+        i.e. no NULL values
+    - read in the edge list graph and the node labels
+    - generate node degrees for all proteins in all tissues
+        - think about how to import this back
+        - maybe write an own graphio using SQLite?
+        - then import back into db??
+        - why use files as exchange mechanism if I could use SQLite from C++
+        - for both import and export of the graphs
+    - write e-mail to meyerhenke regarding meeting

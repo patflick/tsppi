@@ -107,6 +107,21 @@ class GeneExpression(TableManager):
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
+    def create_ids_table(self):
+        """
+        Creates a table named `expr`_ids that holds all the distinct IDs used
+        in the expression data set.
+        """
+        if sql.table_exists(self.name + '_ids', self.sql_conn):
+            return
+        cur = sql_conn.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS `' + self.name + '_ids` '
+                    '(id integer primary key autoincrement, Gene varchar(16))')
+        sqlquery = ('SELECT DISTINCT Gene FROM ' + self.name)
+        cur.execute('INSERT INTO `' + self.name + '_ids` (Gene) ' + sqlquery)
+        cur.close()
+        sql_conn.commit()
+
     def create_tissue_table(self):
         """
         Creates a table `name`_tissues with all unique tissue/cell types in the
@@ -119,9 +134,56 @@ class GeneExpression(TableManager):
         sql.new_table_from_query(self.name + '_tissues', sqlquery,
                                  self.sql_conn)
 
-    def export_node_labels(self, node_ids_tbl):
+    def create_node_labels(self, sep='|', null_syb='-'):
+        """
+        Creates a table of labels for the expression data set. For each gene
+        this creates a label of the expression value for each tissue {0,1}
+        concatenated with `sep` as separator and `null_syb` as replacement
+        of NULL values.
+
+        One such label has the format: 1|1|0|1|1|1|0|1|-|1|-|0|1|1|0|...
+        with one 'column' {0,1,-} for each tissue in the same order as in the
+        `name`_tissues table.
+
+        @param sep:         The separator inserted between concatenated values.
+                            default: '|'.
+        @param null_syb:    The character inserted where no expression value
+                            is available (i.e. NULL). default: '-'.
+        """
+        # first of all, create the tissue table (if it doesn't yet exists)
+        self.create_tissue_table()
+        # then create the ids table, if it does not yet exist
+        self.create_ids_table()
+
+        sqlquery = ('SELECT a.Gene AS Gene, '
+                    'group_concat(CASE WHEN b.Expressed IS NULL '
+                    'THEN "' + null_syb + '" ELSE b.Expressed END, '
+                    '"' + sep + '") AS Label '
+                    'FROM '
+                    '(SELECT a.Gene, b.Type FROM ' + self.name + '_ids AS a, '
+                    ' ' + self.name + '_tissues AS b) AS a '
+                    ' LEFT OUTER JOIN ' + self.name + ' AS b '
+                    ' ON a.Gene = b.Gene AND a.Type = b.Type GROUP BY a.Gene')
+        sql.new_table_from_query(self.name + '_node_labels', sqlquery,
+                                 self.sql_conn)
+
+    def export_node_labels(self, node_ids_tbl, filename,
+                           sep='|', null_syb='-'):
         """
         Exports binary expression node labels for the given Node-IDs table
         which must be of the form (id, Gene).
         """
-        self.create_tissue_table()
+        # create node labels if they don't yet exist
+        if not sql.table_exists(self.name + '_node_labels', self.sql_conn):
+            self.create_node_labels(sep, null_syb)
+
+        # map the node labels to the node ids of the given table
+        cur = self.sql_conn.cursor()
+        cur.execute('SELECT b.id, a.Label '
+                    'FROM ' + self.name + '_node_labels AS a '
+                    'INNER JOIN ' + node_ids_tbl + ' AS b ON a.Gene = b.Gene')
+
+        # save results to file
+        with open(filename, "w") as f:
+            for row in cur.fetchall():
+                f.write("%i\t%s\n" % (row[0], row[1]))
