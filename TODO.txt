@@ -31,6 +31,8 @@ next steps (week of 18.11.)
 
  x see alexis notes on the thesis structure
  - read gatto's paper
+    - the clustering paper
+    - and the tissue specific antibody paper
  x start with networkit stuff (see meyerhenke's email)
 
  x create node label (tissue specificity) output/export
@@ -44,13 +46,20 @@ next steps (week of 18.11.)
 
 NetworKit stuff:
 ----------------
-    - only export (sub-)graph of PPI that is covered by expr
+    x only export (sub-)graph of PPI that is covered by expr
+        x meaning a subgraph export function in ppi.py with list of proteins as
+          parameter
     - use only those tissues and proteins so that everything is covered!?
         i.e. no NULL values
     - read in the edge list graph and the node labels
+        x set up an outside project using the networKit (instead of modifying it)
+        x io.EdgeList ?
+        - read node labels into graph (sub)graph?
+        - create subclass of graph or modify graph?
     - generate node degrees for all proteins in all tissues
         - think about how to import this back
         - maybe write an own graphio using SQLite?
+        - sqlite from C++: https://github.com/SRombauts/SQLiteCpp
         - then import back into db??
         - why use files as exchange mechanism if I could use SQLite from C++
         - for both import and export of the graphs

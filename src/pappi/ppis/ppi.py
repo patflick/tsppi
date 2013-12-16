@@ -18,9 +18,8 @@ class PPI(TableManager):
     def __init__(self, filename, sql_connection, name,
                  gene1_colname, gene2_colname, orig_id):
         """
-        Creates a new PPI network. This MUST explicitly be called
-        by all subclasses of this class to properly initialize
-        all class members.
+        Creates a new PPI network. This MUST explicitly be called by all
+        subclasses of this class to properly initialize all class members.
 
         Parameters:
             - filename:         Filename of the ppi network file.
@@ -160,23 +159,45 @@ class PPI(TableManager):
         cur.close()
         self.sql_conn.commit()
 
-    def export_to_edge_list(self, filename):
+    def export_to_edge_list(self, filename, only_ids=None):
         """
         Exports the network from the SQL table into an edge list of IDs
         in the range [1,#IDs] and saves the resulting list into a tab
         separated file.
+
+        @param filename:        The file-path for the file to which the
+                                edgelist is written.
+        @param only_ids:        An SQL table of Gene ids. The exported network
+                                will consist only of edges between those ids,
+                                i.e. the subnetwork/subgraph defined by this
+                                set of IDs. If this is set to `None`, all
+                                edges are exported. (default: None)
         """
         # check if ids table exists (if not -> create it)
         if not sql.table_exists(self.name + '_ids', self.sql_conn):
             self.create_all_ids_table()
+
+        # set the id default table to be used for mapping the Gene names to
+        # continuous integers
+        id_table = self.name + '_ids'
+
+        # check if the ID table has to be filtered
+        if not only_ids is None:
+            sqlquery = ('SELECT * FROM ' + id_table + ' WHERE Gene IN '
+                        '(SELECT DISTINCT Gene FROM ' + only_ids + ')')
+            # either give as inner query or create table and return new table
+            # name
+            id_table = '(' + sqlquery + ')'
+
         # merge PPI network  with unique integer ids (node-ids)
         cur = self.sql_conn.cursor()
         cur.execute('SELECT b.id AS Gene1, c.id AS Gene2 '
                     'FROM ' + self.name + ' AS a '
-                    'INNER JOIN ' + self.name + '_ids AS b '
+                    'INNER JOIN ' + id_table + ' AS b '
                     ' ON a.Gene1 = b.Gene '
-                    'INNER JOIN ' + self.name + '_ids AS c '
+                    'INNER JOIN ' + id_table + ' AS c '
                     ' ON a.Gene2 = c.Gene ')
+
         # save results to file
         with open(filename, "w") as f:
             for row in cur.fetchall():
