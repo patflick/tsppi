@@ -46,8 +46,8 @@ class RnaSeqAtlas(GeneExpression):
         """
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table('normalized')
-        sqlquery = ('SELECT hgnc_symbol as Gene, Tissue AS Type, Tissue, '
-                    'ExpressionValue '
+        sqlquery = ('SELECT hgnc_symbol as Gene, Tissue AS Type, '
+                    'Tissue, ExpressionValue '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 

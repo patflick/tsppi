@@ -32,7 +32,8 @@ class HPA(GeneExpression):
         """
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table('filtered')
-        sqlquery = ('SELECT Gene, Tissue, Cell_Type, Level, Expression_type '
+        sqlquery = ('SELECT Gene, Tissue, Cell_Type, Level, '
+                    'Expression_type '
                     'FROM ' + src_table + ' '
                     'WHERE (Expression_type = "APE" AND '
                     '(Reliability = "Medium" OR Reliability = "High")) '
@@ -47,8 +48,21 @@ class HPA(GeneExpression):
         """
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table('normalized')
-        sqlquery = ('SELECT Gene, Tissue || " - " || Cell_Type AS Type, '
-                    'Tissue, Cell_Type, Level AS ExpressionValue '
+        sqlquery = ('SELECT Gene, '
+                    'Tissue || " - " || Cell_Type AS Type, '
+                    'Tissue, Cell_Type, '
+                    # replace the string based Level by a numeric level
+                    'CASE '
+                    'WHEN Level = "Negative" THEN 0.0 '
+                    'WHEN Level = "Weak"     THEN 1.0 '
+                    'WHEN Level = "Moderate" THEN 2.0 '
+                    'WHEN Level = "Strong"   THEN 3.0 '
+                    'WHEN Level = "None"     THEN 0.0 '
+                    'WHEN Level = "Low"      THEN 1.0 '
+                    'WHEN Level = "Medium"   THEN 2.0 '
+                    'WHEN Level = "High"     THEN 3.0 '
+                    'END '
+                    ' AS ExpressionValue '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
