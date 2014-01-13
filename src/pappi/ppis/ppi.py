@@ -159,7 +159,7 @@ class PPI(TableManager):
         cur.close()
         self.sql_conn.commit()
 
-    def export_to_edge_list(self, filename, only_ids=None):
+    def export_to_edge_list(self, only_ids=None):
         """
         Exports the network from the SQL table into an edge list of IDs
         in the range [1,#IDs] and saves the resulting list into a tab
@@ -190,15 +190,17 @@ class PPI(TableManager):
             id_table = '(' + sqlquery + ')'
 
         # merge PPI network  with unique integer ids (node-ids)
-        cur = self.sql_conn.cursor()
-        cur.execute('SELECT b.id AS Gene1, c.id AS Gene2 '
+        sqlquery = ('SELECT b.id AS Gene1, c.id AS Gene2 '
                     'FROM ' + self.name + ' AS a '
                     'INNER JOIN ' + id_table + ' AS b '
                     ' ON a.Gene1 = b.Gene '
                     'INNER JOIN ' + id_table + ' AS c '
                     ' ON a.Gene2 = c.Gene ')
 
+        sql.new_table_from_query(self.name + "_for_export", sqlquery,
+                                 self.sql_conn)
+
         # save results to file
-        with open(filename, "w") as f:
-            for row in cur.fetchall():
-                f.write("%i\t%i\n" % (row[0], row[1]))
+        #with open(filename, "w") as f:
+        #    for row in cur.fetchall():
+        #        f.write("%i\t%i\n" % (row[0], row[1]))

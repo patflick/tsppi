@@ -29,9 +29,10 @@ p = bossi
 NODE_LABELS_FILE = '/home/patrick/dev/bio/test_data/node_labels.txt'
 EDGE_LIST_FILE = '/home/patrick/dev/bio/test_data/edge_list.txt'
 
-# TODO this is a bit inconsitent, isn't it? :)
-e.export_node_labels(p.name + '_ids', NODE_LABELS_FILE)
-p.export_to_edge_list(EDGE_LIST_FILE, only_ids=e.name + '_ids')
+# create export tables, that are read by the C++ SQLite part for creating of
+# the tissue specific graph for NetworKit
+e.export_node_labels(p.name + '_ids')
+p.export_to_edge_list(only_ids=e.name + '_ids')
 
 
 ##############################
