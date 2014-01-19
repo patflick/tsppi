@@ -117,10 +117,6 @@ class GeneExpression(TableManager):
                                       "the self.classify_cond attribute set")
         # get the src and dest table, assuming they are in normalized format,
         # create the expression-classified version of the table
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print("Classify condition of " + self.name + " is " + self.classify_cond)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table("")
         sqlquery = ('SELECT Gene, Type, '
@@ -140,7 +136,8 @@ class GeneExpression(TableManager):
         sqlquery = ('SELECT Gene, '
                     ' COUNT(Type) AS TotalCount, '
                     ' SUM(Expressed) AS ExpressedCount '
-                    'FROM ' + src_table)
+                    'FROM ' + src_table + ' '
+                    'GROUP BY Gene')
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
     def create_ids_table(self):

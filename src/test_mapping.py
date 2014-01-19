@@ -110,4 +110,9 @@ overlap_analysis.calc_pairwise_ppi_id_overlap(con)
 overlap_analysis.calc_pairwise_ppi_edge_overlap(con)
 
 
-# phyper(8019, n*(n-1)/2 - k*(k-1)/2, k*(k-1)/2,13943)
+###################################
+#  create core expression tables  #
+###################################
+for expr in [hpa_expr, hpa_all_expr, emtab_expr, rnaseq_atlas, gene_atlas]:
+    print("creating core table for: " + expr.name)
+    expr.create_core_table()
