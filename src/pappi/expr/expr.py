@@ -356,7 +356,7 @@ class GeneExpression(TableManager):
         sql.new_table_from_query(self.name + '_node_labels', sqlquery,
                                  self.sql_conn)
 
-    def export_node_labels(self, node_ids_tbl, filename,
+    def export_node_labels(self, node_ids_tbl,  # filename,
                            sep='|', null_syb='-'):
         """
         Exports binary expression node labels for the given Node-IDs table
@@ -367,12 +367,13 @@ class GeneExpression(TableManager):
             self.create_node_labels(sep, null_syb)
 
         # map the node labels to the node ids of the given table
-        cur = self.sql_conn.cursor()
-        cur.execute('SELECT b.id, a.Label '
+        sqlquery = ('SELECT b.id, a.Label '
                     'FROM ' + self.name + '_node_labels AS a '
                     'INNER JOIN ' + node_ids_tbl + ' AS b ON a.Gene = b.Gene')
+        sql.new_table_from_query(self.name + "_node_labels_for_export",
+                                 sqlquery, self.sql_conn)
 
         # save results to file
-        with open(filename, "w") as f:
-            for row in cur.fetchall():
-                f.write("%i\t%s\n" % (row[0], row[1]))
+        #with open(filename, "w") as f:
+        #    for row in cur.fetchall():
+        #        f.write("%i\t%s\n" % (row[0], row[1]))
