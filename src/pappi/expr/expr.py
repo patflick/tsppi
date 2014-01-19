@@ -80,7 +80,9 @@ class GeneExpression(TableManager):
     def normalize_table(self):
         """
         Normalizes the table structure to the format
-        [Gene],[Type] (,[Specific Type],...), [ExpressionValue]
+        [Gene],[Type] (,[Specific Type],...), [ExpressionValue].
+        The column [Gene] has to be of type `TEXT` and the column
+        [ExpressionValue] has to be of type `REAL`.
         """
         pass
 
@@ -109,12 +111,16 @@ class GeneExpression(TableManager):
         Thresholds or classifies genes into either expressed ( = 1)
         or non-expressed (= 0).
         """
-        if not hasattr(self, 'classify_cond'):
+        if not hasattr(self, 'classify_cond') or self.classify_cond == "":
             raise NotImplementedError("The classify method has to be "
                                       "implemented by all subclasses, or "
                                       "the self.classify_cond attribute set")
         # get the src and dest table, assuming they are in normalized format,
         # create the expression-classified version of the table
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("Classify condition of " + self.name + " is " + self.classify_cond)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table("")
         sqlquery = ('SELECT Gene, Type, '

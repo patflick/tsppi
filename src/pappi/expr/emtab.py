@@ -56,8 +56,8 @@ class Emtab(GeneExpression):
         """
         src_table = self.get_cur_tmp_table()
         dst_table = self.next_tmp_table('normalized')
-        sqlquery = ('SELECT Gene_Name as Gene, Tissue AS Type, '
-                    'Tissue, ExpressionValue '
+        sqlquery = ('SELECT CAST(Gene_Name AS TEXT) as Gene, Tissue AS Type, '
+                    'Tissue, CAST(ExpressionValue AS REAL) AS ExpressionValue '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 

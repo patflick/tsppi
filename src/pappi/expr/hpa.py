@@ -52,6 +52,7 @@ class HPA(GeneExpression):
                     'Tissue || " - " || Cell_Type AS Type, '
                     'Tissue, Cell_Type, '
                     # replace the string based Level by a numeric level
+                    'CAST('
                     'CASE '
                     'WHEN Level = "Negative" THEN 0.0 '
                     'WHEN Level = "Weak"     THEN 1.0 '
@@ -62,6 +63,7 @@ class HPA(GeneExpression):
                     'WHEN Level = "Medium"   THEN 2.0 '
                     'WHEN Level = "High"     THEN 3.0 '
                     'END '
+                    ' AS REAL)'
                     ' AS ExpressionValue '
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
@@ -71,6 +73,6 @@ class HPA(GeneExpression):
         Classifies the ExpressionValue into expressed or non-expressed.
         """
         # set classification condition
-        self.classify_cond = 'NOT IN ("None", "Negative")'
+        self.classify_cond = '>= 1.0'
         # call super class function
         GeneExpression.classify(self)
