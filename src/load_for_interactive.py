@@ -18,15 +18,18 @@ con = pappi.sql.get_conn(DATABASE)
 # import stuff
 import pappi.overlap_analysis
 
-# for testing expr and ppis (bossi and hpa as example)
-from pappi.expr.hpa import *
-from pappi.ppis.bossi_lehner import *
+import pappi.expr
+from pappi.ppis.bossi_lehner import Bossi_Lehner
 # create classes (don't init data)
-hpa = HPA("", con)
+# for testing expr and ppis (bossi and hpa as example)
+hpa = pappi.expr.HPA("", con)
 bossi = Bossi_Lehner("", con)
 # get simple variables
 e = hpa
 p = bossi
+
+expr_classes = [pappi.expr.HPA, pappi.expr.HPA_All, pappi.expr.RnaSeqAtlas, pappi.expr.GeneAtlas, pappi.expr.Emtab]
+exprs = [C("", con) for C in expr_classes]
 
 
 ##############################

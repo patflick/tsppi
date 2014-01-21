@@ -125,14 +125,17 @@ class GeneExpression(TableManager):
                     'FROM ' + src_table)
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
-    def expr_counts(self):
+    def expr_counts(self, for_core=False):
         """
         Creates a table with the total counts and expressed counts of each
         gene/protein in the expression data set. This is a precursor for
         tissue-specific v.s. housekeeping classifications.
         """
-        src_table = self.get_cur_tmp_table()
+        src_table = self.name
         dst_table = self.next_tmp_table("expr_counts")
+        if for_core:
+            src_table = self.name + "_core"
+            dst_table = self.next_tmp_table("core_expr_counts")
         sqlquery = ('SELECT Gene, '
                     ' COUNT(Type) AS TotalCount, '
                     ' SUM(Expressed) AS ExpressedCount '

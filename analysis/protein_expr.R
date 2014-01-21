@@ -43,7 +43,6 @@ mmc_expr_data <-  expr_data[which(expr_data$Gene %in% V(mmc_sub_graph)$name),]
 library(ggplot2)
 
 NUM_BREAKS <- 20
-
 hist_breaks <- 0:NUM_BREAKS/NUM_BREAKS
 h_expr <- hist(expr_data$ExpressedFraction, breaks=hist_breaks, plot=FALSE)
 h_frac <- h_expr$counts/sum(h_expr$counts)
