@@ -178,6 +178,24 @@ test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="ma
 }
 
 
+plot_hist_normalized_expr <- function(expr_name="gene_atlas")
+{
+
+    # load the ts/hk summary data from the database
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    expr_normalized_table <- paste(expr_name, "normalized", sep="_")
+    query <- paste("SELECT * FROM ", expr_normalized_table)
+
+    data <- dbGetQuery(con, query)
+
+    #hist(data$ExpressionValue)
+    print(typeof(data$ExpressionValue))
+    print(data$ExpressionValue[1])
+}
+
+
 
 get_hkts_edge_summary <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="maxts_degree")
 {
@@ -254,6 +272,15 @@ test_for_all <- function(func)
         {
             func(p,e)
         }
+    }
+}
+
+for_all_expr <- function(func)
+{
+    exprs <- get_exprs()
+    for (e in exprs)
+    {
+        func(e)
     }
 }
 
