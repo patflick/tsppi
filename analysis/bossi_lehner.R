@@ -189,10 +189,16 @@ plot_hist_normalized_expr <- function(expr_name="gene_atlas")
     query <- paste("SELECT * FROM ", expr_normalized_table)
 
     data <- dbGetQuery(con, query)
-
-    #hist(data$ExpressionValue)
-    print(typeof(data$ExpressionValue))
-    print(data$ExpressionValue[1])
+    x <- data$ExpressionValue
+    print(paste(expr_name, " median:", quantile(x)))
+    #x <- x[which(x <= 5)]
+    #hist(x, xlab=expr_name)
+    #plot(ecdf(x), main=expr_name)
+    fig <- ggplot(data, aes(x = ExpressionValue))
+    fig <- fig + stat_ecdf()
+    fig <- fig + coord_cartesian(xlim = c(-0.5, quantile(x,c(0.90))[1]))
+    fig <- fig + labs(title=expr_name)
+    return(fig)
 }
 
 
@@ -284,6 +290,18 @@ for_all_expr <- function(func)
     }
 }
 
+plot_all_expr <- function(plot_func)
+{
+    exprs <- get_exprs()
+    figs <- list()
+    for (e in exprs)
+    {
+        fig <- plot_func(e)
+        figs <- c(figs, list(fig))
+    }
+    all_figs <- do.call(grid.arrange, figs)
+    return(all_figs)
+}
 
 plot_all <- function()
 {

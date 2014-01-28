@@ -31,6 +31,7 @@ p = bossi
 expr_classes = [pappi.expr.HPA, pappi.expr.HPA_All, pappi.expr.RnaSeqAtlas, pappi.expr.GeneAtlas, pappi.expr.Emtab]
 exprs = [C("", con) for C in expr_classes]
 
+emtab = pappi.expr.Emtab(EMTAB_FILE, con)
 
 ##############################
 # enable tab completion

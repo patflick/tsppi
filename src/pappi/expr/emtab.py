@@ -58,7 +58,8 @@ class Emtab(GeneExpression):
         dst_table = self.next_tmp_table('normalized')
         sqlquery = ('SELECT CAST(Gene_Name AS TEXT) as Gene, Tissue AS Type, '
                     'Tissue, CAST(ExpressionValue AS REAL) AS ExpressionValue '
-                    'FROM ' + src_table)
+                    'FROM ' + src_table + ' '
+                    'WHERE ExpressionValue != ""')
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
     def classify(self):
@@ -66,6 +67,6 @@ class Emtab(GeneExpression):
         Classifies the ExpressionValue into a binary value Expressed.
         """
         # set the classification condition
-        self.classify_cond = ">= 1"
+        self.classify_cond = ">= 1.0"
         # call the super-class function
         GeneExpression.classify(self)

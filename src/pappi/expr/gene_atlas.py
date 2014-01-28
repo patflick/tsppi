@@ -70,7 +70,8 @@ class GeneAtlas(GeneExpression):
         dst_table = self.next_tmp_table('normalized')
         sqlquery = ('SELECT Cast(Gene_ID AS TEXT) as Gene, Tissue AS Type, '
                     'Tissue, CAST(ExpressionValue AS REAL) AS ExpressionValue '
-                    'FROM ' + src_table)
+                    'FROM ' + src_table + ' '
+                    'WHERE ExpressionValue != ""')
         sql.new_table_from_query(dst_table, sqlquery, self.sql_conn)
 
     def classify(self):
