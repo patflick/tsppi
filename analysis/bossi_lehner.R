@@ -137,9 +137,9 @@ get_hkts_sym_threshold_table <- function(expr_name="gene_atlas", threshold=0.1)
 }
 
 
-# 3.) to which extend to tissue-specific proteins interact with most widely expressed proteins?
-test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="maxts_degree")
+get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atlas")
 {
+
     # load the ts/hk summary data from the database
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
@@ -148,33 +148,131 @@ test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="ma
     min_table <- paste("prop", ppi_name, expr_name, "min_neighbor_expr_count", sep="_")
     max_table <- paste("prop", ppi_name, expr_name, "max_neighbor_expr_count", sep="_")
     # Joining ExpressionCount with Min and Max
+    # Min and Max are the minimum and maximum tissue expression of all neighbors
+    # (i.e. the minimum and maximum amount of tissues a neighbor of the
+    # according gene is expressed in)
     query <- paste("SELECT a.Gene, a.ExpressedCount, a.TotalCount, ",
                    "b.Value AS Min, c.Value AS Max",
                    "FROM ", expr_count_table, " AS a INNER JOIN ",
                    min_table, " AS b ON a.Gene = b.Gene INNER JOIN ",
                    max_table, " AS c ON a.Gene = c.Gene")
-                   #"WHERE a.ExpressedCount != 0")
     data <- dbGetQuery(con, query)
+    return(data)
+}
+
+
+plot_value_for_ppi_expr <- function(plot_data)
+{
+    if (max(plot_data$value) <= 1.0)
+    {
+        plot_data$value <- plot_data$value * 100.0
+    }
+
+    # generate labels (adding the sizes to the empty rows/cols
+    plot_data$label = paste(round(plot_data$value, 1), " %", sep="")
+
+    # plot as heatmap table
+    # TODO generalize the heatmap table into a separate function
+    p <- ggplot(plot_data, aes(expr, ppi)) +
+            geom_tile(aes(fill=value)) +
+            scale_fill_gradient2("Percent", low="grey80", mid="red", high="white", limits=c(0,100)) +
+            scale_color_gradient2(low="grey40", mid="black", high="black", limits=c(0,100), guide='none') +
+            geom_text(aes(label=label, colour=value)) +
+            xlab('') + ylab('') +
+            theme(# disable grid and axis ticks
+                  panel.grid.major=element_blank(),
+                  panel.grid.minor=element_blank(),
+                  axis.ticks=element_blank(),
+                  panel.background=element_blank(),
+                  # flip x axis
+                  #axis.text.x=element_text(angle=90, hjust=1)
+                  axis.text.x=element_text(size=10)
+                  )
+    return(p)
+}
+
+fill_ppi_expr_dataframe <- function(func)
+{
+    ppis <- get_ppis()
+    exprs <- get_exprs()
+    len <- length(ppis)*length(exprs)
+    data_frame <- data.frame(ppi=rep("",len), expr=rep("",len),value=as.double(rep(0.0,len)),stringsAsFactors=FALSE)
+
+    i <- 1
+    for (p in ppis)
+    {
+        for (e in exprs)
+        {
+            val <- func(p,e)
+            data_frame$ppi[i] <- p
+            data_frame$expr[i] <- e
+            data_frame$value[i] <- as.double(val)
+            i <- i + 1
+        }
+    }
+    return(data_frame)
+}
+
+# finds the TS/HK classification threshold for which at least 50% of tissue
+# specific proteins interact with housekeeping proteins
+where_reaches_50_percent_interaction <- function(ppi_name="bossi", expr_name="gene_atlas")
+{
+    # get the minimum and maximum neighbor tissue expression values
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
 
     nTissues <- max(data$TotalCount)
 
-    threshold <- 0.2
+    target <- 0.5
+
+    # find the appropriate threshold by binary search
+    # FIXME: don't need binary search, there's only a fixed (and small)
+    #        number of tissues. I can just iterate through them linearly
+    left <- 0.05
+    right <- 0.5
+
+    while (right - left > 0.01)
+    {
+        threshold <- (right+left)/2.0
+        nTS <- sum(data$ExpressedCount <= threshold * nTissues)
+        n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues & data$Max > (1-threshold)*nTissues)
+
+        value <- n_ts_hk_neighbor / nTS
+
+        if (value > target)
+        {
+            # go in lower half
+            right <- threshold
+        } else {
+            left <- threshold
+        }
+    }
+    print(paste(ppi_name, expr_name, " threshold for 50% TS->HK: ", threshold, " with actual value: ", value))
+}
+
+
+# 2.) to which extend to tissue-specific proteins interact with most widely expressed proteins?
+
+# TODO: ok this can be plotted now, the plot has to be made `nicer`
+#       especially considering the graident colors. Also add more than one label
+#       per square
+test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas")
+{
+    # get the data
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
+
+    nTissues <- max(data$TotalCount)
+
+    threshold <- 0.5
 
     nTS <- sum(data$ExpressedCount <= threshold * nTissues)
-    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues & data$Max >= (1-threshold)*nTissues)
+    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues & data$Max > (1-threshold)*nTissues)
 
-    #print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS))
-
-    # actually do something with this data :)
-    # TODO for some reason there are many many Genes that are not expressed
-    #      in any cell !???
-    # this is especially the case for emtab, gene_atlas and rnaseq_atlas
-    # WHY THE FUCK?? might this be because of too high thresholds???
-
-    #return(data)
-    #return(data)
-    hist(data$ExpressedCount)
-    title(main=paste(ppi_name,expr_name))
+    # TODO: actually output/plot this data
+    # weirdly: this data looks as it disproves bossi&lehner, but I can't
+    #          even reproduce their own findings on their own data :-/
+    #          TODO: maybe I have to try with the classification threshold of 200
+    print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
+    return (n_ts_hk_neighbor*1.0/nTS)
 }
 
 
@@ -200,6 +298,7 @@ plot_hist_normalized_expr <- function(expr_name="gene_atlas")
     fig <- fig + labs(title=expr_name)
     return(fig)
 }
+
 
 
 

@@ -147,15 +147,15 @@ plot_pairwise_table <- function(src_table)
 # plot everything as PDF, for vectorized graphics
 
 # plot the ppi and expr overlap (ID overlap)
-pdf("../figs/overlap_pairwise_expr_ppi.pdf", width=7, height=3)
+#pdf("../figs/overlap_pairwise_expr_ppi.pdf", width=7, height=3)
 p <- plot_pairwise_table("overlap_pairwise_expr_ppi")
 p <- p + labs(title="PPI protein coverage by expression data sets")
 plot(p)
-dev.off()
+#dev.off()
 
 
-pdf("../figs/overlap_pairwise_expr_ppi_edges.pdf", width=7, height=3)
+#pdf("../figs/overlap_pairwise_expr_ppi_edges.pdf", width=7, height=3)
 p <- plot_pairwise_table("overlap_pairwise_expr_ppi_edges")
 p <- p + labs(title="PPI edge coverage by expression data sets")
 plot(p)
-dev.off()
+#dev.off()
