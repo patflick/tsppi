@@ -160,7 +160,24 @@ test_bossi_1 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="co
     #}
     tst <- cor.test(data$ExpressedCount, data$Value, method="spearman")
     #return(tst)
-    return(list(value=tst$estimate, label=paste("rho = ", round(tst$estimate,2), "\np <",sprintf("%.1e",tst$p.value))))
+    return(list(value=tst$p.value, label=paste("rho =", round(tst$estimate,2), "\np ~",sprintf("%.1e",tst$p.value))))
+}
+
+test_bossi_1_ttest <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="coexpr_degree")
+{
+    data <- get_expression_property_data(ppi_name, expr_name, prop_name)
+
+
+    #max_expr_count <- max(data$ExpressedCount)
+    nTissues <- max(data$TotalCount)
+    threshold <- 0.2
+    # bin into TS and HK
+    ts <- data$Value[which(data$ExpressedCount <= threshold*nTissues)]
+    hk <- data$Value[which(data$ExpressedCount >= (1-threshold)*nTissues)]
+
+    tst <- t.test(ts,hk)
+    #return(tst)
+    return(list(value=tst$p.value, label=paste("p ~",sprintf("%.1e",tst$p.value))))
 }
 
 
@@ -211,7 +228,7 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
 }
 
 
-plot_tiles_for_ppi_expr <- function(plot_data)
+plot_tiles_for_ppi_expr <- function(plot_data, font_size=4)
 {
 
     # create labels if they don't exist yet
@@ -237,7 +254,7 @@ plot_tiles_for_ppi_expr <- function(plot_data)
             scale_color_gradient2(low="grey40", mid="black", high="black", limits=c(0,100), guide='none') +
             # set labels:
             # TODO set size here with parameter
-            geom_text(aes(label=label, colour=value), size=2) +
+            geom_text(aes(label=label, colour=value), size=font_size) +
             xlab('') + ylab('') +
             theme(# disable grid and axis ticks
                   panel.grid.major=element_blank(),
@@ -509,31 +526,65 @@ plot_all <- function(plot_func,...)
 bossi_1 <- function()
 {
     # TODO: put all properties into one plot.. 
-    #for (prop in c("maxts_degree", "coexpr_degree","degree"))
-    #{
-    #    p <- plot_all(plot_degree_vs_expr, prop)
-    #    pdf(paste("../figs/bossi1_all_prop_",prop,".pdf",sep=""), width=10, height=7.5)
-    #    print(p)
-    #    dev.off()
-    #}
+    for (prop in c("maxts_degree", "coexpr_degree","degree"))
+    {
+        p <- plot_all(plot_degree_vs_expr, prop)
+        # TODO size approriately
+        pdf(paste("../figs/bossi1_all_prop_",prop,".pdf",sep=""), width=20, height=15)
+        print(p)
+        dev.off()
+    }
 
-    ## output small examples
-    ## TODO: what would the random expectation look like?
-    #p <- plot_degree_vs_expr("bossi", "gene_atlas", "coexpr_degree")
-    #pdf("../figs/bossi1_bossi_gene_atlas.pdf", width=5, height=3)
-    #p <- p + labs(title="blaeh")
-    #print(p)
-    #dev.off()
-
-    # spearmans rho for all PxE
-    pdf("../figs/bossi1_rho.pdf", width=7, height=5)
-    data <- fill_ppi_expr_dataframe(test_bossi_1)
-    # TODO different plot tiles call (needs other gradient, and smaller font)
-    p <- plot_tiles_for_ppi_expr(data)
-    p <- p + scale_fill_gradient2(midpoint=0.5,limits=c(0,1))
-    #p <- p + geom_text(size=3)
+    # output small examples
+    # TODO: what would the random expectation look like?
+    p <- plot_degree_vs_expr("bossi", "gene_atlas", "coexpr_degree")
+    pdf("../figs/bossi1_bossi_gene_atlas.pdf", width=5, height=3)
+    p <- p + labs(title="Interaction degree by tissue expression")
+    p <- p + xlab("Number of tissues in which protein is expressed")
+    p <- p + ylab("Mean interaction degree")
     print(p)
     dev.off()
+    # again with other data
+    p <- plot_degree_vs_expr("ccsb", "hpa", "coexpr_degree")
+    pdf("../figs/bossi1_ccsb_hpa.pdf", width=5, height=3)
+    p <- p + labs(title="Interaction degree by tissue expression")
+    p <- p + xlab("Number of tissues in which protein is expressed")
+    p <- p + ylab("Mean interaction degree")
+    print(p)
+    dev.off()
+    # for string <-> emtab
+    p <- plot_degree_vs_expr("string", "emtab", "coexpr_degree")
+    pdf("../figs/bossi1_string_emtab.pdf", width=5, height=3)
+    p <- p + labs(title="Interaction degree by tissue expression")
+    p <- p + xlab("Number of tissues in which protein is expressed")
+    p <- p + ylab("Mean interaction degree")
+    print(p)
+    dev.off()
+
+
+    # spearmans rho for all PxE and for different degree calculations
+    for (prop in c("maxts_degree", "coexpr_degree","degree"))
+    {
+        pdf(paste("../figs/bossi1_rho_", prop, ".pdf", sep=""), width=7, height=3.5)
+        data <- fill_ppi_expr_dataframe(test_bossi_1,prop)
+        p <- plot_tiles_for_ppi_expr(data, 3)
+        p <- p + scale_fill_gradient2("P-value",na.value="white",midpoint=1, mid="red",high="red", low="white",limits=c(1e-3,1e-1),trans="log10")
+        p <- p + labs(title="Correlation test: Spearman's rho")
+        plot(p)
+        dev.off()
+    }
+
+    # simple t-test for TS vs. HK degrees
+    for (prop in c("maxts_degree", "coexpr_degree","degree"))
+    {
+        pdf(paste("../figs/bossi1_ttest_", prop, ".pdf", sep=""), width=7, height=3)
+        data <- fill_ppi_expr_dataframe(test_bossi_1_ttest, prop)
+        p <- plot_tiles_for_ppi_expr(data, 3)
+        p <- p + scale_fill_gradient2("P-value",na.value="white",midpoint=1, mid="red",high="red", low="white",limits=c(1e-3,1e-1),trans="log10")
+        p <- p + labs(title="T-test: degrees of TS vs. HK proteins")
+        plot(p)
+        dev.off()
+    }
 }
 
 
