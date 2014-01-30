@@ -4,6 +4,7 @@ library(ggplot2)
 library(plyr) # for `round_any`
 library(gridExtra) # for `grid.arrange`
 library(Hmisc) # for spearman correlation + p-value
+library(reshape2) # for `melt`
 
 # returns a list of all PPIs that can be analyzed
 # TODO: put this as a unified function somewhere (using the SQL database)
@@ -39,7 +40,7 @@ lower_se <- function(x) mean(x) - std(x)
 #  Bossi & Lehner Fig1B  #
 ##########################
 
-
+# data getter:
 get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="degree_test")
 {
 
@@ -55,7 +56,7 @@ get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas"
     query <- paste("SELECT a.Gene, a.Value, b.ExpressedCount, b.TotalCount
                     FROM ", prop_table, " AS a",
                    "INNER JOIN ", expr_count_table, " AS b",
-                   "ON a.Gene = b.Gene")
+                   "ON a.Gene = b.Gene WHERE ExpressedCount > 0")
 
     # load ppi network from db
     data <- dbGetQuery(con, query)
@@ -92,13 +93,52 @@ plot_degree_vs_expr <- function(ppi_name="bossi",expr_name="gene_atlas",prop_nam
           # draw error bars:
           stat_summary(fun.ymin="lower_se", fun.ymax="upper_se",
                        geom="errorbar", width=error_width) +
-          labs(title=paste("PPI:", ppi_name, ", Expr:", expr_name),
-               xlab="Number of tissues in which protein is expressed",
-               ylab="Protein interaction degree")
+          labs(title=paste("PPI:", ppi_name, ", Expr:", expr_name)) +
+          xlab("Num. Tissues") +
+          ylab("Degree")
 
     return(fig)
 }
 
+plot_tissue_expr_count_hist <- function(expr_name="gene_atlas")
+{
+    # load the ts/hk summary data from the database
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    #expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
+    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount, TotalCount")
+
+    data <- dbGetQuery(con, query)
+    data$Gene <- 1:length(data$Gene)
+    data <- melt(data, id.vars="Gene")
+
+    fig <- ggplot(data, aes(x=Gene, y=value, group=variable)) +
+            labs(title=expr_name) +
+            xlab("Genes (sorted by expression)") +
+            ylab("Tissue expression") +
+            # plot as line + area underneath
+            geom_area(aes(fill=variable),position="identity") +
+            scale_fill_manual(values=c("gray70", "gray20"))
+    return(fig)
+}
+
+
+# Main reason for this plot: to show why HPA/HPA_All shows so few interactions
+# between TS and HK
+plot_min_max_by_threshold <- function(ppi_name="bossi", expr_name="gene_atlas")
+{
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
+
+    nTissues <- max(data$TotalCount)
+    threshold <- 0.20
+    nTS <- sum(data$ExpressedCount <= threshold * nTissues & data$ExpressedCount != 0)
+    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues& data$ExpressedCount != 0 & data$Max > (1-threshold)*nTissues)
+
+    fig <- ggplot(data, aes(x=ExpressedCount, group=ExpressedCount))# + geom_ribbon(aes(ymin=min(data$Max),ymax=max(data$Max)))
+    return (fig)
+}
 
 # checking for bossi results:
 # 1.) tissue specific proteins make fewer protein interactions than widely
@@ -110,13 +150,17 @@ test_bossi_1 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="co
 
     # run a spearman test:
 
-    for (test in c("spearman", "kendall", "pearson"))
-    {
-        print(cor.test(data$ExpressedCount, data$Value, method=test))
+    #for (test in c("spearman", "kendall", "pearson"))
+    #{
+    #    print(cor.test(data$ExpressedCount, data$Value, method=test))
+        # TODO plot/output results in publishable format
         #rho = tst$estimate
         #pvalue = tst$p.value
         #print(paste("runing", test, "test: ", ppi_name, expr_name, "rho=", rho, ", p-value=", pvalue))
-    }
+    #}
+    tst <- cor.test(data$ExpressedCount, data$Value, method="spearman")
+    #return(tst)
+    return(list(value=tst$estimate, label=paste("rho = ", round(tst$estimate,2), "\np <",sprintf("%.1e",tst$p.value))))
 }
 
 
@@ -143,8 +187,10 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
     # load the ts/hk summary data from the database
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
-
-    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    
+    # have to load from `core`, as the min and max counts are also
+    # calculated in the `core` of the expression data set.
+    expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
     min_table <- paste("prop", ppi_name, expr_name, "min_neighbor_expr_count", sep="_")
     max_table <- paste("prop", ppi_name, expr_name, "max_neighbor_expr_count", sep="_")
     # Joining ExpressionCount with Min and Max
@@ -155,29 +201,43 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
                    "b.Value AS Min, c.Value AS Max",
                    "FROM ", expr_count_table, " AS a INNER JOIN ",
                    min_table, " AS b ON a.Gene = b.Gene INNER JOIN ",
-                   max_table, " AS c ON a.Gene = c.Gene")
+                   max_table, " AS c ON a.Gene = c.Gene ",
+                   # TODO: this excludes all genes that are not expressed at all
+                   #       the TODO here is to figure out if this is the right
+                   #       position to do this
+                   "WHERE ExpressedCount > 0")
     data <- dbGetQuery(con, query)
     return(data)
 }
 
 
-plot_value_for_ppi_expr <- function(plot_data)
+plot_tiles_for_ppi_expr <- function(plot_data)
 {
-    if (max(plot_data$value) <= 1.0)
-    {
-        plot_data$value <- plot_data$value * 100.0
-    }
 
-    # generate labels (adding the sizes to the empty rows/cols
-    plot_data$label = paste(round(plot_data$value, 1), " %", sep="")
+    # create labels if they don't exist yet
+    if (length(plot_data$label) == 0)
+    {
+
+        if (max(plot_data$value) <= 1.0)
+        {
+            plot_data$value <- plot_data$value * 100.0
+        }
+
+        # generate labels (adding the sizes to the empty rows/cols
+        plot_data$label = paste(round(plot_data$value, 1), " %", sep="")
+    }
 
     # plot as heatmap table
     # TODO generalize the heatmap table into a separate function
     p <- ggplot(plot_data, aes(expr, ppi)) +
-            geom_tile(aes(fill=value)) +
-            scale_fill_gradient2("Percent", low="grey80", mid="red", high="white", limits=c(0,100)) +
+            geom_tile(aes(fill=value,label=label,colour=value)) +
+            # fill colors:
+            scale_fill_gradient2("Percent", midpoint=50, limits=c(0,100)) +
+            # font colors:
             scale_color_gradient2(low="grey40", mid="black", high="black", limits=c(0,100), guide='none') +
-            geom_text(aes(label=label, colour=value)) +
+            # set labels:
+            # TODO set size here with parameter
+            geom_text(aes(label=label, colour=value), size=2) +
             xlab('') + ylab('') +
             theme(# disable grid and axis ticks
                   panel.grid.major=element_blank(),
@@ -191,7 +251,7 @@ plot_value_for_ppi_expr <- function(plot_data)
     return(p)
 }
 
-fill_ppi_expr_dataframe <- function(func)
+fill_ppi_expr_dataframe <- function(func, ...)
 {
     ppis <- get_ppis()
     exprs <- get_exprs()
@@ -203,15 +263,26 @@ fill_ppi_expr_dataframe <- function(func)
     {
         for (e in exprs)
         {
-            val <- func(p,e)
             data_frame$ppi[i] <- p
             data_frame$expr[i] <- e
-            data_frame$value[i] <- as.double(val)
+
+            result <- func(p,e, ...)
+            if (length(result) == 1)
+            {
+                # assume this is only the value (no label)
+                data_frame$value[i] = as.double(result)
+            } else {
+                # get named variables from list
+                data_frame$value[i] <- result$value
+                data_frame$label[i] <- result$label
+            }
+
             i <- i + 1
         }
     }
     return(data_frame)
 }
+
 
 # finds the TS/HK classification threshold for which at least 50% of tissue
 # specific proteins interact with housekeeping proteins
@@ -255,24 +326,23 @@ where_reaches_50_percent_interaction <- function(ppi_name="bossi", expr_name="ge
 # TODO: ok this can be plotted now, the plot has to be made `nicer`
 #       especially considering the graident colors. Also add more than one label
 #       per square
-test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas")
+test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
 {
     # get the data
     data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
 
     nTissues <- max(data$TotalCount)
 
-    threshold <- 0.5
-
-    nTS <- sum(data$ExpressedCount <= threshold * nTissues)
-    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues & data$Max > (1-threshold)*nTissues)
+    nTS <- sum(data$ExpressedCount <= threshold * nTissues & data$ExpressedCount != 0)
+    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues& data$ExpressedCount != 0 & data$Max > (1-threshold)*nTissues)
 
     # TODO: actually output/plot this data
     # weirdly: this data looks as it disproves bossi&lehner, but I can't
     #          even reproduce their own findings on their own data :-/
     #          TODO: maybe I have to try with the classification threshold of 200
     print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
-    return (n_ts_hk_neighbor*1.0/nTS)
+    result <- n_ts_hk_neighbor*100.0/nTS
+    return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
 
@@ -402,7 +472,7 @@ plot_all_expr <- function(plot_func)
     return(all_figs)
 }
 
-plot_all <- function()
+plot_all <- function(plot_func,...)
 {
     ppis <- get_ppis()
     exprs <- get_exprs()
@@ -415,19 +485,70 @@ plot_all <- function()
         for (e in exprs)
         {
             # call the bossi plotting function
-            fig <- plot_degree_vs_expr(p, e, "coexpr_degree")
-            create_test_degrees(p,e);
+            #fig <- plot_degree_vs_expr(p, e, "coexpr_degree")
+            fig <- plot_func(p,e,...)
             #fig <- plot_degree_vs_expr(p, e, "degree_test")
             figs <- c(figs, list(fig))
         }
     }
 
-    all_figs <- do.call(grid.arrange, figs)
+    #all_figs <- do.call(grid.arrange, figs)
+    all_figs <- do.call(arrangeGrob, figs)
 
+    return(all_figs)
     # in order to pass named parameters to grid.arrange:
     #do.call(grid.arrange, c(figs,list(nrow=5,left="hello there"))
 }
 
 
 
+#######################################################################
+#                 Generate actual plots (into PDF)                    #
+#######################################################################
+
+bossi_1 <- function()
+{
+    # TODO: put all properties into one plot.. 
+    #for (prop in c("maxts_degree", "coexpr_degree","degree"))
+    #{
+    #    p <- plot_all(plot_degree_vs_expr, prop)
+    #    pdf(paste("../figs/bossi1_all_prop_",prop,".pdf",sep=""), width=10, height=7.5)
+    #    print(p)
+    #    dev.off()
+    #}
+
+    ## output small examples
+    ## TODO: what would the random expectation look like?
+    #p <- plot_degree_vs_expr("bossi", "gene_atlas", "coexpr_degree")
+    #pdf("../figs/bossi1_bossi_gene_atlas.pdf", width=5, height=3)
+    #p <- p + labs(title="blaeh")
+    #print(p)
+    #dev.off()
+
+    # spearmans rho for all PxE
+    pdf("../figs/bossi1_rho.pdf", width=7, height=5)
+    data <- fill_ppi_expr_dataframe(test_bossi_1)
+    # TODO different plot tiles call (needs other gradient, and smaller font)
+    p <- plot_tiles_for_ppi_expr(data)
+    p <- p + scale_fill_gradient2(midpoint=0.5,limits=c(0,1))
+    #p <- p + geom_text(size=3)
+    print(p)
+    dev.off()
+}
+
+
+bossi_2 <- function()
+{
+    for (t in c(0.1, 0.125, 0.2, 0.5))
+    {
+        data <- fill_ppi_expr_dataframe(test_bossi_2, t)
+        p <- plot_tiles_for_ppi_expr(data)
+        p <- p + labs(title=paste("TS that interact with HK (threshold:", t*100,"%)"))
+
+        pdf(paste("../figs/bossi2_all_t",t*100,".pdf",sep=""), width=7, height=3)
+        print(p)
+        dev.off()
+    }
+    # TODO? output single plot examples
+}
 

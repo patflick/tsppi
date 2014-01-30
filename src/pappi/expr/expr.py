@@ -44,6 +44,10 @@ class GeneExpression(TableManager):
         # summarize the genes/proteins with stats of how much
         # they are expressed (expressed_count / total_count)
         self.expr_counts()
+        # get the expression counts for the core
+        # TODO: first change the pipeline implementation, so that it
+        #       calculates the core before classification
+        # self.expr_counts(True)
 
     def import_raw_file(self):
         """

@@ -116,3 +116,5 @@ overlap_analysis.calc_pairwise_ppi_edge_overlap(con)
 for expr in [hpa_expr, hpa_all_expr, emtab_expr, rnaseq_atlas, gene_atlas]:
     print("creating core table for: " + expr.name)
     expr.create_core_table()
+    # get expression counts for the core tables
+    expr.expr_counts(True)
