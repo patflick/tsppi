@@ -204,7 +204,7 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
     # load the ts/hk summary data from the database
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
-    
+
     # have to load from `core`, as the min and max counts are also
     # calculated in the `core` of the expression data set.
     expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
@@ -351,14 +351,33 @@ test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
     nTissues <- max(data$TotalCount)
 
     nTS <- sum(data$ExpressedCount <= threshold * nTissues & data$ExpressedCount != 0)
-    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues& data$ExpressedCount != 0 & data$Max > (1-threshold)*nTissues)
+    n_ts_hk_neighbor <- sum(data$ExpressedCount <= threshold * nTissues &
+                            data$ExpressedCount != 0 &
+                            data$Max > (1-threshold) * nTissues)
 
     # TODO: actually output/plot this data
-    # weirdly: this data looks as it disproves bossi&lehner, but I can't
-    #          even reproduce their own findings on their own data :-/
-    #          TODO: maybe I have to try with the classification threshold of 200
     print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
     result <- n_ts_hk_neighbor*100.0/nTS
+    return (list(value=result, label=paste(round(result, 1), "%")))
+}
+
+# testing bossi 3:
+#   almost all houskeeping genes have some non housekeeping interaction
+test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
+{
+    # get the data
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
+
+    nTissues <- max(data$TotalCount)
+
+    nHK <- sum(data$ExpressedCount >= (1-threshold) * nTissues & data$ExpressedCount != 0)
+    # get the number of HK proteins that interact directly with non HK proteins
+    n_hk_non_hk_neighbor <- sum(data$ExpressedCount >= (1-threshold) * nTissues &
+                                data$ExpressedCount != 0 &
+                                data$Min < (1-threshold) * nTissues)
+
+    # get result (percentage of HK that interact with non HK)
+    result <- n_hk_non_hk_neighbor*100.0/nHK
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
@@ -525,7 +544,7 @@ plot_all <- function(plot_func,...)
 
 bossi_1 <- function()
 {
-    # TODO: put all properties into one plot.. 
+    # TODO: put all properties into one plot..
     for (prop in c("maxts_degree", "coexpr_degree","degree"))
     {
         p <- plot_all(plot_degree_vs_expr, prop)
@@ -601,5 +620,20 @@ bossi_2 <- function()
         dev.off()
     }
     # TODO? output single plot examples
+}
+
+
+bossi_3 <- function()
+{
+    for (t in c(0.1, 0.125, 0.2, 0.5))
+    {
+        data <- fill_ppi_expr_dataframe(test_bossi_3, t)
+        p <- plot_tiles_for_ppi_expr(data)
+        p <- p + labs(title=paste("HK that interact with non HK (threshold:", t*100,"%)"))
+
+        pdf(paste("../figs/bossi3_all_t",t*100,".pdf",sep=""), width=7, height=3)
+        print(p)
+        dev.off()
+    }
 }
 
