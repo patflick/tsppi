@@ -106,8 +106,8 @@ plot_tissue_expr_count_hist <- function(expr_name="gene_atlas")
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
 
-    #expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
-    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
+    #expr_count_table <- paste(expr_name, "expr_counts", sep="_")
     query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount, TotalCount")
 
     data <- dbGetQuery(con, query)
@@ -355,11 +355,54 @@ test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
                             data$ExpressedCount != 0 &
                             data$Max > (1-threshold) * nTissues)
 
-    # TODO: actually output/plot this data
+    # TODO actually output/plot this data
     print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
     result <- n_ts_hk_neighbor*100.0/nTS
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
+
+
+test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
+{
+    # get the data
+    # TODO: test different degree sources
+    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    data <- data[which(data$ExpressedCount != 0),]
+
+    nTissues <- max(data$TotalCount)
+
+    nTS <- sum(data$ExpressedCount <= threshold * nTissues)
+    nHK <- sum(data$ExpressedCount >= (1-threshold) * nTissues)
+    N <- length(data$ExpressedCount)
+    mean_degree <- mean(data$Value)
+
+    # probability of an edge to HK
+    data$HkEdgeProb <- 1 - dhyper(0, nHK, N - nHK, data$Value)
+
+    # use the hypergeometric distribution to calc the expectation for an
+    # edge of a TS node to connect to HK
+    # thus we want the probability P(X >= 1) using the hyper geometric distr
+    # and:
+    # P(X >= 1) = 1 - P(X = 0)
+    # TODO: is there a way to use the degree distribution rather than
+    # the mean(degree)
+    # FIXME: we needed to round here (dhyper requires int), is the result
+    # still "correct"?
+    #ex_edge_to_hk_exists <- 1 - dhyper(0, nHK, N - nHK, round(mean_degree))
+    ex_edge_to_hk_exists <- mean(data$HkEdgeProb)
+
+    # now multiply by the number of tissue specific nodes, in order to
+    # get the expected number of TS having an edge to HK
+    ex_n_ts_hk_neighbor <- ex_edge_to_hk_exists * nTS
+
+    # WRONG!
+    # ex_n_ts_hk_neighbor <- mean_degree * (nHK*1.0/N) * nTS
+
+    # TODO: test this function
+    result <- ex_n_ts_hk_neighbor*100.0/nTS
+    return (list(value=result, label=paste(round(result, 1), "%")))
+}
+
 
 # testing bossi 3:
 #   almost all houskeeping genes have some non housekeeping interaction
@@ -609,7 +652,7 @@ bossi_1 <- function()
 
 bossi_2 <- function()
 {
-    for (t in c(0.1, 0.125, 0.2, 0.5))
+    for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
     {
         data <- fill_ppi_expr_dataframe(test_bossi_2, t)
         p <- plot_tiles_for_ppi_expr(data)
@@ -625,7 +668,7 @@ bossi_2 <- function()
 
 bossi_3 <- function()
 {
-    for (t in c(0.1, 0.125, 0.2, 0.5))
+    for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
     {
         data <- fill_ppi_expr_dataframe(test_bossi_3, t)
         p <- plot_tiles_for_ppi_expr(data)
