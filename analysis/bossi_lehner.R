@@ -366,7 +366,7 @@ test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
 {
     # get the data
     # TODO: test different degree sources
-    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    data <- get_expression_property_data(ppi_name, expr_name, "degree")
     data <- data[which(data$ExpressedCount != 0),]
 
     nTissues <- max(data$TotalCount)
@@ -377,7 +377,7 @@ test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
     mean_degree <- mean(data$Value)
 
     # probability of an edge to HK
-    data$HkEdgeProb <- 1 - dhyper(0, nHK, N - nHK, data$Value)
+    data$HkEdgeProb <- 1 - dhyper(0, nHK, (N-1) - nHK, data$Value)
 
     # use the hypergeometric distribution to calc the expectation for an
     # edge of a TS node to connect to HK
@@ -390,6 +390,7 @@ test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
     # still "correct"?
     #ex_edge_to_hk_exists <- 1 - dhyper(0, nHK, N - nHK, round(mean_degree))
     ex_edge_to_hk_exists <- mean(data$HkEdgeProb)
+    #ex_edge_to_hk_exists <- mean(data$HkEdgeProb[which(data$ExpressedCount <= threshold * nTissues)])
 
     # now multiply by the number of tissue specific nodes, in order to
     # get the expected number of TS having an edge to HK
@@ -424,6 +425,41 @@ test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
+test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
+{
+    # get the data
+    data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    data <- data[which(data$ExpressedCount != 0),]
+
+    nTissues <- max(data$TotalCount)
+
+    nTS <- sum(data$ExpressedCount <= threshold * nTissues)
+    nHK <- sum(data$ExpressedCount >= (1-threshold) * nTissues)
+    N <- length(data$ExpressedCount)
+    mean_degree <- mean(data$Value)
+
+    # probability of an edge from each node to a non-HK node
+    data$NonHkEdgeProb <- 1 - dhyper(0, N - nHK, nHK, data$Value)
+
+    # use the hypergeometric distribution to calc the expectation for an
+    # edge of a TS node to connect to HK
+    # thus we want the probability P(X >= 1) using the hyper geometric distr
+    # and:
+    # P(X >= 1) = 1 - P(X = 0)
+    #ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb)
+    ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb[which(data$ExpressedCount >= (1 - threshold)* nTissues)])
+
+    # now multiply by the number of tissue specific nodes, in order to
+    # get the expected number of TS having an edge to HK
+    ex_n_hk_nonhk_neighbor <- ex_edge_to_nonhk_exists * nHK
+
+    # WRONG!
+    # ex_n_ts_hk_neighbor <- mean_degree * (nHK*1.0/N) * nTS
+
+    # TODO: test this function
+    result <- ex_n_hk_nonhk_neighbor*100.0/nHK
+    return (list(value=result, label=paste(round(result, 1), "%")))
+}
 
 plot_hist_normalized_expr <- function(expr_name="gene_atlas")
 {
