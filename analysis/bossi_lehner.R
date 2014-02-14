@@ -362,11 +362,15 @@ test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
 }
 
 
-test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
+test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125, account_for_ts=FALSE)
 {
     # get the data
     # TODO: test different degree sources
-    data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    if (account_for_ts){
+        data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    } else {
+        data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    }
     data <- data[which(data$ExpressedCount != 0),]
 
     nTissues <- max(data$TotalCount)
@@ -377,20 +381,21 @@ test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
     mean_degree <- mean(data$Value)
 
     # probability of an edge to HK
-    data$HkEdgeProb <- 1 - dhyper(0, nHK, (N-1) - nHK, data$Value)
-
+    # ----------------------------
     # use the hypergeometric distribution to calc the expectation for an
     # edge of a TS node to connect to HK
     # thus we want the probability P(X >= 1) using the hyper geometric distr
     # and:
     # P(X >= 1) = 1 - P(X = 0)
-    # TODO: is there a way to use the degree distribution rather than
-    # the mean(degree)
-    # FIXME: we needed to round here (dhyper requires int), is the result
-    # still "correct"?
-    #ex_edge_to_hk_exists <- 1 - dhyper(0, nHK, N - nHK, round(mean_degree))
-    ex_edge_to_hk_exists <- mean(data$HkEdgeProb)
-    #ex_edge_to_hk_exists <- mean(data$HkEdgeProb[which(data$ExpressedCount <= threshold * nTissues)])
+    data$HkEdgeProb <- (1 - dhyper(0, nHK, (N-1) - nHK, data$Value))
+
+    if (account_for_ts) {
+        # take TS smaller degrees into account
+        ex_edge_to_hk_exists <- mean(data$HkEdgeProb[which(data$ExpressedCount <= threshold * nTissues)])
+    } else {
+        # average over all expectations
+        ex_edge_to_hk_exists <- mean(data$HkEdgeProb)
+    }
 
     # now multiply by the number of tissue specific nodes, in order to
     # get the expected number of TS having an edge to HK
@@ -425,10 +430,14 @@ test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
-test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
+test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125, account_for_hk=FALSE)
 {
     # get the data
-    data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    if (account_for_hk){
+        data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    } else {
+        data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    }
     data <- data[which(data$ExpressedCount != 0),]
 
     nTissues <- max(data$TotalCount)
@@ -438,23 +447,26 @@ test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
     N <- length(data$ExpressedCount)
     mean_degree <- mean(data$Value)
 
-    # probability of an edge from each node to a non-HK node
-    data$NonHkEdgeProb <- 1 - dhyper(0, N - nHK, nHK, data$Value)
-
+    # probability of an edge to non-HK
+    # ----------------------------
     # use the hypergeometric distribution to calc the expectation for an
-    # edge of a TS node to connect to HK
+    # edge of a HK node to connect to non-HK
     # thus we want the probability P(X >= 1) using the hyper geometric distr
     # and:
     # P(X >= 1) = 1 - P(X = 0)
-    #ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb)
-    ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb[which(data$ExpressedCount >= (1 - threshold)* nTissues)])
+    data$NonHkEdgeProb <- 1 - dhyper(0, N - nHK, nHK, data$Value)
+
+    if (account_for_hk) {
+        # take the degree distribution of HK proteins into account
+        ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb[which(data$ExpressedCount >= (1 - threshold) * nTissues)])
+    } else {
+        # average over all expectations
+        ex_edge_to_nonhk_exists <- mean(data$NonHkEdgeProb)
+    }
 
     # now multiply by the number of tissue specific nodes, in order to
     # get the expected number of TS having an edge to HK
     ex_n_hk_nonhk_neighbor <- ex_edge_to_nonhk_exists * nHK
-
-    # WRONG!
-    # ex_n_ts_hk_neighbor <- mean_degree * (nHK*1.0/N) * nTS
 
     # TODO: test this function
     result <- ex_n_hk_nonhk_neighbor*100.0/nHK
@@ -615,7 +627,54 @@ plot_all <- function(plot_func,...)
     #do.call(grid.arrange, c(figs,list(nrow=5,left="hello there"))
 }
 
+#######################################################################
+#                         random expectation                          #
+#######################################################################
 
+
+plot_expectation_corr <- function(data, threshold)
+{
+    # get linear regression model
+    l <- lm(expected_value~value, data=data)
+    lm_intercept <- l$coefficients[1]
+    lm_slope <- l$coefficients[2]
+
+    r <- cor(data$value, data$expected_value)
+
+    fig <- ggplot(data, aes(x = value, y = expected_value)) +
+        geom_point() +
+        coord_fixed(1, xlim=c(0,100), ylim=c(0,100)) +
+        geom_abline(intercept = 0, slope = 1, colour="grey60",lty="dotted") +
+        geom_abline(intercept = lm_intercept, slope = lm_slope, colour="grey40") +
+        annotate("text", x = 20, y = lm_intercept + 30*lm_slope, label=paste("r =",round(r,3)), size=3.5) +
+        xlab("Actual") +
+        ylab("Random expectation") +
+        labs(title=paste("Expected vs real interactions (t =", 100*threshold, "%)"))
+
+    return(fig)
+}
+
+bossi_2_expectation_corr <- function(threshold = 0.125, account_for_ts=FALSE)
+{
+    data_o <- fill_ppi_expr_dataframe(test_bossi_2, threshold)
+    data_e <- fill_ppi_expr_dataframe(test_bossi_2_expectation, threshold, account_for_ts)
+
+    data <- data_o
+    data$expected_value <- data_e$value
+
+    return(data)
+}
+
+bossi_3_expectation_corr <- function(threshold = 0.125, account_for_hk=FALSE)
+{
+    data_o <- fill_ppi_expr_dataframe(test_bossi_3, threshold)
+    data_e <- fill_ppi_expr_dataframe(test_bossi_3_expectation, threshold, account_for_hk)
+
+    data <- data_o
+    data$expected_value <- data_e$value
+
+    return(data)
+}
 
 #######################################################################
 #                 Generate actual plots (into PDF)                    #
@@ -699,6 +758,33 @@ bossi_2 <- function()
         dev.off()
     }
     # TODO? output single plot examples
+
+    # Random expectation:
+    for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
+    {
+        # random expectation percentage tiles
+        data <- fill_ppi_expr_dataframe(test_bossi_2_expectation, t)
+        p <- plot_tiles_for_ppi_expr(data)
+        p <- p + labs(title=paste("Expected TS that interact with HK (threshold:", t*100,"%)"))
+
+        pdf(paste("../figs/bossi2_all_expected_t",t*100,".pdf",sep=""), width=7, height=3)
+        print(p)
+        dev.off()
+
+        # random expectation correlation
+        data <- bossi_2_expectation_corr(t, FALSE)
+        p <- plot_expectation_corr(data, t)
+        pdf(paste("../figs/bossi2_expected_corr_t",t*100,".pdf",sep=""), width=4, height=4)
+        print(p)
+        dev.off()
+
+        # random expectation correlation accounting for TS degree distr
+        data <- bossi_2_expectation_corr(t, TRUE)
+        p <- plot_expectation_corr(data, t)
+        pdf(paste("../figs/bossi2_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=4, height=4)
+        print(p)
+        dev.off()
+    }
 }
 
 
@@ -711,6 +797,32 @@ bossi_3 <- function()
         p <- p + labs(title=paste("HK that interact with non HK (threshold:", t*100,"%)"))
 
         pdf(paste("../figs/bossi3_all_t",t*100,".pdf",sep=""), width=7, height=3)
+        print(p)
+        dev.off()
+    }
+
+    # Random expectation
+    for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
+    {
+        data <- fill_ppi_expr_dataframe(test_bossi_3_expectation, t)
+        p <- plot_tiles_for_ppi_expr(data)
+        p <- p + labs(title=paste("Expected HK that interact with non HK (threshold:", t*100,"%)"))
+
+        pdf(paste("../figs/bossi3_all_expected_t",t*100,".pdf",sep=""), width=7, height=3)
+        print(p)
+        dev.off()
+
+        # random expectation correlation
+        data <- bossi_3_expectation_corr(t, FALSE)
+        p <- plot_expectation_corr(data, t)
+        pdf(paste("../figs/bossi3_expected_corr_t",t*100,".pdf",sep=""), width=4, height=4)
+        print(p)
+        dev.off()
+
+        # random expectation correlation accounting for TS degree distr
+        data <- bossi_3_expectation_corr(t, TRUE)
+        p <- plot_expectation_corr(data, t)
+        pdf(paste("../figs/bossi3_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=4, height=4)
         print(p)
         dev.off()
     }
