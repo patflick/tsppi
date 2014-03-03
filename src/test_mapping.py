@@ -24,6 +24,17 @@ pappi.id_mapping.import_biomart_file(BIOMART_FILE, con)
 pappi.id_mapping.import_hgnc_file(HGNC_FILE, con)
 
 
+#####################
+#  GO terms import  #
+#####################
+
+# load GO terms
+import pappi.go_import
+
+# import GO associations
+pappi.go_import.import_go_association(GO_ASSOC_FILE, con)
+
+
 ##############################
 # import PPIs
 ##############################

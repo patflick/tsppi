@@ -16,6 +16,7 @@ mkdir -p $DOWNLOAD_FOLDER
 
 mkdir ppis
 mkdir expr
+mkdir go
 
 ####################
 #   PPI networks 
@@ -184,5 +185,44 @@ then
 else
     echo "Downloading RNA Seq Atlas file"
     curl -o expr/$RNASEQ_ATLAS_FILE $RNASEQ_ATLAS_URL
+fi
+
+
+
+#######################################################################
+#                  GO files (terms and associations                   #
+#######################################################################
+
+GO_OBO_URL=http://geneontology.org/ontology/obo_format_1_2/gene_ontology.1_2.obo
+GO_OBO_FILE=gene_ontology.1_2.obo
+
+# download obo dag
+if [ -f go/$GO_OBO_FILE]
+then
+    echo "Gene Ontology Dag file already exists, skipping download"
+else
+    echo "Downloading GO terms Dag"
+    curl -o go/$GO_OBO_FILE $GO_OBO_URL
+fi
+
+
+GO_ASSOC_URL=ftp://ftp.ebi.ac.uk/pub/databases/GO/goa/HUMAN/gene_association.goa_ref_human.gz
+GO_ASSOC_GZ=gene_association.goa_ref_human.gz
+GO_ASSOC_FILE=gene_association.goa_ref_human
+
+# download association
+if [ -f $DOWNLOAD_FOLDER/$GO_ASSOC_GZ]
+then
+    echo "GO gene association file already exists, skipping download"
+else
+    echo "Downloading GO gene associations"
+    curl -o $DOWNLOAD_FOLDER/$GO_ASSOC_GZ $GO_ASSOC_URL
+fi
+
+# unpack association
+if [ ! -f go/$GO_ASSOC_FILE ]
+then
+    gunzip $DOWNLOAD_FOLDER/$GO_ASSOC_GZ
+    mv $DOWNLOAD_FOLDER/$GO_ASSOC_FILE go/
 fi
 

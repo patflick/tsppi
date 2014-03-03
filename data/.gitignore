@@ -48,3 +48,9 @@ expr/subcellular_location.csv
 # RNA Seq Atlas data
 expr/RNA_Seq_Atlas_rev1.txt
 
+
+###########################
+#  GO terms associations  #
+###########################
+
+go/gene_association.goa_ref_human
