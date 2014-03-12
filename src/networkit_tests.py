@@ -4,6 +4,7 @@
 
 import os
 import re
+import itertools
 import pappi.id_mapping
 import pappi.sql
 from pappi.data_config import *
@@ -49,11 +50,64 @@ def load_go_associations(sql_conn, only_genes=None):
             assoc[gene] = set([go_term])
     return assoc
 
+def get_all_go_terms(assoc):
+    terms = set()
+    for ts in assoc.values():
+        terms = terms.union(ts)
+    return terms
+
+def get_SimRel(go_dag, term1, term2):
+    #print("terms: " + term1 + ", " + term2)
+    LCAs = go_dag.get_lca(term1, term2)
+    lca_IC = max(go_dag.IC[t] for t in LCAs)
+    lca_p = min(go_dag.p[t] for t in LCAs)
+    # TODO: check the formula (whether it is correct)
+    denom = go_dag.IC[term1] + go_dag.IC[term2]
+    if denom != 0:
+        return 2*lca_IC / denom * (1 - lca_p)
+    else:
+        return 0
+
+def get_bpscore(go_dag, assoc, gene1, gene2):
+    terms1 = assoc[gene1]
+    terms2 = assoc[gene2]
+    m = -1
+    score = 0.0
+    for t1 in terms1:
+        if not t1 in go_dag:
+            continue
+        for t2 in terms2:
+            if not t2 in go_dag:
+                continue
+            score = get_SimRel(go_dag, t1, t2)
+            score = max(m, score)
+    return score
+
+
+def avg_bp_score(go_dag, assoc, gene_set):
+    """
+    Calculates the average BPscore for a set of genes by first determining
+    the BPscore between all pairs of genes in the set and then averaging
+    over all BPscores.
+    """
+    genes = set()
+    for g in gene_set:
+        if g in assoc:
+            genes.add(g)
+    scores = []
+    for g1, g2 in itertools.combinations(genes, 2):
+        scores.append(get_bpscore(go_dag, assoc, g1, g2))
+    # get mean
+    avg = numpy.mean(scores)
+    return avg
+
+# load the GO Dag only once
+obo_dag = GODag(obo_file=GO_OBO_FILE, only_namespace="biological_process")
+
 
 def enrichment_scoring(cluster, all_genes, assoc):
     print("got cluster of size " + str(len(cluster)) + " and #genes: " + str(len(all_genes)))
     print("Performing gene enrichment study:")
-    obo_dag = GODag(obo_file=GO_OBO_FILE)
     population = set(all_genes)
     study = set(cluster)
     ge = GOEnrichmentStudy(population, assoc, obo_dag, alpha=0.05,
@@ -63,12 +117,21 @@ def enrichment_scoring(cluster, all_genes, assoc):
 
 def score_clusters(clusters, tsppi, all_genes, assoc):
     cluster_sizes = clusters.subsetSizeMap()
+    # TODO: do this globally
+    print("get prob of nodes")
+    obo_dag.term_probability(assoc)
+    print("get IC")
+    obo_dag.term_IC()
     # loop through all the clusters, get the associated gene names
     # and call the GO enrichment scoring of the cluster
     for cluster, size in cluster_sizes.items():
         cluster_nodes = clusters.getMembers(cluster)
         cl_node_names = [tsppi.getGeneName(x) for x in cluster_nodes]
-        enrichment_scoring(cl_node_names, all_genes, assoc)
+        #enrichment_scoring(cl_node_names, all_genes, assoc)
+        print("calc cluster of size: " + str(size))
+        score = avg_bp_score(obo_dag, assoc, cl_node_names)
+        print(str(cluster) + "\t" + str(size) + "\t" + str(avg_score))
+
 
 ##############################
 # get database connection
@@ -106,6 +169,11 @@ print("getting all genes")
 all_genes = tsppi.getAllGenes()
 print("loading go associations file")
 assoc = load_go_associations(con, all_genes)
+
+print("calc freq and probability")
+obo_dag.term_probability(assoc)
+print([obo_dag.freq[x.id] for x in obo_dag.roots])
+
 print("scoring clusters:")
 score_clusters(clusters, tsppi, all_genes, assoc)
 
