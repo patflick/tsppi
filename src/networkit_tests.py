@@ -5,6 +5,8 @@
 import os
 import re
 import itertools
+import numpy
+
 import pappi.id_mapping
 import pappi.sql
 from pappi.data_config import *
@@ -94,6 +96,16 @@ def avg_bp_score(go_dag, assoc, gene_set):
     for g in gene_set:
         if g in assoc:
             genes.add(g)
+
+    # get counts (merely for status print out)
+    total_terms = sum(len(assoc[g]) for g in genes)
+    unique_terms = set()
+    for g in genes:
+        unique_terms = unique_terms.union(assoc[g])
+    print("scoring " + str(len(genes)) + " (" + str(len(gene_set)) + ") genes"
+          " with " + str(total_terms) + " total and "
+          + str(len(unique_terms)) + " unique terms")
+
     scores = []
     for g1, g2 in itertools.combinations(genes, 2):
         scores.append(get_bpscore(go_dag, assoc, g1, g2))
