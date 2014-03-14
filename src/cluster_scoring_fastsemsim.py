@@ -75,8 +75,8 @@ def score_clusters(clusters, tsppi):
     for cluster, size in cluster_sizes.items():
         cluster_nodes = clusters.getMembers(cluster)
         cl_node_names = [tsppi.getGeneName(x) for x in cluster_nodes]
-        #avg_score = go_sim.avg_bp_score(cl_node_names)
-        avg_score = cluster_get_n_go(cl_node_names)
+        avg_score = go_sim.avg_bp_score(cl_node_names)
+        #avg_score = cluster_get_n_go(cl_node_names)
         print(str(cluster) + "\t" + str(size) + "\t" + str(avg_score))
 
 
@@ -94,13 +94,13 @@ print("loading tsppi graph")
 
 sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
-tsppi = sqlio.load_tsppi_graph("ccsb", "gene_atlas")
+tsppi = sqlio.load_tsppi_graph("string", "gene_atlas")
 g = tsppi.getGraph()
 
 clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.PLM2, ppi_networkit.CNM]
 
-#clusterer = ppi_networkit.PLM(gamma=1000.0)
-clusterer = ppi_networkit.PLP()
+clusterer = ppi_networkit.PLM(gamma=1000.0)
+#clusterer = ppi_networkit.PLP()
 clusters = clusterer.run(g)
 
 # TODO: do all this systematically, apparently lots of clusters are

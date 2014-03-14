@@ -34,8 +34,9 @@ def print_sorted_hist(hist):
 
 import sys
 sys.path.append("/home/patrick/dev/bio/goatools")
-from goatools.go_enrichment import GOEnrichmentStudy
-from goatools.obo_parser import GODag
+#from goatools.go_enrichment import GOEnrichmentStudy
+from pappi.go_fastdag import GODag
+from pappi.go_fastdag import name2id
 
 def load_go_associations(sql_conn, only_genes=None):
     cur = sql_conn.cursor()
@@ -60,15 +61,20 @@ def get_all_go_terms(assoc):
 
 def get_SimRel(go_dag, term1, term2):
     #print("terms: " + term1 + ", " + term2)
+    term1 = name2id(term1)
+    term2 = name2id(term2)
     LCAs = go_dag.get_lca(term1, term2)
     lca_IC = max(go_dag.IC[t] for t in LCAs)
     lca_p = min(go_dag.p[t] for t in LCAs)
     # TODO: check the formula (whether it is correct)
     denom = go_dag.IC[term1] + go_dag.IC[term2]
     if denom != 0:
-        return 2*lca_IC / denom * (1 - lca_p)
+        score = 2*lca_IC / denom * (1 - lca_p)
     else:
-        return 0
+        score = 0.0
+    if (score > 1.0 or score < 0.0):
+        raise Exception
+    return score
 
 def get_bpscore(go_dag, assoc, gene1, gene2):
     terms1 = assoc[gene1]
@@ -76,13 +82,15 @@ def get_bpscore(go_dag, assoc, gene1, gene2):
     m = -1
     score = 0.0
     for t1 in terms1:
-        if not t1 in go_dag:
+        if not go_dag.has_term(t1):
             continue
         for t2 in terms2:
-            if not t2 in go_dag:
+            if not go_dag.has_term(t2):
                 continue
             score = get_SimRel(go_dag, t1, t2)
             score = max(m, score)
+    if (score > 1.0 or score < 0.0):
+        raise Exception
     return score
 
 
@@ -142,7 +150,7 @@ def score_clusters(clusters, tsppi, all_genes, assoc):
         #enrichment_scoring(cl_node_names, all_genes, assoc)
         print("calc cluster of size: " + str(size))
         score = avg_bp_score(obo_dag, assoc, cl_node_names)
-        print(str(cluster) + "\t" + str(size) + "\t" + str(avg_score))
+        print(str(cluster) + "\t" + str(size) + "\t" + str(score))
 
 
 ##############################
@@ -184,7 +192,7 @@ assoc = load_go_associations(con, all_genes)
 
 print("calc freq and probability")
 obo_dag.term_probability(assoc)
-print([obo_dag.freq[x.id] for x in obo_dag.roots])
+print([obo_dag.freq[x] for x in obo_dag.roots])
 
 print("scoring clusters:")
 score_clusters(clusters, tsppi, all_genes, assoc)
