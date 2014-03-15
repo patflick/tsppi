@@ -372,10 +372,6 @@ class GODag:
         """
         Finds the lowest common ancestor for the two given terms.
         """
-        # search upwards level by level, till an overlap is found
-        term1 = self._to_id(term1)
-        term2 = self._to_id(term2)
-
         # get the difference of levels of the two terms
         # and define `left` as the term with biggest level (furthest from root)
         left = set()
@@ -418,6 +414,28 @@ class GODag:
 
         return LCAs
 
+    def get_lca_option2(self, term1, term2):
+        """
+        Finds the lowest common ancestors for the two given terms
+        """
+        # get common ancestors
+        t1_anc = self.ancestors[term1]
+        t1_anc.add(term1)
+        t2_anc = self.ancestors[term2]
+        t2_anc.add(term2)
+        common_ancestors = t1_anc.intersection(t2_anc)
+
+        # get the common ancestors with maximum level
+        max_level = max(self.level[t] for t in common_ancestors)
+
+        # get all ancestors with that level
+        LCAs = set(t for t in common_ancestors if self.level[t] == max_level)
+
+        return LCAs
+
+
+
     def get_lca(self, term1, term2):
         # TODO: try different versions of finding the LCA
-        return self.get_lca_option1(term1, term2)
+        #return self.get_lca_option1(term1, term2)
+        return self.get_lca_option2(term1, term2)
