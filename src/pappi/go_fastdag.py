@@ -328,7 +328,6 @@ class GODag:
             for t in terms:
                 t = self._to_id(t)
                 if not t in self.terms:
-                    print("term not found: " + str(t))
                     continue
                 anno[t] = anno[t] + 1
 

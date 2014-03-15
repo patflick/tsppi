@@ -38,6 +38,7 @@ sys.path.append("/home/patrick/dev/bio/goatools")
 from pappi.go_fastdag import GODag
 from pappi.go_fastdag import name2id
 
+
 def load_go_associations(sql_conn, only_genes=None):
     cur = sql_conn.cursor()
     cur.execute("SELECT * FROM go_gene_assoc")
@@ -45,6 +46,7 @@ def load_go_associations(sql_conn, only_genes=None):
     for row in cur.fetchall():
         gene = row[0]
         go_term = row[1]
+        go_term = name2id(go_term)
         if only_genes and gene not in only_genes:
             continue
         if gene in assoc:
@@ -53,16 +55,18 @@ def load_go_associations(sql_conn, only_genes=None):
             assoc[gene] = set([go_term])
     return assoc
 
+
 def get_all_go_terms(assoc):
     terms = set()
     for ts in assoc.values():
         terms = terms.union(ts)
     return terms
 
+
 def get_SimRel(go_dag, term1, term2):
     #print("terms: " + term1 + ", " + term2)
-    term1 = name2id(term1)
-    term2 = name2id(term2)
+    #term1 = name2id(term1)
+    #term2 = name2id(term2)
     LCAs = go_dag.get_lca(term1, term2)
     lca_IC = max(go_dag.IC[t] for t in LCAs)
     lca_p = min(go_dag.p[t] for t in LCAs)
@@ -76,11 +80,11 @@ def get_SimRel(go_dag, term1, term2):
         raise Exception
     return score
 
+
 def get_bpscore(go_dag, assoc, gene1, gene2):
     terms1 = assoc[gene1]
     terms2 = assoc[gene2]
-    m = -1
-    score = 0.0
+    scores = []
     for t1 in terms1:
         if not go_dag.has_term(t1):
             continue
@@ -88,7 +92,11 @@ def get_bpscore(go_dag, assoc, gene1, gene2):
             if not go_dag.has_term(t2):
                 continue
             score = get_SimRel(go_dag, t1, t2)
-            score = max(m, score)
+            scores.append(score)
+    if len(scores) == 0:
+        score = 0.0
+    else:
+        score = max(scores)
     if (score > 1.0 or score < 0.0):
         raise Exception
     return score
@@ -106,13 +114,13 @@ def avg_bp_score(go_dag, assoc, gene_set):
             genes.add(g)
 
     # get counts (merely for status print out)
-    total_terms = sum(len(assoc[g]) for g in genes)
-    unique_terms = set()
-    for g in genes:
-        unique_terms = unique_terms.union(assoc[g])
-    print("scoring " + str(len(genes)) + " (" + str(len(gene_set)) + ") genes"
-          " with " + str(total_terms) + " total and "
-          + str(len(unique_terms)) + " unique terms")
+    #total_terms = sum(len(assoc[g]) for g in genes)
+    #unique_terms = set()
+    #for g in genes:
+    #    unique_terms = unique_terms.union(assoc[g])
+    #print("scoring " + str(len(genes)) + " (" + str(len(gene_set)) + ") genes"
+    #      " with " + str(total_terms) + " total and "
+    #      + str(len(unique_terms)) + " unique terms")
 
     scores = []
     for g1, g2 in itertools.combinations(genes, 2):
@@ -121,17 +129,20 @@ def avg_bp_score(go_dag, assoc, gene_set):
     avg = numpy.mean(scores)
     return avg
 
+
 # load the GO Dag only once
 obo_dag = GODag(obo_file=GO_OBO_FILE, only_namespace="biological_process")
 
 
 def enrichment_scoring(cluster, all_genes, assoc):
-    print("got cluster of size " + str(len(cluster)) + " and #genes: " + str(len(all_genes)))
+    print("got cluster of size " + str(len(cluster)) + " and #genes: "
+          + str(len(all_genes)))
     print("Performing gene enrichment study:")
     population = set(all_genes)
     study = set(cluster)
     ge = GOEnrichmentStudy(population, assoc, obo_dag, alpha=0.05,
-            study=study, methods=["bonferroni", "sidak", "holm"])
+                           study=study,
+                           methods=["bonferroni", "sidak", "holm"])
     ge.print_summary(pval=0.05)
 
 
@@ -153,13 +164,12 @@ def score_clusters(clusters, tsppi, all_genes, assoc):
         print(str(cluster) + "\t" + str(size) + "\t" + str(score))
 
 
-##############################
-# get database connection
-##############################
+#############################
+#  get database connection  #
+#############################
 
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
-
 
 
 #################################
@@ -176,7 +186,8 @@ sqlio = ppi_networkit.SQLiteIO(DATABASE)
 tsppi = sqlio.load_tsppi_graph("string", "gene_atlas")
 g = tsppi.getGraph()
 
-clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.PLM2, ppi_networkit.CNM]
+clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.PLM2,
+              ppi_networkit.CNM]
 
 clusterer = ppi_networkit.PLM(gamma=1000.0)
 clusters = clusterer.run(g)
@@ -190,9 +201,18 @@ all_genes = tsppi.getAllGenes()
 print("loading go associations file")
 assoc = load_go_associations(con, all_genes)
 
+
 print("calc freq and probability")
 obo_dag.term_probability(assoc)
+obo_dag.term_IC()
 print([obo_dag.freq[x] for x in obo_dag.roots])
+
+
+gene1 = "EHF"
+gene2 = "EZH2"
+#gene2 = "HK3"
+print("BPscore:")
+print(get_bpscore(obo_dag, assoc, gene1, gene2))
 
 print("scoring clusters:")
 score_clusters(clusters, tsppi, all_genes, assoc)

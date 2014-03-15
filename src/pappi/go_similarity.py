@@ -82,8 +82,8 @@ class GoSimilarity:
     def pairwise_bp_score(self, gene1, gene2):
         # get similarity score for BP subtree
         score = self.semsim_class.SemSim(self.gene_assoc[gene1],
-                                         self.gene_assoc[gene2])
-                                        # root=self.BP_root)
+                                         self.gene_assoc[gene2],
+                                         root=self.BP_root)
         # in case one gene is not annotated with a BP term, None is returned
         # in that case the genes have 0 similarity
         if score is None:
