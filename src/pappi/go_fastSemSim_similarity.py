@@ -48,7 +48,7 @@ class GoFastSemSimSimilarity(GoSimilarity):
             print("loading gene associations")
         # TODO: might do this jointly with fastSemSim's associations
         # this load all HGNC gene -> GO term associations into memory
-        self.gene_assoc = self.load_go_associations(sql_conn)
+        self.assoc = self.load_go_associations(sql_conn)
 
         if verbose:
             print("creating BPscore object")
@@ -63,8 +63,8 @@ class GoFastSemSimSimilarity(GoSimilarity):
 
     def gene_pairwise_score(self, gene1, gene2):
         # get similarity score for BP subtree
-        score = self.semsim_class.SemSim(self.gene_assoc[gene1],
-                                         self.gene_assoc[gene2],
+        score = self.semsim_class.SemSim(self.assoc[gene1],
+                                         self.assoc[gene2],
                                          root=self.BP_root)
         # in case one gene is not annotated with a BP term, None is returned
         # in that case the genes have 0 similarity

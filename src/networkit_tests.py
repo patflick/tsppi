@@ -124,15 +124,9 @@ clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.PLM2,
               ppi_networkit.CNM]
 
 clusterer = ppi_networkit.PLM(gamma=1000.0)
-#clusters = clusterer.run(g)
+clusters = clusterer.run(g)
 
-# TODO: do all this systematically, apparently lots of clusters are
-# highly enriched
-# THUS TODO: figure out how to continue from here and how to test multiple
-#            clusterers
-print("getting all genes")
-all_genes = tsppi.getAllGenes()
-
+# import similarity scorer
 from pappi.go_fast_similarity import GoFastSimilarity
 from pappi.go_fastSemSim_similarity import GoFastSemSimSimilarity
 
@@ -149,7 +143,7 @@ print("BPscore:")
 print(simScorer.gene_pairwise_score(gene1, gene2))
 
 print("scoring clusters:")
-#score_clusters(clusters, tsppi, all_genes, assoc)
+score_clusters(clusters, tsppi, simScorer)
 
 
 ##############################

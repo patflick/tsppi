@@ -47,22 +47,21 @@ class GoFastSimilarity(GoSimilarity):
             raise Exception("SimRel score is invalid")
         return score
 
+    def term_pairwise_score(self, term1, term2):
+        return self._simRel_score(term1, term2)
+
 
     def gene_pairwise_score(self, gene1, gene2):
+        # get associated GO-Terms:
         terms1 = self.assoc[gene1]
         terms2 = self.assoc[gene2]
-        scores = []
 
-        # fixme: filter by set operations
-        for t1 in terms1:
-            if not self.go_dag.has_term(t1):
-                continue
-            for t2 in terms2:
-                if not self.go_dag.has_term(t2):
-                    continue
-                score = self._simRel_score(t1, t2)
-                scores.append(score)
+        # get scores:
+        scores = self.terms_sets_scores(terms1, terms2)
+
+        # get maximum score
         if len(scores) == 0:
+            # set to zero in case there are no scores
             score = 0.0
         else:
             score = max(scores)
