@@ -47,3 +47,7 @@ GENE_ATLAS_FILE = os.path.join(EXPR_DATA_FOLDER, 'U133AGNF1B.gcrma.avg.csv')
 # GO terms:
 GO_OBO_FILE = os.path.join(GO_DATA_FOLDER, 'gene_ontology.1_2.obo')
 GO_ASSOC_FILE = os.path.join(GO_DATA_FOLDER, 'gene_association.goa_ref_human')
+
+# GO scoring generated files
+GO_SCORE_FILE = os.path.join(GO_DATA_FOLDER, 'simrel_scoring.npy')
+GO_SCORE_MAP_FILE = os.path.join(GO_DATA_FOLDER, 'score_mapping.json')

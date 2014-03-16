@@ -20,6 +20,7 @@ class GoSimilarity:
         for row in cur.fetchall():
             gene = row[0]
             go_term = row[1]
+            go_term = self.name2id(go_term)
             if only_genes and gene not in only_genes:
                 continue
             if type(go_term) is str:

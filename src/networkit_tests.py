@@ -37,40 +37,6 @@ import sys
 sys.path.append("/home/patrick/dev/bio/goatools")
 #from goatools.go_enrichment import GOEnrichmentStudy
 
-def all_term_sim(go_dag, assoc):
-    # get the unique go_terms
-    terms = set()
-    for term_set in assoc.values():
-        terms = terms.union(term_set)
-    # intersect with terms in GO Dag
-    terms = terms.intersection(go_dag.terms)
-    
-    # number of terms
-    nTerms = len(terms)
-
-    # map terms to numberical range [0, nTerms-1]
-    i = 0
-    term_mapping = dict()
-    idx_2_term = list()
-    for t in terms:
-        term_mapping[t] = i
-        idx_2_term.append(t)
-        i = i + 1
-
-    print("Pre-calculating SemSim between all " + str(len(terms)) + " terms.")
-    sim_vals = numpy.zeros((nTerms, nTerms))
-    
-    # fill matrix in row major
-    for i in range(0, nTerms):
-        t1 = idx_2_term[i]
-        if i % 10 == 0:
-            print("filling row " + str(i) + "/" + str(nTerms))
-        for j in range(i+1, nTerms):
-            t2 = idx_2_term[j]
-            sim = get_SimRel(go_dag, t1, t2)
-            sim_vals[i][j] = sim
-            sim_vals[j][i] = sim
-    numpy.save("half-simrel", sim_vals)
 
 def enrichment_scoring(cluster, all_genes, assoc):
     print("got cluster of size " + str(len(cluster)) + " and #genes: "
@@ -92,9 +58,10 @@ def score_clusters(clusters, tsppi, sim_scorer):
         cluster_nodes = clusters.getMembers(cluster)
         cl_node_names = [tsppi.getGeneName(x) for x in cluster_nodes]
         #enrichment_scoring(cl_node_names, all_genes, assoc)
-        print("calc cluster of size: " + str(size))
+
+        # calculate the cluster score
         score = sim_scorer.gene_set_score(cl_node_names)
-        #score = avg_bp_score(obo_dag, assoc, cl_node_names)
+        # print it (TODO: do something with it (for statistics)
         print(str(cluster) + "\t" + str(size) + "\t" + str(score))
 
 
@@ -129,21 +96,49 @@ clusters = clusterer.run(g)
 # import similarity scorer
 from pappi.go_fast_similarity import GoFastSimilarity
 from pappi.go_fastSemSim_similarity import GoFastSemSimSimilarity
+from pappi.go_prebuf_similarity import GoPreBufSimilarity
 
-# import my GO scoring
-simScorer = GoFastSimilarity(GO_OBO_FILE, con, True)
+import time
+
+scorers = []
+init_time = []
+
+# initialize the scorers
+start = time.time()
+scorers.append(GoFastSimilarity(GO_OBO_FILE, con, True))
+init_time.append(time.time() - start)
+
+start = time.time()
+scorers.append(GoFastSemSimSimilarity(GO_OBO_FILE, GO_ASSOC_FILE, con))
+init_time.append(time.time() - start)
+
+start = time.time()
+scorers.append(GoPreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
+                                  GO_SCORE_MAP_FILE, con, True))
+init_time.append(time.time() - start)
 
 
-#all_term_sim(obo_dag, assoc)
 
-gene1 = "EHF"
-gene2 = "EZH2"
-#gene2 = "HK3"
-print("BPscore:")
-print(simScorer.gene_pairwise_score(gene1, gene2))
+#gene1 = "EHF"
+#gene2 = "EZH2"
+##gene2 = "HK3"
+#print("BPscore:")
+#print(simScorer.gene_pairwise_score(gene1, gene2))
+score_time = []
+for scorer in scorers:
+    start = time.time()
+    score_clusters(clusters, tsppi, scorer)
+    score_time.append(time.time() - start)
 
-print("scoring clusters:")
-score_clusters(clusters, tsppi, simScorer)
+
+print("scored by " + str(len(scorers)) + " scorers")
+for i in range(0, len(scorers)):
+    name = scorers[i].__class__.__name__
+    t_init = init_time[i]
+    t_score = score_time[i]
+    print(name + ": init = " + str(t_init) + "s, score = "
+      + str(t_score) + ", total = "
+      + str(t_init + t_score))
 
 
 ##############################
