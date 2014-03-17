@@ -57,4 +57,5 @@ go/gene_association.goa_ref_human
 go/gene_ontology.1_2.obo
 go/simrel_scoring.npy
 go/score_mapping.json
-
+go/bp_scoring.npy
+go/gene_bpscore_mapping.json
