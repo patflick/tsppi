@@ -51,3 +51,5 @@ GO_ASSOC_FILE = os.path.join(GO_DATA_FOLDER, 'gene_association.goa_ref_human')
 # GO scoring generated files
 GO_SCORE_FILE = os.path.join(GO_DATA_FOLDER, 'simrel_scoring.npy')
 GO_SCORE_MAP_FILE = os.path.join(GO_DATA_FOLDER, 'score_mapping.json')
+GO_BPSCORE_FILE = os.path.join(GO_DATA_FOLDER, 'bp_scoring.npy')
+GO_BPSCORE_MAP_FILE = os.path.join(GO_DATA_FOLDER, 'gene_bpscore_mapping.json')

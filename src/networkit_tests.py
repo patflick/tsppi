@@ -97,6 +97,7 @@ clusters = clusterer.run(g)
 from pappi.go_fast_similarity import GoFastSimilarity
 from pappi.go_fastSemSim_similarity import GoFastSemSimSimilarity
 from pappi.go_prebuf_similarity import GoPreBufSimilarity
+from pappi.go_gene_prebuf_similarity import GoGenePreBufSimilarity
 
 import time
 
@@ -117,7 +118,11 @@ scorers.append(GoPreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
                                   GO_SCORE_MAP_FILE, con, True))
 init_time.append(time.time() - start)
 
-
+start = time.time()
+scorers.append(GoGenePreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
+                                      GO_SCORE_MAP_FILE, GO_BPSCORE_FILE,
+                                      GO_BPSCORE_MAP_FILE, con, True))
+init_time.append(time.time() - start)
 
 #gene1 = "EHF"
 #gene2 = "EZH2"
@@ -137,8 +142,8 @@ for i in range(0, len(scorers)):
     t_init = init_time[i]
     t_score = score_time[i]
     print(name + ": init = " + str(t_init) + "s, score = "
-      + str(t_score) + ", total = "
-      + str(t_init + t_score))
+          + str(t_score) + ", total = "
+          + str(t_init + t_score))
 
 
 ##############################
