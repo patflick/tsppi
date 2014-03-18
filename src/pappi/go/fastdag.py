@@ -438,7 +438,7 @@ class GODag:
         #return self.get_lca_option1(term1, term2)
         return self.get_lca_option2(term1, term2)
 
-    def get_max_IC_anc(self, term1, term2);
+    def get_max_IC_anc(self, term1, term2):
         """
         Returns the common ancestor of term1 and term2 with the maximum
         information conent (IC) score.

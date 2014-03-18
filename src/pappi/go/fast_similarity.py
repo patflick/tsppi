@@ -32,7 +32,7 @@ class GoFastSimilarity(GoSimilarity):
 
     def _simRel_score(self, term1, term2):
         # get the MICA (common ancestor with maximal IC)
-        max_ic_anc = self.go_dag.max_ic_anc(term1, term2)
+        max_ic_anc = self.go_dag.get_max_IC_anc(term1, term2)
         # get IC and p() of that term
         lca_IC = self.go_dag.IC[max_ic_anc]
         lca_p = self.go_dag.p[max_ic_anc]
