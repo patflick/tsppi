@@ -9,8 +9,8 @@ import json
 # for checking if file exists
 import os.path
 
-from pappi.go_fastdag import GODag
-from pappi.go_fast_similarity import GoFastSimilarity
+from pappi.go.fastdag import GODag
+from pappi.go.fast_similarity import GoFastSimilarity
 
 
 class GoPreBufSimilarity(GoFastSimilarity):

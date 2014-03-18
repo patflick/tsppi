@@ -13,7 +13,7 @@ from fastSemSim.Ontology.AnnotationCorpus import AnnotationCorpus
 from fastSemSim.SemSim.SetSemSim import SetSemSim
 
 # import base class
-from pappi.go_similarity import GoSimilarity
+from pappi.go.similarity import GoSimilarity
 
 
 class GoFastSemSimSimilarity(GoSimilarity):

@@ -433,9 +433,29 @@ class GODag:
 
         return LCAs
 
-
-
     def get_lca(self, term1, term2):
         # TODO: try different versions of finding the LCA
         #return self.get_lca_option1(term1, term2)
         return self.get_lca_option2(term1, term2)
+
+    def get_max_IC_anc(self, term1, term2);
+        """
+        Returns the common ancestor of term1 and term2 with the maximum
+        information conent (IC) score.
+        """
+        # get common ancestors
+        t1_anc = self.ancestors[term1]
+        t1_anc.add(term1)
+        t2_anc = self.ancestors[term2]
+        t2_anc.add(term2)
+        common_ancestors = t1_anc.intersection(t2_anc)
+
+        # get the ancestor with maxium IC
+        ic = -1
+        max_anc = None
+        for t in common_ancestors:
+            if self.IC[t] > ic:
+                ic = self.IC[t]
+                max_anc = t
+        # return the max IC anc
+        return max_anc

@@ -4,8 +4,9 @@
 import itertools
 import numpy
 
-from pappi.go_fastdag import GODag
-from pappi.go_similarity import GoSimilarity
+from pappi.go.fastdag import GODag
+from pappi.go.similarity import GoSimilarity
+
 
 # TODO abstract interface into shared base class
 class GoFastSimilarity(GoSimilarity):
@@ -29,15 +30,13 @@ class GoFastSimilarity(GoSimilarity):
         self.go_dag.term_probability(self.assoc)
         self.go_dag.term_IC()
 
-
     def _simRel_score(self, term1, term2):
-        #print("terms: " + term1 + ", " + term2)
-        #term1 = name2id(term1)
-        #term2 = name2id(term2)
-        LCAs = self.go_dag.get_lca(term1, term2)
-        # FIXME: take p from actual max lca
-        lca_IC = max(self.go_dag.IC[t] for t in LCAs)
-        lca_p = min(self.go_dag.p[t] for t in LCAs)
+        # get the MICA (common ancestor with maximal IC)
+        max_ic_anc = self.go_dag.max_ic_anc(term1, term2)
+        # get IC and p() of that term
+        lca_IC = self.go_dag.IC[max_ic_anc]
+        lca_p = self.go_dag.p[max_ic_anc]
+        # calc the denominator for the score
         denom = self.go_dag.IC[term1] + self.go_dag.IC[term2]
         if denom != 0:
             score = 2*lca_IC / denom * (1 - lca_p)
@@ -49,7 +48,6 @@ class GoFastSimilarity(GoSimilarity):
 
     def term_pairwise_score(self, term1, term2):
         return self._simRel_score(term1, term2)
-
 
     def gene_pairwise_score(self, gene1, gene2):
         # get associated GO-Terms:
