@@ -1,0 +1,6 @@
+n	GoFastSemSimSimilarity	GoFastSemSimSimilarity	GoPreBufSimilarity	GoGenePreBufSimilarity
+10	0.0246	1.78	0.0025	6.87e-05
+100	2.56	0.747	0.3044	0.0037
+250	13.56	3.95	1.637	0.0236
+500	43.13	12.60	5.148	0.1108
+1000	161.5	47.17	18.70	0.3726
