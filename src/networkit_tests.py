@@ -60,9 +60,10 @@ def score_clusters(clusters, tsppi, sim_scorer):
         #enrichment_scoring(cl_node_names, all_genes, assoc)
 
         # calculate the cluster score
-        score = sim_scorer.gene_set_score(cl_node_names)
+        in_score, ext_score = sim_scorer.gene_cluster_score(cl_node_names)
         # print it (TODO: do something with it (for statistics)
-        print(str(cluster) + "\t" + str(size) + "\t" + str(score))
+        print(str(cluster) + "\t" + str(size) + "\t" + str(in_score)
+              + "\t" + str(ext_score))
 
 
 #############################
@@ -87,63 +88,31 @@ sqlio = ppi_networkit.SQLiteIO(DATABASE)
 tsppi = sqlio.load_tsppi_graph("string", "gene_atlas")
 g = tsppi.getGraph()
 
-clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.PLM2,
-              ppi_networkit.CNM]
+clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
 
 clusterer = ppi_networkit.PLM(gamma=1000.0)
 clusters = clusterer.run(g)
 
 # import similarity scorer
-from pappi.go_fast_similarity import GoFastSimilarity
-from pappi.go_fastSemSim_similarity import GoFastSemSimSimilarity
-from pappi.go_prebuf_similarity import GoPreBufSimilarity
-from pappi.go_gene_prebuf_similarity import GoGenePreBufSimilarity
+from pappi.go.gene_prebuf_similarity import GoGenePreBufSimilarity
 
 import time
 
-scorers = []
-init_time = []
-
-# initialize the scorers
 start = time.time()
-scorers.append(GoFastSimilarity(GO_OBO_FILE, con, True))
-init_time.append(time.time() - start)
+scorer = GoGenePreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
+                                GO_SCORE_MAP_FILE, GO_BPSCORE_FILE,
+                                GO_BPSCORE_MAP_FILE, con, True)
+init_time = time.time() - start
 
+
+print("scoring all clusters")
 start = time.time()
-scorers.append(GoFastSemSimSimilarity(GO_OBO_FILE, GO_ASSOC_FILE, con))
-init_time.append(time.time() - start)
+score_clusters(clusters, tsppi, scorer)
+score_time = time.time() - start
 
-start = time.time()
-scorers.append(GoPreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
-                                  GO_SCORE_MAP_FILE, con, True))
-init_time.append(time.time() - start)
-
-start = time.time()
-scorers.append(GoGenePreBufSimilarity(GO_OBO_FILE, GO_SCORE_FILE,
-                                      GO_SCORE_MAP_FILE, GO_BPSCORE_FILE,
-                                      GO_BPSCORE_MAP_FILE, con, True))
-init_time.append(time.time() - start)
-
-#gene1 = "EHF"
-#gene2 = "EZH2"
-##gene2 = "HK3"
-#print("BPscore:")
-#print(simScorer.gene_pairwise_score(gene1, gene2))
-score_time = []
-for scorer in scorers:
-    start = time.time()
-    score_clusters(clusters, tsppi, scorer)
-    score_time.append(time.time() - start)
-
-
-print("scored by " + str(len(scorers)) + " scorers")
-for i in range(0, len(scorers)):
-    name = scorers[i].__class__.__name__
-    t_init = init_time[i]
-    t_score = score_time[i]
-    print(name + ": init = " + str(t_init) + "s, score = "
-          + str(t_score) + ", total = "
-          + str(t_init + t_score))
+print("timing: init = " + str(init_time) + "s, score = "
+      + str(score_time) + ", total = "
+      + str(init_time + score_time))
 
 
 ##############################
