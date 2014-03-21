@@ -16,29 +16,33 @@ from pappi.go.fast_similarity import GoFastSimilarity
 
 class GoGenePreBufSimilarity(GoPreBufSimilarity):
     def __init__(self, obo_file, sim_file, term_mapping_file,
-                 gene_bpscore_file, gene_mapping_file, sql_conn, verbose=True):
+                 bpscore_file, bpscore_row_file, gene_mapping_file,
+                 sql_conn, verbose=True):
         # initialize the super class
         GoPreBufSimilarity.__init__(self, obo_file, sim_file,
                                     term_mapping_file, sql_conn, verbose)
 
         # load the data file or create and fill it
-        self._load_or_create_bpscore(gene_bpscore_file, gene_mapping_file)
+        self._load_or_create_bpscore(bpscore_file, bpscore_row_file,
+                                     gene_mapping_file)
 
-    def _load_or_create_bpscore(self, bpscore_file, mapping_file):
+    def _load_or_create_bpscore(self, bpscore_file, bpscore_row_file,
+                                mapping_file):
         # both files (score matrix and term mapping) need to exist,
         # otherwise both have to be created from scratch
-        if os.path.isfile(bpscore_file) and os.path.isfile(mapping_file):
+        if (os.path.isfile(bpscore_file) and os.path.isfile(mapping_file)
+                and os.path.isfile(bpscore_row_file)):
             # load matrix and mapping file
-            bp_score_arrays = numpy.load(bpscore_file)
-            score_matrx = bp_score_arrays['bp_score']
-            row_sums = bp_score_arrays['row_sums']
+            score_matrix = numpy.load(bpscore_file)
+            row_sums = numpy.load(bpscore_row_file)
             with open(mapping_file, 'r') as f:
                 mapping = json.loads(f.read())
         else:
             score_matrix, row_sums, mapping = self._fill_bpscore_matrix()
             # saving for future reuse:
             #  save matrix
-            numpy.savez(bpscore_file, bp_score=score_matrix, row_sums=row_sums)
+            numpy.save(bpscore_file, score_matrix)
+            numpy.save(bpscore_row_file, row_sums)
             with open(mapping_file, 'w') as f:
                 f.write(json.dumps(mapping))
 
@@ -79,7 +83,9 @@ class GoGenePreBufSimilarity(GoPreBufSimilarity):
         if verbose:
             print("Pre-calculating BPScore between all " + str(nGenes)
                   + " genes...")
-        bpscore_matrix = numpy.zeros((nGenes, nGenes))
+        # float32's precision is sufficient (this way all gene combinations
+        # can easily be kept in memory)
+        bpscore_matrix = numpy.zeros((nGenes, nGenes), dtype=numpy.float32)
 
         # fill matrix in row major
         for i in range(0, nGenes):
@@ -94,7 +100,7 @@ class GoGenePreBufSimilarity(GoPreBufSimilarity):
                 bpscore_matrix[j][i] = bpscore
 
         # fill rows sums
-        row_sums = numpy.zeros(nGenes)
+        row_sums = numpy.zeros(nGenes, dtype=numpy.float32)
         for i in range(0, nGenes):
             # set the row sum but ignore self
             row_sums[i] = numpy.sum(bpscore_matrix[i]) - bpscore_matrix[i][i]
@@ -119,12 +125,17 @@ class GoGenePreBufSimilarity(GoPreBufSimilarity):
         one gene is in this set. The set of all possible genes is take to be
         the same set as the genes covered by the bpscore matrix.
         """
+        if not type(genes) is set:
+            genes = set(genes)
         # only score those genes that are mapped
         genes = genes.intersection(self.mapped_genes)
 
         # size of the cluster
         n = len(self.mapped_genes)
         k = len(genes)
+
+        if k <= 1:
+            return (0.0, 0.0)
 
         # get all the ids -> only map each gene to an integer once
         # use in sorted order for more cache efficient access in the
@@ -151,10 +162,3 @@ class GoGenePreBufSimilarity(GoPreBufSimilarity):
         avg_in_cluster = in_cluster_sum / (k*(k-1))
         avg_ext_cluster = ext_cluster_sum / (k*(n-k))
         return (avg_in_cluster, avg_ext_cluster)
-
-
-
-
-                
-
-        pass
