@@ -170,6 +170,11 @@ def run_ts_clustering(tsppi, clusterer, scorer):
         ts_graph = tsppi.getTsGraph(t)
         run_and_score_clustering(ts_graph, clusterer, scorer)
 
+def run_edgescore_clustering(tsppi, clusterer, scorer):
+    print("Scoring on EdgeScore graph (TS/Global hybrid via edge weighting)")
+    g = tsppi.getEdgeScoreGraph()
+    run_and_score_clustering(g, clusterer, scorer)
+
 
 # import similarity scorer
 from pappi.go.gene_prebuf_similarity import GoGenePreBufSimilarity
@@ -202,7 +207,8 @@ g = tsppi.getGraph()
 clusterer = ppi_networkit.PLM(gamma=100.0)
 scorer = get_scorer(con)
 #run_multiple_clusterers(g, scorer)
-run_ts_clustering(tsppi, clusterer, scorer)
+#run_ts_clustering(tsppi, clusterer, scorer)
+run_edgescore_clustering(tsppi, clusterer, scorer)
 
 
 ##############################
