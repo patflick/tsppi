@@ -473,29 +473,6 @@ test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
-plot_hist_normalized_expr <- function(expr_name="gene_atlas")
-{
-
-    # load the ts/hk summary data from the database
-    source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
-
-    expr_normalized_table <- paste(expr_name, "normalized", sep="_")
-    query <- paste("SELECT * FROM ", expr_normalized_table)
-
-    data <- dbGetQuery(con, query)
-    x <- data$ExpressionValue
-    print(paste(expr_name, " median:", quantile(x)))
-    #x <- x[which(x <= 5)]
-    #hist(x, xlab=expr_name)
-    #plot(ecdf(x), main=expr_name)
-    fig <- ggplot(data, aes(x = ExpressionValue))
-    fig <- fig + stat_ecdf()
-    fig <- fig + coord_cartesian(xlim = c(-0.5, quantile(x,c(0.90))[1]))
-    fig <- fig + labs(title=expr_name)
-    return(fig)
-}
-
 
 
 
