@@ -149,25 +149,28 @@ class GOTerm:
 
 class GODag:
 
-    # a set of integer IDs of all GO terms present in the DAG
-    terms = set()
-    # a dict of ID->GoTerm node (full struct)
-    nodes = dict()
-    # a dict of ID->level
-    level = dict()
-    # a dict of ID->[set of ID]
-    parents = dict()
-    # a dict of ID->[set of ID]
-    children = dict()
-    # all ancestors
-    ancestors = dict()
-    # all decendents
-    decendents = dict()
-    # a dict of ID-> Information content
-    IC = dict()
-
     def __init__(self, obo_file="gene_ontology.1_2.obo", only_namespace=None, load_obsolete=False):
-        self.load_obo_file(obo_file, only_namespace)
+        # initialize all members
+
+        # a set of integer IDs of all GO terms present in the DAG
+        self.terms = set()
+        # a dict of ID->GoTerm node (full struct)
+        self.nodes = dict()
+        # a dict of ID->level
+        self.level = dict()
+        # a dict of ID->[set of ID]
+        self.parents = dict()
+        # a dict of ID->[set of ID]
+        self.children = dict()
+        # all ancestors
+        self.ancestors = dict()
+        # all decendents
+        self.decendents = dict()
+        # a dict of ID-> Information content
+        self.IC = dict()
+
+        # load the file
+        self.load_obo_file(obo_file, only_namespace, load_obsolete)
 
     def load_obo_file(self, obo_file, only_namespace=None, load_obsolete=False):
 
@@ -176,7 +179,7 @@ class GODag:
         # parse all file entries:
         for rec in obo_reader:
             # filter by namespace (in case that option is set)
-            if not only_namespace is None and rec.namespace != only_namespace:
+            if (not only_namespace is None) and rec.namespace != only_namespace:
                 continue
             # filter out obsolete (done by default)
             if not load_obsolete and rec.is_obsolete:

@@ -106,7 +106,9 @@ def score_clusters(clusters, tsppi, sim_scorer):
         # print it (TODO: do something with it (for statistics)
         #print(str(cluster) + "\t" + str(size) + "\t" + str(in_score)
         #      + "\t" + str(ext_score) + "\t" + str(in_score - ext_score))
-    return sum(score for size, score in scores)/len(scores)
+    #return numpy.percentile([score for size, score in scores], 75)
+    #return sum(score for size, score in scores)/len(scores)
+    return scores
 
 
 #############################
@@ -121,7 +123,7 @@ con = pappi.sql.get_conn(DATABASE)
 #  Import PPI NetworKit module  #
 #################################
 
-def run_and_score_clustering(graph, clusterer, scorer):
+def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=None):
     # run clustering
     start = time.time()
     clusters = clusterer.run(g)
@@ -135,8 +137,14 @@ def run_and_score_clustering(graph, clusterer, scorer):
 
     # run scoring
     start = time.time()
-    avg_score = score_clusters(clusters, tsppi, scorer)
+    scores = score_clusters(clusters, tsppi, scorer)
     t_score = time.time() - start
+
+    avg_score = numpy.mean([score for size, score in scores])
+
+    if not writer is None:
+        for size, score in scores:
+            writer.writerow([category, size, score])
 
     # print some scoring results:
     print("avg score: " + str(avg_score) + ", time clustering: "
@@ -156,10 +164,10 @@ def run_multiple_clusterers(graph, scorer):
     run_and_score_clustering(graph, clusterer, scorer)
 
 
-def run_ts_clustering(tsppi, clusterer, scorer):
+def run_ts_clustering(tsppi, clusterer, scorer, writer=None):
     print("GLOBAL GRAPH:")
     g = tsppi.getGraph()
-    run_and_score_clustering(g, clusterer, scorer)
+    run_and_score_clustering(g, clusterer, scorer, writer, "Global")
 
     print("TS GRAPHs")
     nTissues = tsppi.getNumberOfTissues()
@@ -168,12 +176,17 @@ def run_ts_clustering(tsppi, clusterer, scorer):
         tissue_name = tsppi.getTissueName(t)
         print("Tissue: " + tissue_name)
         ts_graph = tsppi.getTsGraph(t)
-        run_and_score_clustering(ts_graph, clusterer, scorer)
+        run_and_score_clustering(ts_graph, clusterer, scorer, writer, tissue_name)
 
-def run_edgescore_clustering(tsppi, clusterer, scorer):
+def run_edgescore_clustering(tsppi, clusterer, scorer, writer=None):
     print("Scoring on EdgeScore graph (TS/Global hybrid via edge weighting)")
     g = tsppi.getEdgeScoreGraph()
-    run_and_score_clustering(g, clusterer, scorer)
+    run_and_score_clustering(g, clusterer, scorer, writer, "EdgeScoring")
+
+def run_global_clustering(tsppi, clusterer, scorer, writer=None):
+    print("scoring on global graph:")
+    g = tsppi.getGraph()
+    run_and_score_clustering(g, clusterer, scorer, writer, "GLOBAL")
 
 
 # import similarity scorer
@@ -199,16 +212,29 @@ import ppi_networkit
 ppi_networkit.setLogLevel("ERROR")
 sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
-tsppi = sqlio.load_tsppi_graph("string", "gene_atlas")
+#ppi = "string"
+#expr = "gene_atlas"
+ppi = "ccsb"
+ppi = "bossi"
+expr = "hpa"
+expr = "hpa_all"
+tsppi = sqlio.load_tsppi_graph(ppi, expr)
 g = tsppi.getGraph()
 
 #clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
 
-clusterer = ppi_networkit.PLM(gamma=100.0)
+gamma = 1
+clusterer = ppi_networkit.PLM(gamma=gamma)
 scorer = get_scorer(con)
 #run_multiple_clusterers(g, scorer)
-#run_ts_clustering(tsppi, clusterer, scorer)
-run_edgescore_clustering(tsppi, clusterer, scorer)
+import csv
+filename = "PLM_g_" + str(gamma) + "_" + ppi + "_" + expr + ".csv"
+with open(filename, 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(["PPI","ClusterSize", "ClusterScore"])
+    run_global_clustering(tsppi, clusterer, scorer, writer)
+    run_ts_clustering(tsppi, clusterer, scorer, writer)
+    run_edgescore_clustering(tsppi, clusterer, scorer, writer)
 
 
 ##############################
