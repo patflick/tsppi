@@ -36,6 +36,7 @@ plot_hist_normalized_expr <- function(expr_name="gene_atlas")
 }
 
 
+# gets the discrete cds of the data
 inverse_cdf <- function(data)
 {
     # first sort the data and get the unique values
@@ -67,6 +68,8 @@ inverse_cdf <- function(data)
     return (df)
 }
 
+
+
 get_thres_freq <- function(df, t)
 {
     n <- length(df$val)
@@ -77,7 +80,7 @@ get_thres_freq <- function(df, t)
     {
         # integer divide
         mid <- (right + left)%/%2
-        if (df$val[mid] <= t)
+        if (df$val[mid] < t)
         {
             # bottom half
             left <- mid
@@ -134,7 +137,7 @@ plot_expr_inv_cdf <- function(expr_name="gene_atlas", threshold = 100, t_lbl=thr
     fig <- fig + annotate("segment", y = thres_freq, yend = thres_freq, x = min_y, xend = max_y, colour = "blue", lty="dotted")
     fig <- fig + annotate("segment", y = 0, yend = 1.0, x = threshold, xend = log(threshold,base=10), colour = "blue",lty="dotted")
     # text annotation
-    fig <- fig + annotate("text", y=0, x=threshold, label=paste("t <=",t_lbl), vjust=0, size=4)
+    fig <- fig + annotate("text", y=0, x=threshold, label=paste("t <",t_lbl), vjust=0, size=4)
     #fig <- fig + annotate("text", x=0, y=threshold, label=paste("t >=",threshold), hjust=0, vjust=-0.2, size=4)
 
     # text annotation to freq
@@ -147,11 +150,12 @@ plot_expr_inv_cdf <- function(expr_name="gene_atlas", threshold = 100, t_lbl=thr
 
 
 # plots the percentage of expressed classifications linearly on the x-axis
-plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 100, t_lbl=threshold)
+# TODO: this should be called ` plot HPA expression diagram`
+plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 1, t_lbl=threshold)
 {
     # get the data
     data <- get_expr_values(expr_name)
-
+    
     #y <- unique(data$ExpressionValue)
     #
     #inv_cdf <- function(val)
@@ -159,7 +163,9 @@ plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 100, t_lbl=thre
     #    return (sum(data$ExpressionValue <= val) / length(data$ExpressionValue))
     #}
 
+    # insert a (0,0) column at the beginning
     cdf_data <- inverse_cdf(data$ExpressionValue)
+    #cdf_data <- rbind(cdf_data, c(0,0))
 
     # get the freq of the cdf at the threshold position
     thres_freq <- get_thres_freq(cdf_data, threshold)
@@ -179,7 +185,7 @@ plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 100, t_lbl=thre
     #df <- cbind(x, y)
     fig <- ggplot(cdf_data, aes(x = val, y = freq))
     fig <- fig + geom_line()
-    #fig <- fig + coord_cartesian(xlim = c(-0.5, quantile(x,c(0.90))[1]))
+    fig <- fig + coord_cartesian(xlim = c(-0.5, max_y))
     fig <- fig + ylab("Cumulative Frequency")
     fig <- fig + xlab("Expression Value")
     #fig <- fig + labs(title=expr_name)
@@ -189,7 +195,7 @@ plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 100, t_lbl=thre
     fig <- fig + annotate("segment", y = thres_freq, yend = thres_freq, x = min_y, xend = max_y, colour = "blue", lty="dotted")
     fig <- fig + annotate("segment", y = 0, yend = 1.0, x = threshold, xend = threshold, colour = "blue",lty="dotted")
     # text annotation
-    fig <- fig + annotate("text", y=0, x=threshold, label=paste("t <=",t_lbl), vjust=0, size=4)
+    fig <- fig + annotate("text", y=0, x=threshold, label=paste("t <",t_lbl), vjust=0, size=4)
     #fig <- fig + annotate("text", x=0, y=threshold, label=paste("t >=",threshold), hjust=0, vjust=-0.2, size=4)
 
     # text annotation to freq
