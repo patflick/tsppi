@@ -1,6 +1,85 @@
 library(ggplot2)
 library(gridExtra) # for `grid.arrange`
 
+get_exprs <- function()
+{
+    exprs <- c("emtab", "gene_atlas", "rnaseq_atlas", "hpa", "hpa_all")
+    return(exprs)
+}
+
+to_short_expr_name <- function(s)
+{
+    if (s == "emtab")
+    {
+        return ("Body Map")
+    }
+    else if (s == "gene_atlas")
+    {
+        return ("Gene Atlas")
+    }
+    else if (s == "rnaseq_atlas")
+    {
+        return ("RNAseq Atlas")
+    }
+    else if (s == "hpa")
+    {
+        return ("HPA")
+    }
+    else if (s == "hpa_all")
+    {
+        return ("HPA All")
+    }
+    else
+    {
+        return ("ERROR ERROR ERROR FIXME")
+    }
+}
+
+to_expr_name <- function(s)
+{
+    if (s == "emtab")
+    {
+        return ("Illumina Body Map 2.0")
+    }
+    else if (s == "gene_atlas")
+    {
+        return ("Gene Atlas")
+    }
+    else if (s == "rnaseq_atlas")
+    {
+        return ("RNAseq Atlas")
+    }
+    else if (s == "hpa")
+    {
+        return ("Human Protein Atlas")
+    }
+    else if (s == "hpa_all")
+    {
+        return ("Human Protein Atlas all")
+    }
+    else
+    {
+        return ("ERROR ERROR ERROR FIXME")
+    }
+}
+
+get_all_expr_size_stats <- function()
+{
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    for (e in get_exprs())
+    {
+        query <- paste("SELECT COUNT(DISTINCT Gene), COUNT(DISTINCT Type) FROM ", e)
+        data <- dbGetQuery(con, query)
+
+        nGenes <- data[1,1]
+        nTypes <- data[1,2]
+
+        cat(sprintf("%s    & %i    &     %i  \\\\\n", to_expr_name(e), nGenes, nTypes))
+    }
+}
+
 # get the expression values table for the given expression data set
 get_expr_values <- function(expr_name="gene_atlas")
 {
@@ -207,40 +286,46 @@ plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 1, t_lbl=thresh
 }
 
 
-figs <- list()
 
-# TODO: HPA
-p <- plot_expr_inv_cdf_nolog("hpa", 1.0)
-p <- p + labs(title="Human Protein Atlas")
-figs <- c(figs, list(p))
+save_plots_expr_value_hist <- function()
+{
+    figs <- list()
 
-# GeneAtlas
-p <- plot_expr_inv_cdf("gene_atlas", 100.0, "100")
-p <- p + labs(title="Gene Atlas")
-figs <- c(figs, list(p))
+    # TODO: HPA
+    p <- plot_expr_inv_cdf_nolog("hpa", 1.0)
+    p <- p + labs(title="Human Protein Atlas")
+    figs <- c(figs, list(p))
 
-# Illumina body map:
-p <- plot_expr_inv_cdf("emtab", 1.0, "1.0")
-p <- p + labs(title="Illumina Body Map 2.0")
-figs <- c(figs, list(p))
+    # GeneAtlas
+    p <- plot_expr_inv_cdf("gene_atlas", 100.0, "100")
+    p <- p + labs(title="Gene Atlas")
+    figs <- c(figs, list(p))
 
-# RNAseq atlas
-p <- plot_expr_inv_cdf("rnaseq_atlas", 1.0, "1.0")
-p <- p + labs(title="RNAseq Atlas")
-figs <- c(figs, list(p))
+    # Illumina body map:
+    p <- plot_expr_inv_cdf("emtab", 1.0, "1.0")
+    p <- p + labs(title="Illumina Body Map 2.0")
+    figs <- c(figs, list(p))
+
+    # RNAseq atlas
+    p <- plot_expr_inv_cdf("rnaseq_atlas", 1.0, "1.0")
+    p <- p + labs(title="RNAseq Atlas")
+    figs <- c(figs, list(p))
 
 
-par(mfrow=c(2,2))
+    par(mfrow=c(2,2))
 
 
-#all_figs <- do.call(grid.arrange, figs)
-all_figs <- do.call(arrangeGrob, figs)
+    #all_figs <- do.call(grid.arrange, figs)
+    all_figs <- do.call(arrangeGrob, figs)
 
-# actually plot:
+    # actually plot:
 
-pdf("../figs/expression_thresholding.pdf", width=6, height=4.8)
-#print(all_figs)
-print(all_figs)
-dev.off()
+    pdf("../figs/expression_thresholding.pdf", width=6, height=4.8)
+    #print(all_figs)
+    print(all_figs)
+    dev.off()
+}
 #plot(all_figs)
+
+
 

@@ -248,13 +248,21 @@ def map_identifier(from_table, from_cols, from_id, to_table, to_id,
             print("Mapping same identifiers (" + from_id + " -> " + to_id
                   + "), " + "thus just copy table")
 
-        sql.new_table_from_query(to_table, 'SELECT * FROM ' + from_table,
+        if not sql.table_exists(from_id + "_all_ids", sql_conn):
+            create_all_id_table(from_id, sql_conn)
+
+        # TODO: only genes that are in the mapping table
+        allids = "(SELECT " + from_id + " FROM " + from_id + "_all_ids)"
+        where = "WHERE " + " AND ".join(c + " in " + allids for c in from_cols)
+        sql.new_table_from_query(to_table,
+                                 'SELECT * FROM ' + from_table + " " + where,
                                  sql_conn)
+
+        #sql.new_table_from_query(to_table, 'SELECT * FROM ' + from_table,
+        #                         sql_conn)
 
         # get some stats
         if verbose:
-            if not sql.table_exists(from_id + "_all_ids", sql_conn):
-                create_all_id_table(from_id, sql_conn)
             # set the mapping table to this, so that the mapping
             # stats are also generated for this mapping
             mapping_table = from_id + "_all_ids"
