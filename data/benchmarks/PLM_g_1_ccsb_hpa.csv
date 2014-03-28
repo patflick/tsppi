@@ -1,0 +1,928 @@
+PPI,ClusterSize,ClusterScore
+GLOBAL,50,0.0689177353335
+GLOBAL,29,0.0344450970388
+GLOBAL,23,0.0775349335723
+GLOBAL,20,0.0692824284476
+GLOBAL,16,0.193159355133
+GLOBAL,25,0.0838407938738
+GLOBAL,25,0.0422378115536
+GLOBAL,19,0.141937959974
+GLOBAL,29,0.0627330287482
+GLOBAL,16,0.12472840842
+GLOBAL,5,0.449714525282
+GLOBAL,28,0.0311140208174
+GLOBAL,6,0.146801189139
+GLOBAL,12,0.319284364272
+GLOBAL,6,0.287344478871
+Global,58,0.0667829807086
+Global,29,0.0344450970388
+Global,23,0.0775349335723
+Global,12,0.0543875136426
+Global,16,0.193159355133
+Global,31,0.0900702045319
+Global,25,0.0422378115536
+Global,21,0.148928356
+Global,34,0.0744877721375
+Global,5,0.449714525282
+Global,29,0.0345803681646
+Global,8,0.183991934291
+Global,12,0.319284364272
+Global,6,0.287344478871
+adrenal gland - glandular cells,60,0.0589366695465
+adrenal gland - glandular cells,29,0.0344450970388
+adrenal gland - glandular cells,23,0.0775349335723
+adrenal gland - glandular cells,13,0.0574566466635
+adrenal gland - glandular cells,16,0.193159355133
+adrenal gland - glandular cells,30,0.0958827547511
+adrenal gland - glandular cells,27,0.0566466864739
+adrenal gland - glandular cells,25,0.162562878306
+adrenal gland - glandular cells,27,0.0193487950035
+adrenal gland - glandular cells,36,0.0778621619692
+adrenal gland - glandular cells,5,0.449714525282
+adrenal gland - glandular cells,12,0.319284364272
+adrenal gland - glandular cells,6,0.287344478871
+appendix - glandular cells,58,0.0667829807086
+appendix - glandular cells,29,0.0344450970388
+appendix - glandular cells,23,0.0775349335723
+appendix - glandular cells,12,0.0543875136426
+appendix - glandular cells,16,0.193159355133
+appendix - glandular cells,31,0.0900702045319
+appendix - glandular cells,25,0.0422378115536
+appendix - glandular cells,21,0.148928356
+appendix - glandular cells,34,0.0744877721375
+appendix - glandular cells,5,0.449714525282
+appendix - glandular cells,29,0.0345803681646
+appendix - glandular cells,8,0.183991934291
+appendix - glandular cells,12,0.319284364272
+appendix - glandular cells,6,0.287344478871
+appendix - lymphoid tissue,58,0.0667829807086
+appendix - lymphoid tissue,29,0.0344450970388
+appendix - lymphoid tissue,23,0.0775349335723
+appendix - lymphoid tissue,12,0.0543875136426
+appendix - lymphoid tissue,16,0.193159355133
+appendix - lymphoid tissue,31,0.0900702045319
+appendix - lymphoid tissue,25,0.0422378115536
+appendix - lymphoid tissue,21,0.148928356
+appendix - lymphoid tissue,34,0.0744877721375
+appendix - lymphoid tissue,5,0.449714525282
+appendix - lymphoid tissue,29,0.0345803681646
+appendix - lymphoid tissue,8,0.183991934291
+appendix - lymphoid tissue,12,0.319284364272
+appendix - lymphoid tissue,6,0.287344478871
+bone marrow - hematopoietic cells,60,0.0589366695465
+bone marrow - hematopoietic cells,29,0.0344450970388
+bone marrow - hematopoietic cells,23,0.0775349335723
+bone marrow - hematopoietic cells,13,0.0574566466635
+bone marrow - hematopoietic cells,16,0.193159355133
+bone marrow - hematopoietic cells,30,0.0958827547511
+bone marrow - hematopoietic cells,27,0.0566466864739
+bone marrow - hematopoietic cells,25,0.162562878306
+bone marrow - hematopoietic cells,27,0.0193487950035
+bone marrow - hematopoietic cells,36,0.0778621619692
+bone marrow - hematopoietic cells,5,0.449714525282
+bone marrow - hematopoietic cells,12,0.319284364272
+bone marrow - hematopoietic cells,6,0.287344478871
+breast - adipocytes,60,0.0589366695465
+breast - adipocytes,29,0.0344450970388
+breast - adipocytes,23,0.0775349335723
+breast - adipocytes,13,0.0574566466635
+breast - adipocytes,16,0.193159355133
+breast - adipocytes,30,0.0958827547511
+breast - adipocytes,27,0.0566466864739
+breast - adipocytes,25,0.162562878306
+breast - adipocytes,27,0.0193487950035
+breast - adipocytes,36,0.0778621619692
+breast - adipocytes,5,0.449714525282
+breast - adipocytes,12,0.319284364272
+breast - adipocytes,6,0.287344478871
+breast - glandular cells,58,0.0667829807086
+breast - glandular cells,29,0.0344450970388
+breast - glandular cells,22,0.111509826775
+breast - glandular cells,12,0.0543875136426
+breast - glandular cells,16,0.193159355133
+breast - glandular cells,14,0.133603861454
+breast - glandular cells,20,0.136728541078
+breast - glandular cells,23,0.0137977817371
+breast - glandular cells,24,0.17849658796
+breast - glandular cells,34,0.0744877721375
+breast - glandular cells,5,0.449714525282
+breast - glandular cells,29,0.0345803681646
+breast - glandular cells,17,-0.00952812797912
+breast - glandular cells,6,0.287344478871
+breast - myoepithelial cells,60,0.0589366695465
+breast - myoepithelial cells,29,0.0344450970388
+breast - myoepithelial cells,23,0.0775349335723
+breast - myoepithelial cells,13,0.0574566466635
+breast - myoepithelial cells,16,0.193159355133
+breast - myoepithelial cells,30,0.0958827547511
+breast - myoepithelial cells,27,0.0566466864739
+breast - myoepithelial cells,25,0.162562878306
+breast - myoepithelial cells,27,0.0193487950035
+breast - myoepithelial cells,36,0.0778621619692
+breast - myoepithelial cells,5,0.449714525282
+breast - myoepithelial cells,12,0.319284364272
+breast - myoepithelial cells,6,0.287344478871
+bronchus - respiratory epithelial cells,60,0.0589366695465
+bronchus - respiratory epithelial cells,29,0.0344450970388
+bronchus - respiratory epithelial cells,23,0.0775349335723
+bronchus - respiratory epithelial cells,13,0.0574566466635
+bronchus - respiratory epithelial cells,16,0.193159355133
+bronchus - respiratory epithelial cells,30,0.0958827547511
+bronchus - respiratory epithelial cells,27,0.0566466864739
+bronchus - respiratory epithelial cells,25,0.162562878306
+bronchus - respiratory epithelial cells,27,0.0193487950035
+bronchus - respiratory epithelial cells,36,0.0778621619692
+bronchus - respiratory epithelial cells,5,0.449714525282
+bronchus - respiratory epithelial cells,12,0.319284364272
+bronchus - respiratory epithelial cells,6,0.287344478871
+cerebellum - Purkinje cells,60,0.0589366695465
+cerebellum - Purkinje cells,29,0.0344450970388
+cerebellum - Purkinje cells,23,0.0775349335723
+cerebellum - Purkinje cells,13,0.0574566466635
+cerebellum - Purkinje cells,16,0.193159355133
+cerebellum - Purkinje cells,30,0.0958827547511
+cerebellum - Purkinje cells,27,0.0566466864739
+cerebellum - Purkinje cells,25,0.162562878306
+cerebellum - Purkinje cells,27,0.0193487950035
+cerebellum - Purkinje cells,36,0.0778621619692
+cerebellum - Purkinje cells,5,0.449714525282
+cerebellum - Purkinje cells,12,0.319284364272
+cerebellum - Purkinje cells,6,0.287344478871
+cerebellum - cells in granular layer,29,0.0767102203639
+cerebellum - cells in granular layer,29,0.0344450970388
+cerebellum - cells in granular layer,24,0.0780254626623
+cerebellum - cells in granular layer,13,0.0574566466635
+cerebellum - cells in granular layer,16,0.193159355133
+cerebellum - cells in granular layer,26,0.0766338727512
+cerebellum - cells in granular layer,28,0.0437227977183
+cerebellum - cells in granular layer,23,0.151110130553
+cerebellum - cells in granular layer,26,0.0224297922125
+cerebellum - cells in granular layer,38,0.0857598841343
+cerebellum - cells in granular layer,34,0.0744877721375
+cerebellum - cells in granular layer,5,0.449714525282
+cerebellum - cells in granular layer,12,0.319284364272
+cerebellum - cells in granular layer,6,0.287344478871
+cerebellum - cells in molecular layer,58,0.0667829807086
+cerebellum - cells in molecular layer,29,0.0344450970388
+cerebellum - cells in molecular layer,23,0.0775349335723
+cerebellum - cells in molecular layer,12,0.0543875136426
+cerebellum - cells in molecular layer,16,0.193159355133
+cerebellum - cells in molecular layer,31,0.0900702045319
+cerebellum - cells in molecular layer,25,0.0422378115536
+cerebellum - cells in molecular layer,21,0.148928356
+cerebellum - cells in molecular layer,34,0.0744877721375
+cerebellum - cells in molecular layer,5,0.449714525282
+cerebellum - cells in molecular layer,29,0.0345803681646
+cerebellum - cells in molecular layer,8,0.183991934291
+cerebellum - cells in molecular layer,12,0.319284364272
+cerebellum - cells in molecular layer,6,0.287344478871
+cerebral cortex - endothelial cells,29,0.0767102203639
+cerebral cortex - endothelial cells,29,0.0344450970388
+cerebral cortex - endothelial cells,24,0.0780254626623
+cerebral cortex - endothelial cells,13,0.0574566466635
+cerebral cortex - endothelial cells,16,0.193159355133
+cerebral cortex - endothelial cells,26,0.0766338727512
+cerebral cortex - endothelial cells,28,0.0437227977183
+cerebral cortex - endothelial cells,23,0.151110130553
+cerebral cortex - endothelial cells,26,0.0224297922125
+cerebral cortex - endothelial cells,38,0.0857598841343
+cerebral cortex - endothelial cells,29,0.0627330287482
+cerebral cortex - endothelial cells,5,0.127415230676
+cerebral cortex - endothelial cells,5,0.449714525282
+cerebral cortex - endothelial cells,12,0.319284364272
+cerebral cortex - endothelial cells,6,0.287344478871
+cerebral cortex - glial cells,58,0.0667829807086
+cerebral cortex - glial cells,29,0.0344450970388
+cerebral cortex - glial cells,23,0.0775349335723
+cerebral cortex - glial cells,12,0.0543875136426
+cerebral cortex - glial cells,16,0.193159355133
+cerebral cortex - glial cells,31,0.0900702045319
+cerebral cortex - glial cells,25,0.0422378115536
+cerebral cortex - glial cells,21,0.148928356
+cerebral cortex - glial cells,34,0.0744877721375
+cerebral cortex - glial cells,5,0.449714525282
+cerebral cortex - glial cells,29,0.0345803681646
+cerebral cortex - glial cells,8,0.183991934291
+cerebral cortex - glial cells,12,0.319284364272
+cerebral cortex - glial cells,6,0.287344478871
+cerebral cortex - neuronal cells,60,0.0589366695465
+cerebral cortex - neuronal cells,29,0.0344450970388
+cerebral cortex - neuronal cells,23,0.0775349335723
+cerebral cortex - neuronal cells,13,0.0574566466635
+cerebral cortex - neuronal cells,16,0.193159355133
+cerebral cortex - neuronal cells,30,0.0958827547511
+cerebral cortex - neuronal cells,27,0.0566466864739
+cerebral cortex - neuronal cells,25,0.162562878306
+cerebral cortex - neuronal cells,27,0.0193487950035
+cerebral cortex - neuronal cells,36,0.0778621619692
+cerebral cortex - neuronal cells,5,0.449714525282
+cerebral cortex - neuronal cells,12,0.319284364272
+cerebral cortex - neuronal cells,6,0.287344478871
+cerebral cortex - neuropil,58,0.0667829807086
+cerebral cortex - neuropil,29,0.0344450970388
+cerebral cortex - neuropil,23,0.0775349335723
+cerebral cortex - neuropil,12,0.0543875136426
+cerebral cortex - neuropil,16,0.193159355133
+cerebral cortex - neuropil,31,0.0900702045319
+cerebral cortex - neuropil,25,0.0422378115536
+cerebral cortex - neuropil,21,0.148928356
+cerebral cortex - neuropil,34,0.0744877721375
+cerebral cortex - neuropil,5,0.449714525282
+cerebral cortex - neuropil,29,0.0345803681646
+cerebral cortex - neuropil,8,0.183991934291
+cerebral cortex - neuropil,12,0.319284364272
+cerebral cortex - neuropil,6,0.287344478871
+colon - endothelial cells,60,0.0589366695465
+colon - endothelial cells,29,0.0344450970388
+colon - endothelial cells,23,0.0775349335723
+colon - endothelial cells,13,0.0574566466635
+colon - endothelial cells,16,0.193159355133
+colon - endothelial cells,30,0.0958827547511
+colon - endothelial cells,27,0.0566466864739
+colon - endothelial cells,25,0.162562878306
+colon - endothelial cells,27,0.0193487950035
+colon - endothelial cells,36,0.0778621619692
+colon - endothelial cells,5,0.449714525282
+colon - endothelial cells,12,0.319284364272
+colon - endothelial cells,6,0.287344478871
+colon - glandular cells,60,0.0589366695465
+colon - glandular cells,29,0.0344450970388
+colon - glandular cells,23,0.0775349335723
+colon - glandular cells,13,0.0574566466635
+colon - glandular cells,16,0.193159355133
+colon - glandular cells,30,0.0958827547511
+colon - glandular cells,27,0.0566466864739
+colon - glandular cells,25,0.162562878306
+colon - glandular cells,27,0.0193487950035
+colon - glandular cells,36,0.0778621619692
+colon - glandular cells,5,0.449714525282
+colon - glandular cells,12,0.319284364272
+colon - glandular cells,6,0.287344478871
+duodenum - glandular cells,60,0.0589366695465
+duodenum - glandular cells,29,0.0344450970388
+duodenum - glandular cells,23,0.0775349335723
+duodenum - glandular cells,13,0.0574566466635
+duodenum - glandular cells,16,0.193159355133
+duodenum - glandular cells,30,0.0958827547511
+duodenum - glandular cells,27,0.0566466864739
+duodenum - glandular cells,25,0.162562878306
+duodenum - glandular cells,27,0.0193487950035
+duodenum - glandular cells,36,0.0778621619692
+duodenum - glandular cells,5,0.449714525282
+duodenum - glandular cells,12,0.319284364272
+duodenum - glandular cells,6,0.287344478871
+epididymis - glandular cells,60,0.0589366695465
+epididymis - glandular cells,29,0.0344450970388
+epididymis - glandular cells,23,0.0775349335723
+epididymis - glandular cells,13,0.0574566466635
+epididymis - glandular cells,16,0.193159355133
+epididymis - glandular cells,30,0.0958827547511
+epididymis - glandular cells,27,0.0566466864739
+epididymis - glandular cells,25,0.162562878306
+epididymis - glandular cells,27,0.0193487950035
+epididymis - glandular cells,36,0.0778621619692
+epididymis - glandular cells,5,0.449714525282
+epididymis - glandular cells,12,0.319284364272
+epididymis - glandular cells,6,0.287344478871
+esophagus - squamous epithelial cells,58,0.0667829807086
+esophagus - squamous epithelial cells,29,0.0344450970388
+esophagus - squamous epithelial cells,23,0.0775349335723
+esophagus - squamous epithelial cells,12,0.0543875136426
+esophagus - squamous epithelial cells,16,0.193159355133
+esophagus - squamous epithelial cells,31,0.0900702045319
+esophagus - squamous epithelial cells,25,0.0422378115536
+esophagus - squamous epithelial cells,21,0.148928356
+esophagus - squamous epithelial cells,34,0.0744877721375
+esophagus - squamous epithelial cells,5,0.449714525282
+esophagus - squamous epithelial cells,29,0.0345803681646
+esophagus - squamous epithelial cells,8,0.183991934291
+esophagus - squamous epithelial cells,12,0.319284364272
+esophagus - squamous epithelial cells,6,0.287344478871
+fallopian tube - glandular cells,60,0.0589366695465
+fallopian tube - glandular cells,29,0.0344450970388
+fallopian tube - glandular cells,23,0.0775349335723
+fallopian tube - glandular cells,13,0.0574566466635
+fallopian tube - glandular cells,16,0.193159355133
+fallopian tube - glandular cells,30,0.0958827547511
+fallopian tube - glandular cells,27,0.0566466864739
+fallopian tube - glandular cells,25,0.162562878306
+fallopian tube - glandular cells,27,0.0193487950035
+fallopian tube - glandular cells,36,0.0778621619692
+fallopian tube - glandular cells,5,0.449714525282
+fallopian tube - glandular cells,12,0.319284364272
+fallopian tube - glandular cells,6,0.287344478871
+gallbladder - glandular cells,60,0.0589366695465
+gallbladder - glandular cells,29,0.0344450970388
+gallbladder - glandular cells,23,0.0775349335723
+gallbladder - glandular cells,13,0.0574566466635
+gallbladder - glandular cells,16,0.193159355133
+gallbladder - glandular cells,30,0.0958827547511
+gallbladder - glandular cells,27,0.0566466864739
+gallbladder - glandular cells,25,0.162562878306
+gallbladder - glandular cells,27,0.0193487950035
+gallbladder - glandular cells,36,0.0778621619692
+gallbladder - glandular cells,5,0.449714525282
+gallbladder - glandular cells,12,0.319284364272
+gallbladder - glandular cells,6,0.287344478871
+heart muscle - myocytes,58,0.0667829807086
+heart muscle - myocytes,29,0.0344450970388
+heart muscle - myocytes,23,0.0775349335723
+heart muscle - myocytes,12,0.0543875136426
+heart muscle - myocytes,16,0.193159355133
+heart muscle - myocytes,31,0.0900702045319
+heart muscle - myocytes,25,0.0422378115536
+heart muscle - myocytes,21,0.148928356
+heart muscle - myocytes,34,0.0744877721375
+heart muscle - myocytes,5,0.449714525282
+heart muscle - myocytes,29,0.0345803681646
+heart muscle - myocytes,8,0.183991934291
+heart muscle - myocytes,12,0.319284364272
+heart muscle - myocytes,6,0.287344478871
+hippocampus - glial cells,58,0.0667829807086
+hippocampus - glial cells,29,0.0344450970388
+hippocampus - glial cells,23,0.0775349335723
+hippocampus - glial cells,12,0.0543875136426
+hippocampus - glial cells,16,0.193159355133
+hippocampus - glial cells,31,0.0900702045319
+hippocampus - glial cells,25,0.0422378115536
+hippocampus - glial cells,21,0.148928356
+hippocampus - glial cells,34,0.0744877721375
+hippocampus - glial cells,5,0.449714525282
+hippocampus - glial cells,29,0.0345803681646
+hippocampus - glial cells,8,0.183991934291
+hippocampus - glial cells,12,0.319284364272
+hippocampus - glial cells,6,0.287344478871
+hippocampus - neuronal cells,60,0.0589366695465
+hippocampus - neuronal cells,29,0.0344450970388
+hippocampus - neuronal cells,23,0.0775349335723
+hippocampus - neuronal cells,13,0.0574566466635
+hippocampus - neuronal cells,16,0.193159355133
+hippocampus - neuronal cells,30,0.0958827547511
+hippocampus - neuronal cells,27,0.0566466864739
+hippocampus - neuronal cells,25,0.162562878306
+hippocampus - neuronal cells,27,0.0193487950035
+hippocampus - neuronal cells,36,0.0778621619692
+hippocampus - neuronal cells,5,0.449714525282
+hippocampus - neuronal cells,12,0.319284364272
+hippocampus - neuronal cells,6,0.287344478871
+kidney - cells in glomeruli,58,0.0667829807086
+kidney - cells in glomeruli,29,0.0344450970388
+kidney - cells in glomeruli,23,0.0775349335723
+kidney - cells in glomeruli,12,0.0543875136426
+kidney - cells in glomeruli,16,0.193159355133
+kidney - cells in glomeruli,31,0.0900702045319
+kidney - cells in glomeruli,25,0.0422378115536
+kidney - cells in glomeruli,21,0.148928356
+kidney - cells in glomeruli,34,0.0744877721375
+kidney - cells in glomeruli,5,0.449714525282
+kidney - cells in glomeruli,29,0.0345803681646
+kidney - cells in glomeruli,8,0.183991934291
+kidney - cells in glomeruli,12,0.319284364272
+kidney - cells in glomeruli,6,0.287344478871
+kidney - cells in tubules,60,0.0589366695465
+kidney - cells in tubules,29,0.0344450970388
+kidney - cells in tubules,23,0.0775349335723
+kidney - cells in tubules,13,0.0574566466635
+kidney - cells in tubules,16,0.193159355133
+kidney - cells in tubules,30,0.0958827547511
+kidney - cells in tubules,27,0.0566466864739
+kidney - cells in tubules,25,0.162562878306
+kidney - cells in tubules,27,0.0193487950035
+kidney - cells in tubules,36,0.0778621619692
+kidney - cells in tubules,5,0.449714525282
+kidney - cells in tubules,12,0.319284364272
+kidney - cells in tubules,6,0.287344478871
+lateral ventricle - glial cells,58,0.0667829807086
+lateral ventricle - glial cells,29,0.0344450970388
+lateral ventricle - glial cells,23,0.0775349335723
+lateral ventricle - glial cells,12,0.0543875136426
+lateral ventricle - glial cells,16,0.193159355133
+lateral ventricle - glial cells,31,0.0900702045319
+lateral ventricle - glial cells,25,0.0422378115536
+lateral ventricle - glial cells,21,0.148928356
+lateral ventricle - glial cells,34,0.0744877721375
+lateral ventricle - glial cells,5,0.449714525282
+lateral ventricle - glial cells,29,0.0345803681646
+lateral ventricle - glial cells,8,0.183991934291
+lateral ventricle - glial cells,12,0.319284364272
+lateral ventricle - glial cells,6,0.287344478871
+liver - bile duct cells,60,0.0589366695465
+liver - bile duct cells,29,0.0344450970388
+liver - bile duct cells,23,0.0775349335723
+liver - bile duct cells,13,0.0574566466635
+liver - bile duct cells,16,0.193159355133
+liver - bile duct cells,30,0.0958827547511
+liver - bile duct cells,27,0.0566466864739
+liver - bile duct cells,25,0.162562878306
+liver - bile duct cells,27,0.0193487950035
+liver - bile duct cells,36,0.0778621619692
+liver - bile duct cells,5,0.449714525282
+liver - bile duct cells,12,0.319284364272
+liver - bile duct cells,6,0.287344478871
+liver - hepatocytes,60,0.0589366695465
+liver - hepatocytes,29,0.0344450970388
+liver - hepatocytes,23,0.0775349335723
+liver - hepatocytes,13,0.0574566466635
+liver - hepatocytes,16,0.193159355133
+liver - hepatocytes,30,0.0958827547511
+liver - hepatocytes,27,0.0566466864739
+liver - hepatocytes,25,0.162562878306
+liver - hepatocytes,27,0.0193487950035
+liver - hepatocytes,36,0.0778621619692
+liver - hepatocytes,5,0.449714525282
+liver - hepatocytes,12,0.319284364272
+liver - hepatocytes,6,0.287344478871
+lung - macrophages,60,0.0589366695465
+lung - macrophages,29,0.0344450970388
+lung - macrophages,23,0.0775349335723
+lung - macrophages,13,0.0574566466635
+lung - macrophages,16,0.193159355133
+lung - macrophages,30,0.0958827547511
+lung - macrophages,27,0.0566466864739
+lung - macrophages,25,0.162562878306
+lung - macrophages,27,0.0193487950035
+lung - macrophages,36,0.0778621619692
+lung - macrophages,5,0.449714525282
+lung - macrophages,12,0.319284364272
+lung - macrophages,6,0.287344478871
+lung - pneumocytes,60,0.0589366695465
+lung - pneumocytes,29,0.0344450970388
+lung - pneumocytes,23,0.0775349335723
+lung - pneumocytes,13,0.0574566466635
+lung - pneumocytes,16,0.193159355133
+lung - pneumocytes,30,0.0958827547511
+lung - pneumocytes,27,0.0566466864739
+lung - pneumocytes,25,0.162562878306
+lung - pneumocytes,27,0.0193487950035
+lung - pneumocytes,36,0.0778621619692
+lung - pneumocytes,5,0.449714525282
+lung - pneumocytes,12,0.319284364272
+lung - pneumocytes,6,0.287344478871
+lymph node - non-germinal center cells,58,0.0667829807086
+lymph node - non-germinal center cells,29,0.0344450970388
+lymph node - non-germinal center cells,23,0.0775349335723
+lymph node - non-germinal center cells,12,0.0543875136426
+lymph node - non-germinal center cells,16,0.193159355133
+lymph node - non-germinal center cells,31,0.0900702045319
+lymph node - non-germinal center cells,25,0.0422378115536
+lymph node - non-germinal center cells,21,0.148928356
+lymph node - non-germinal center cells,34,0.0744877721375
+lymph node - non-germinal center cells,5,0.449714525282
+lymph node - non-germinal center cells,29,0.0345803681646
+lymph node - non-germinal center cells,8,0.183991934291
+lymph node - non-germinal center cells,12,0.319284364272
+lymph node - non-germinal center cells,6,0.287344478871
+oral mucosa - squamous epithelial cells,60,0.0589366695465
+oral mucosa - squamous epithelial cells,29,0.0344450970388
+oral mucosa - squamous epithelial cells,23,0.0775349335723
+oral mucosa - squamous epithelial cells,13,0.0574566466635
+oral mucosa - squamous epithelial cells,16,0.193159355133
+oral mucosa - squamous epithelial cells,30,0.0958827547511
+oral mucosa - squamous epithelial cells,27,0.0566466864739
+oral mucosa - squamous epithelial cells,25,0.162562878306
+oral mucosa - squamous epithelial cells,27,0.0193487950035
+oral mucosa - squamous epithelial cells,36,0.0778621619692
+oral mucosa - squamous epithelial cells,5,0.449714525282
+oral mucosa - squamous epithelial cells,12,0.319284364272
+oral mucosa - squamous epithelial cells,6,0.287344478871
+ovary - ovarian stroma cells,29,0.0767102203639
+ovary - ovarian stroma cells,29,0.0344450970388
+ovary - ovarian stroma cells,24,0.0780254626623
+ovary - ovarian stroma cells,13,0.0574566466635
+ovary - ovarian stroma cells,16,0.193159355133
+ovary - ovarian stroma cells,26,0.0766338727512
+ovary - ovarian stroma cells,28,0.0437227977183
+ovary - ovarian stroma cells,23,0.151110130553
+ovary - ovarian stroma cells,26,0.0224297922125
+ovary - ovarian stroma cells,38,0.0857598841343
+ovary - ovarian stroma cells,34,0.0744877721375
+ovary - ovarian stroma cells,5,0.449714525282
+ovary - ovarian stroma cells,12,0.319284364272
+ovary - ovarian stroma cells,6,0.287344478871
+pancreas - exocrine glandular cells,60,0.0589366695465
+pancreas - exocrine glandular cells,29,0.0344450970388
+pancreas - exocrine glandular cells,23,0.0775349335723
+pancreas - exocrine glandular cells,13,0.0574566466635
+pancreas - exocrine glandular cells,16,0.193159355133
+pancreas - exocrine glandular cells,30,0.0958827547511
+pancreas - exocrine glandular cells,27,0.0566466864739
+pancreas - exocrine glandular cells,25,0.162562878306
+pancreas - exocrine glandular cells,27,0.0193487950035
+pancreas - exocrine glandular cells,36,0.0778621619692
+pancreas - exocrine glandular cells,5,0.449714525282
+pancreas - exocrine glandular cells,12,0.319284364272
+pancreas - exocrine glandular cells,6,0.287344478871
+placenta - trophoblastic cells,60,0.0589366695465
+placenta - trophoblastic cells,29,0.0344450970388
+placenta - trophoblastic cells,23,0.0775349335723
+placenta - trophoblastic cells,13,0.0574566466635
+placenta - trophoblastic cells,16,0.193159355133
+placenta - trophoblastic cells,30,0.0958827547511
+placenta - trophoblastic cells,27,0.0566466864739
+placenta - trophoblastic cells,25,0.162562878306
+placenta - trophoblastic cells,27,0.0193487950035
+placenta - trophoblastic cells,36,0.0778621619692
+placenta - trophoblastic cells,5,0.449714525282
+placenta - trophoblastic cells,12,0.319284364272
+placenta - trophoblastic cells,6,0.287344478871
+prostate - glandular cells,60,0.0589366695465
+prostate - glandular cells,29,0.0344450970388
+prostate - glandular cells,23,0.0775349335723
+prostate - glandular cells,13,0.0574566466635
+prostate - glandular cells,16,0.193159355133
+prostate - glandular cells,30,0.0958827547511
+prostate - glandular cells,27,0.0566466864739
+prostate - glandular cells,25,0.162562878306
+prostate - glandular cells,27,0.0193487950035
+prostate - glandular cells,36,0.0778621619692
+prostate - glandular cells,5,0.449714525282
+prostate - glandular cells,12,0.319284364272
+prostate - glandular cells,6,0.287344478871
+rectum - glandular cells,60,0.0589366695465
+rectum - glandular cells,29,0.0344450970388
+rectum - glandular cells,23,0.0775349335723
+rectum - glandular cells,13,0.0574566466635
+rectum - glandular cells,16,0.193159355133
+rectum - glandular cells,30,0.0958827547511
+rectum - glandular cells,27,0.0566466864739
+rectum - glandular cells,25,0.162562878306
+rectum - glandular cells,27,0.0193487950035
+rectum - glandular cells,36,0.0778621619692
+rectum - glandular cells,5,0.449714525282
+rectum - glandular cells,12,0.319284364272
+rectum - glandular cells,6,0.287344478871
+salivary gland - glandular cells,58,0.0667829807086
+salivary gland - glandular cells,29,0.0344450970388
+salivary gland - glandular cells,23,0.0775349335723
+salivary gland - glandular cells,12,0.0543875136426
+salivary gland - glandular cells,16,0.193159355133
+salivary gland - glandular cells,31,0.0900702045319
+salivary gland - glandular cells,25,0.0422378115536
+salivary gland - glandular cells,21,0.148928356
+salivary gland - glandular cells,34,0.0744877721375
+salivary gland - glandular cells,5,0.449714525282
+salivary gland - glandular cells,29,0.0345803681646
+salivary gland - glandular cells,8,0.183991934291
+salivary gland - glandular cells,12,0.319284364272
+salivary gland - glandular cells,6,0.287344478871
+seminal vesicle - glandular cells,29,0.0767102203639
+seminal vesicle - glandular cells,29,0.0344450970388
+seminal vesicle - glandular cells,24,0.0780254626623
+seminal vesicle - glandular cells,13,0.0574566466635
+seminal vesicle - glandular cells,16,0.193159355133
+seminal vesicle - glandular cells,26,0.0766338727512
+seminal vesicle - glandular cells,28,0.0437227977183
+seminal vesicle - glandular cells,23,0.151110130553
+seminal vesicle - glandular cells,26,0.0224297922125
+seminal vesicle - glandular cells,38,0.0857598841343
+seminal vesicle - glandular cells,34,0.0744877721375
+seminal vesicle - glandular cells,5,0.449714525282
+seminal vesicle - glandular cells,12,0.319284364272
+seminal vesicle - glandular cells,6,0.287344478871
+skeletal muscle - myocytes,60,0.0589366695465
+skeletal muscle - myocytes,29,0.0344450970388
+skeletal muscle - myocytes,23,0.0775349335723
+skeletal muscle - myocytes,13,0.0574566466635
+skeletal muscle - myocytes,16,0.193159355133
+skeletal muscle - myocytes,30,0.0958827547511
+skeletal muscle - myocytes,27,0.0566466864739
+skeletal muscle - myocytes,25,0.162562878306
+skeletal muscle - myocytes,27,0.0193487950035
+skeletal muscle - myocytes,36,0.0778621619692
+skeletal muscle - myocytes,5,0.449714525282
+skeletal muscle - myocytes,12,0.319284364272
+skeletal muscle - myocytes,6,0.287344478871
+skin - Langerhans,60,0.0589366695465
+skin - Langerhans,29,0.0344450970388
+skin - Langerhans,23,0.0775349335723
+skin - Langerhans,13,0.0574566466635
+skin - Langerhans,16,0.193159355133
+skin - Langerhans,30,0.0958827547511
+skin - Langerhans,27,0.0566466864739
+skin - Langerhans,25,0.162562878306
+skin - Langerhans,27,0.0193487950035
+skin - Langerhans,36,0.0778621619692
+skin - Langerhans,5,0.449714525282
+skin - Langerhans,12,0.319284364272
+skin - Langerhans,6,0.287344478871
+skin - fibroblasts,58,0.0667829807086
+skin - fibroblasts,29,0.0344450970388
+skin - fibroblasts,22,0.111509826775
+skin - fibroblasts,12,0.0543875136426
+skin - fibroblasts,16,0.193159355133
+skin - fibroblasts,14,0.133603861454
+skin - fibroblasts,20,0.136728541078
+skin - fibroblasts,23,0.0137977817371
+skin - fibroblasts,24,0.17849658796
+skin - fibroblasts,34,0.0744877721375
+skin - fibroblasts,5,0.449714525282
+skin - fibroblasts,29,0.0345803681646
+skin - fibroblasts,17,-0.00952812797912
+skin - fibroblasts,6,0.287344478871
+skin - keratinocytes,60,0.0589366695465
+skin - keratinocytes,29,0.0344450970388
+skin - keratinocytes,23,0.0775349335723
+skin - keratinocytes,13,0.0574566466635
+skin - keratinocytes,16,0.193159355133
+skin - keratinocytes,30,0.0958827547511
+skin - keratinocytes,27,0.0566466864739
+skin - keratinocytes,25,0.162562878306
+skin - keratinocytes,27,0.0193487950035
+skin - keratinocytes,36,0.0778621619692
+skin - keratinocytes,5,0.449714525282
+skin - keratinocytes,12,0.319284364272
+skin - keratinocytes,6,0.287344478871
+skin - melanocytes,60,0.0589366695465
+skin - melanocytes,29,0.0344450970388
+skin - melanocytes,23,0.0775349335723
+skin - melanocytes,13,0.0574566466635
+skin - melanocytes,16,0.193159355133
+skin - melanocytes,30,0.0958827547511
+skin - melanocytes,27,0.0566466864739
+skin - melanocytes,25,0.162562878306
+skin - melanocytes,27,0.0193487950035
+skin - melanocytes,36,0.0778621619692
+skin - melanocytes,5,0.449714525282
+skin - melanocytes,12,0.319284364272
+skin - melanocytes,6,0.287344478871
+small intestine - glandular cells,29,0.0767102203639
+small intestine - glandular cells,29,0.0344450970388
+small intestine - glandular cells,24,0.0780254626623
+small intestine - glandular cells,13,0.0574566466635
+small intestine - glandular cells,16,0.193159355133
+small intestine - glandular cells,26,0.0766338727512
+small intestine - glandular cells,28,0.0437227977183
+small intestine - glandular cells,23,0.151110130553
+small intestine - glandular cells,26,0.0224297922125
+small intestine - glandular cells,38,0.0857598841343
+small intestine - glandular cells,34,0.0744877721375
+small intestine - glandular cells,5,0.449714525282
+small intestine - glandular cells,12,0.319284364272
+small intestine - glandular cells,6,0.287344478871
+smooth muscle - smooth muscle cells,60,0.0589366695465
+smooth muscle - smooth muscle cells,29,0.0344450970388
+smooth muscle - smooth muscle cells,23,0.0775349335723
+smooth muscle - smooth muscle cells,13,0.0574566466635
+smooth muscle - smooth muscle cells,16,0.193159355133
+smooth muscle - smooth muscle cells,30,0.0958827547511
+smooth muscle - smooth muscle cells,27,0.0566466864739
+smooth muscle - smooth muscle cells,25,0.162562878306
+smooth muscle - smooth muscle cells,27,0.0193487950035
+smooth muscle - smooth muscle cells,36,0.0778621619692
+smooth muscle - smooth muscle cells,5,0.449714525282
+smooth muscle - smooth muscle cells,12,0.319284364272
+smooth muscle - smooth muscle cells,6,0.287344478871
+soft tissue 1 - fibroblasts,29,0.0767102203639
+soft tissue 1 - fibroblasts,29,0.0344450970388
+soft tissue 1 - fibroblasts,24,0.0780254626623
+soft tissue 1 - fibroblasts,13,0.0574566466635
+soft tissue 1 - fibroblasts,16,0.193159355133
+soft tissue 1 - fibroblasts,26,0.0766338727512
+soft tissue 1 - fibroblasts,28,0.0437227977183
+soft tissue 1 - fibroblasts,23,0.151110130553
+soft tissue 1 - fibroblasts,26,0.0224297922125
+soft tissue 1 - fibroblasts,38,0.0857598841343
+soft tissue 1 - fibroblasts,34,0.0744877721375
+soft tissue 1 - fibroblasts,5,0.449714525282
+soft tissue 1 - fibroblasts,12,0.319284364272
+soft tissue 1 - fibroblasts,6,0.287344478871
+soft tissue 2 - fibroblasts,60,0.0589366695465
+soft tissue 2 - fibroblasts,29,0.0344450970388
+soft tissue 2 - fibroblasts,23,0.0775349335723
+soft tissue 2 - fibroblasts,13,0.0574566466635
+soft tissue 2 - fibroblasts,16,0.193159355133
+soft tissue 2 - fibroblasts,30,0.0958827547511
+soft tissue 2 - fibroblasts,27,0.0566466864739
+soft tissue 2 - fibroblasts,25,0.162562878306
+soft tissue 2 - fibroblasts,27,0.0193487950035
+soft tissue 2 - fibroblasts,36,0.0778621619692
+soft tissue 2 - fibroblasts,5,0.449714525282
+soft tissue 2 - fibroblasts,12,0.319284364272
+soft tissue 2 - fibroblasts,6,0.287344478871
+spleen - cells in red pulp,60,0.0589366695465
+spleen - cells in red pulp,29,0.0344450970388
+spleen - cells in red pulp,23,0.0775349335723
+spleen - cells in red pulp,13,0.0574566466635
+spleen - cells in red pulp,16,0.193159355133
+spleen - cells in red pulp,30,0.0958827547511
+spleen - cells in red pulp,27,0.0566466864739
+spleen - cells in red pulp,25,0.162562878306
+spleen - cells in red pulp,27,0.0193487950035
+spleen - cells in red pulp,36,0.0778621619692
+spleen - cells in red pulp,5,0.449714525282
+spleen - cells in red pulp,12,0.319284364272
+spleen - cells in red pulp,6,0.287344478871
+spleen - cells in white pulp,60,0.0589366695465
+spleen - cells in white pulp,29,0.0344450970388
+spleen - cells in white pulp,23,0.0775349335723
+spleen - cells in white pulp,13,0.0574566466635
+spleen - cells in white pulp,16,0.193159355133
+spleen - cells in white pulp,30,0.0958827547511
+spleen - cells in white pulp,27,0.0566466864739
+spleen - cells in white pulp,25,0.162562878306
+spleen - cells in white pulp,27,0.0193487950035
+spleen - cells in white pulp,36,0.0778621619692
+spleen - cells in white pulp,5,0.449714525282
+spleen - cells in white pulp,12,0.319284364272
+spleen - cells in white pulp,6,0.287344478871
+"stomach, lower - glandular cells",58,0.0667829807086
+"stomach, lower - glandular cells",29,0.0344450970388
+"stomach, lower - glandular cells",23,0.0775349335723
+"stomach, lower - glandular cells",12,0.0543875136426
+"stomach, lower - glandular cells",16,0.193159355133
+"stomach, lower - glandular cells",31,0.0900702045319
+"stomach, lower - glandular cells",25,0.0422378115536
+"stomach, lower - glandular cells",21,0.148928356
+"stomach, lower - glandular cells",34,0.0744877721375
+"stomach, lower - glandular cells",5,0.449714525282
+"stomach, lower - glandular cells",29,0.0345803681646
+"stomach, lower - glandular cells",8,0.183991934291
+"stomach, lower - glandular cells",12,0.319284364272
+"stomach, lower - glandular cells",6,0.287344478871
+"stomach, upper - glandular cells",58,0.0667829807086
+"stomach, upper - glandular cells",29,0.0344450970388
+"stomach, upper - glandular cells",23,0.0775349335723
+"stomach, upper - glandular cells",12,0.0543875136426
+"stomach, upper - glandular cells",16,0.193159355133
+"stomach, upper - glandular cells",31,0.0900702045319
+"stomach, upper - glandular cells",25,0.0422378115536
+"stomach, upper - glandular cells",21,0.148928356
+"stomach, upper - glandular cells",34,0.0744877721375
+"stomach, upper - glandular cells",5,0.449714525282
+"stomach, upper - glandular cells",29,0.0345803681646
+"stomach, upper - glandular cells",8,0.183991934291
+"stomach, upper - glandular cells",12,0.319284364272
+"stomach, upper - glandular cells",6,0.287344478871
+testis - Leydig cells,60,0.0589366695465
+testis - Leydig cells,29,0.0344450970388
+testis - Leydig cells,23,0.0775349335723
+testis - Leydig cells,13,0.0574566466635
+testis - Leydig cells,16,0.193159355133
+testis - Leydig cells,30,0.0958827547511
+testis - Leydig cells,27,0.0566466864739
+testis - Leydig cells,25,0.162562878306
+testis - Leydig cells,27,0.0193487950035
+testis - Leydig cells,36,0.0778621619692
+testis - Leydig cells,5,0.449714525282
+testis - Leydig cells,12,0.319284364272
+testis - Leydig cells,6,0.287344478871
+testis - cells in seminiferus ducts,60,0.0589366695465
+testis - cells in seminiferus ducts,29,0.0344450970388
+testis - cells in seminiferus ducts,23,0.0775349335723
+testis - cells in seminiferus ducts,13,0.0574566466635
+testis - cells in seminiferus ducts,16,0.193159355133
+testis - cells in seminiferus ducts,30,0.0958827547511
+testis - cells in seminiferus ducts,27,0.0566466864739
+testis - cells in seminiferus ducts,25,0.162562878306
+testis - cells in seminiferus ducts,27,0.0193487950035
+testis - cells in seminiferus ducts,36,0.0778621619692
+testis - cells in seminiferus ducts,5,0.449714525282
+testis - cells in seminiferus ducts,12,0.319284364272
+testis - cells in seminiferus ducts,6,0.287344478871
+thyroid gland - glandular cells,60,0.0589366695465
+thyroid gland - glandular cells,29,0.0344450970388
+thyroid gland - glandular cells,23,0.0775349335723
+thyroid gland - glandular cells,13,0.0574566466635
+thyroid gland - glandular cells,16,0.193159355133
+thyroid gland - glandular cells,30,0.0958827547511
+thyroid gland - glandular cells,27,0.0566466864739
+thyroid gland - glandular cells,25,0.162562878306
+thyroid gland - glandular cells,27,0.0193487950035
+thyroid gland - glandular cells,36,0.0778621619692
+thyroid gland - glandular cells,5,0.449714525282
+thyroid gland - glandular cells,12,0.319284364272
+thyroid gland - glandular cells,6,0.287344478871
+tonsil - germinal center cells,60,0.0589366695465
+tonsil - germinal center cells,29,0.0344450970388
+tonsil - germinal center cells,23,0.0775349335723
+tonsil - germinal center cells,13,0.0574566466635
+tonsil - germinal center cells,16,0.193159355133
+tonsil - germinal center cells,30,0.0958827547511
+tonsil - germinal center cells,27,0.0566466864739
+tonsil - germinal center cells,25,0.162562878306
+tonsil - germinal center cells,27,0.0193487950035
+tonsil - germinal center cells,36,0.0778621619692
+tonsil - germinal center cells,5,0.449714525282
+tonsil - germinal center cells,12,0.319284364272
+tonsil - germinal center cells,6,0.287344478871
+tonsil - non-germinal center cells,58,0.0667829807086
+tonsil - non-germinal center cells,29,0.0344450970388
+tonsil - non-germinal center cells,23,0.0775349335723
+tonsil - non-germinal center cells,12,0.0543875136426
+tonsil - non-germinal center cells,16,0.193159355133
+tonsil - non-germinal center cells,31,0.0900702045319
+tonsil - non-germinal center cells,25,0.0422378115536
+tonsil - non-germinal center cells,21,0.148928356
+tonsil - non-germinal center cells,34,0.0744877721375
+tonsil - non-germinal center cells,5,0.449714525282
+tonsil - non-germinal center cells,29,0.0345803681646
+tonsil - non-germinal center cells,8,0.183991934291
+tonsil - non-germinal center cells,12,0.319284364272
+tonsil - non-germinal center cells,6,0.287344478871
+urinary bladder - urothelial cells,60,0.0589366695465
+urinary bladder - urothelial cells,29,0.0344450970388
+urinary bladder - urothelial cells,23,0.0775349335723
+urinary bladder - urothelial cells,13,0.0574566466635
+urinary bladder - urothelial cells,16,0.193159355133
+urinary bladder - urothelial cells,30,0.0958827547511
+urinary bladder - urothelial cells,27,0.0566466864739
+urinary bladder - urothelial cells,25,0.162562878306
+urinary bladder - urothelial cells,27,0.0193487950035
+urinary bladder - urothelial cells,36,0.0778621619692
+urinary bladder - urothelial cells,5,0.449714525282
+urinary bladder - urothelial cells,12,0.319284364272
+urinary bladder - urothelial cells,6,0.287344478871
+"uterus, post-menopause - cells in endometrial stroma",60,0.0589366695465
+"uterus, post-menopause - cells in endometrial stroma",29,0.0344450970388
+"uterus, post-menopause - cells in endometrial stroma",23,0.0775349335723
+"uterus, post-menopause - cells in endometrial stroma",13,0.0574566466635
+"uterus, post-menopause - cells in endometrial stroma",16,0.193159355133
+"uterus, post-menopause - cells in endometrial stroma",30,0.0958827547511
+"uterus, post-menopause - cells in endometrial stroma",27,0.0566466864739
+"uterus, post-menopause - cells in endometrial stroma",25,0.162562878306
+"uterus, post-menopause - cells in endometrial stroma",27,0.0193487950035
+"uterus, post-menopause - cells in endometrial stroma",36,0.0778621619692
+"uterus, post-menopause - cells in endometrial stroma",5,0.449714525282
+"uterus, post-menopause - cells in endometrial stroma",12,0.319284364272
+"uterus, post-menopause - cells in endometrial stroma",6,0.287344478871
+"uterus, post-menopause - glandular cells",60,0.0589366695465
+"uterus, post-menopause - glandular cells",29,0.0344450970388
+"uterus, post-menopause - glandular cells",23,0.0775349335723
+"uterus, post-menopause - glandular cells",13,0.0574566466635
+"uterus, post-menopause - glandular cells",16,0.193159355133
+"uterus, post-menopause - glandular cells",30,0.0958827547511
+"uterus, post-menopause - glandular cells",27,0.0566466864739
+"uterus, post-menopause - glandular cells",25,0.162562878306
+"uterus, post-menopause - glandular cells",27,0.0193487950035
+"uterus, post-menopause - glandular cells",36,0.0778621619692
+"uterus, post-menopause - glandular cells",5,0.449714525282
+"uterus, post-menopause - glandular cells",12,0.319284364272
+"uterus, post-menopause - glandular cells",6,0.287344478871
+"uterus, pre-menopause - cells in endometrial stroma",60,0.0589366695465
+"uterus, pre-menopause - cells in endometrial stroma",29,0.0344450970388
+"uterus, pre-menopause - cells in endometrial stroma",23,0.0775349335723
+"uterus, pre-menopause - cells in endometrial stroma",13,0.0574566466635
+"uterus, pre-menopause - cells in endometrial stroma",16,0.193159355133
+"uterus, pre-menopause - cells in endometrial stroma",30,0.0958827547511
+"uterus, pre-menopause - cells in endometrial stroma",27,0.0566466864739
+"uterus, pre-menopause - cells in endometrial stroma",25,0.162562878306
+"uterus, pre-menopause - cells in endometrial stroma",27,0.0193487950035
+"uterus, pre-menopause - cells in endometrial stroma",36,0.0778621619692
+"uterus, pre-menopause - cells in endometrial stroma",5,0.449714525282
+"uterus, pre-menopause - cells in endometrial stroma",12,0.319284364272
+"uterus, pre-menopause - cells in endometrial stroma",6,0.287344478871
+"uterus, pre-menopause - glandular cells",60,0.0589366695465
+"uterus, pre-menopause - glandular cells",29,0.0344450970388
+"uterus, pre-menopause - glandular cells",23,0.0775349335723
+"uterus, pre-menopause - glandular cells",13,0.0574566466635
+"uterus, pre-menopause - glandular cells",16,0.193159355133
+"uterus, pre-menopause - glandular cells",30,0.0958827547511
+"uterus, pre-menopause - glandular cells",27,0.0566466864739
+"uterus, pre-menopause - glandular cells",25,0.162562878306
+"uterus, pre-menopause - glandular cells",27,0.0193487950035
+"uterus, pre-menopause - glandular cells",36,0.0778621619692
+"uterus, pre-menopause - glandular cells",5,0.449714525282
+"uterus, pre-menopause - glandular cells",12,0.319284364272
+"uterus, pre-menopause - glandular cells",6,0.287344478871
+vagina - squamous epithelial cells,60,0.0589366695465
+vagina - squamous epithelial cells,29,0.0344450970388
+vagina - squamous epithelial cells,23,0.0775349335723
+vagina - squamous epithelial cells,13,0.0574566466635
+vagina - squamous epithelial cells,16,0.193159355133
+vagina - squamous epithelial cells,30,0.0958827547511
+vagina - squamous epithelial cells,27,0.0566466864739
+vagina - squamous epithelial cells,25,0.162562878306
+vagina - squamous epithelial cells,27,0.0193487950035
+vagina - squamous epithelial cells,36,0.0778621619692
+vagina - squamous epithelial cells,5,0.449714525282
+vagina - squamous epithelial cells,12,0.319284364272
+vagina - squamous epithelial cells,6,0.287344478871
+vulva/anal skin - epidermal cells,58,0.0667829807086
+vulva/anal skin - epidermal cells,29,0.0344450970388
+vulva/anal skin - epidermal cells,23,0.0775349335723
+vulva/anal skin - epidermal cells,12,0.0543875136426
+vulva/anal skin - epidermal cells,16,0.193159355133
+vulva/anal skin - epidermal cells,31,0.0900702045319
+vulva/anal skin - epidermal cells,25,0.0422378115536
+vulva/anal skin - epidermal cells,21,0.148928356
+vulva/anal skin - epidermal cells,34,0.0744877721375
+vulva/anal skin - epidermal cells,5,0.449714525282
+vulva/anal skin - epidermal cells,29,0.0345803681646
+vulva/anal skin - epidermal cells,8,0.183991934291
+vulva/anal skin - epidermal cells,12,0.319284364272
+vulva/anal skin - epidermal cells,6,0.287344478871
+EdgeScoring,58,0.0667829807086
+EdgeScoring,29,0.0344450970388
+EdgeScoring,22,0.111509826775
+EdgeScoring,12,0.0543875136426
+EdgeScoring,16,0.193159355133
+EdgeScoring,14,0.133603861454
+EdgeScoring,15,0.164195752343
+EdgeScoring,23,0.0137977817371
+EdgeScoring,21,0.148928356
+EdgeScoring,34,0.0744877721375
+EdgeScoring,5,0.449714525282
+EdgeScoring,29,0.0345803681646
+EdgeScoring,8,0.183991934291
+EdgeScoring,17,-0.00952812797912
+EdgeScoring,6,0.287344478871
