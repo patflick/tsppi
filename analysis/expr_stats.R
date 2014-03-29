@@ -146,7 +146,7 @@ plot_tshk_example <- function(expr_name="hpa", threshold=0.15)
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
 
     expr_count_table <- paste(expr_name, "expr_counts", sep="_")
-    query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount*1.0/TotalCount")
+    query <- paste("SELECT * FROM ", expr_count_table, " WHERE ExpressedCount > 0 ORDER BY ExpressedCount*1.0/TotalCount")
 
     data <- dbGetQuery(con, query)
     # replace gene names with numbers from {1,...,n}
@@ -159,7 +159,7 @@ plot_tshk_example <- function(expr_name="hpa", threshold=0.15)
     hk_index <- binsearch_for(expr_frac, 1-threshold)
 
     fig <- ggplot(data, aes(x=Gene, y=ExpressedCount/TotalCount)) +
-            labs(title=paste("TS and HK classification with t = ",100*threshold, "%",sep="")) +
+            labs(title=paste("TS vs HK (t = ",100*threshold, "%)",sep="")) +
             xlab("Genes") +
             ylab("Tissue expression") +
             # plot as line + area underneath
@@ -184,6 +184,59 @@ plot_tshk_example <- function(expr_name="hpa", threshold=0.15)
     return(fig)
 }
 
+plot_tshk_thresholds <- function(expr_name="hpa")
+{
+    # load the ts/hk summary data from the database
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    query <- paste("SELECT * FROM ", expr_count_table, " WHERE ExpressedCount > 0 ORDER BY ExpressedCount*1.0/TotalCount")
+
+    data <- dbGetQuery(con, query)
+    # replace gene names with numbers from {1,...,n}
+    data$Gene <- 1:length(data$Gene)
+
+    expr_frac <- data$ExpressedCount/data$TotalCount
+
+    # get number of total genes
+    query <- paste("SELECT COUNT(DISTINCT Gene) FROM ", expr_count_table)
+    cdata <- dbGetQuery(con, query)
+    nGenes <- cdata[1,1]
+
+    # get the the TS threshold -> size data
+    ts_x <- unique(expr_frac[which(expr_frac <= 0.5)])
+    ts_y <- ts_x
+    for (i in 1:length(ts_x))
+    {
+        ts_y[i] <- binsearch_for(expr_frac, ts_x[i]) / nGenes
+    }
+
+    # get the the HK threshold -> size data
+    hk_x <- 1.0 - unique(expr_frac[which(expr_frac >= 0.5)])
+    hk_y <- hk_x
+    max_index = length(data$Gene)
+    for (i in 1:length(ts_x))
+    {
+        hk_y[i] <- (max_index - binsearch_for(expr_frac, 1- hk_x[i])) / nGenes
+    }
+
+    # combine TS and HK graphs into one dataframe for ggplot
+    df_ts <- data.frame(Class=rep("TS", length(ts_x)), x=ts_x, y=ts_y)
+    df_hk <- data.frame(Class=rep("HK", length(hk_x)), x=hk_x, y=hk_y)
+
+    df <- rbind(df_ts, df_hk)
+
+
+    fig <- ggplot(df, aes(x=x, y=y, group=Class,colour=Class,lty=Class)) +
+            geom_line() +
+            labs(title=to_expr_name(expr_name)) +
+            xlab("Threshold") +
+            ylab("Rel. size")
+            # plot as line + area underneath
+
+    return(fig)
+}
 
 # gets the discrete cds of the data
 inverse_cdf <- function(data)
@@ -416,21 +469,73 @@ save_plots_tissue_expr_distr <- function()
     dev.off()
 }
 
+
+save_plots_tshk_thresholds <- function()
+{
+    pdf("../figs/tshk_thresholds.pdf", width=6, height=3.5)
+    p <- plot_all_expr(plot_tshk_thresholds)
+    print(p)
+    dev.off()
+}
+
 save_plots_tshk_example <- function()
 {
     figs <- list()
-    p <- plot_tshk_example("hpa", 0.15)
-    figs <- c(figs, list(p))
+    p1 <- plot_tshk_example("hpa", 0.15)
+    figs <- c(figs, list(p1))
 
-    figs <- list()
     p <- plot_tshk_example("hpa", 0.25)
     figs <- c(figs, list(p))
 
+
+
     par(mfrow=c(1,2))
-    all_figs <- do.call(arrangeGrob, figs)
+    #all_figs <- do.call(grid.arrange, figs)
+    #all_figs <- do.call(arrangeGrob, figs)
 
     # TODO: FIXME this still plots one plot rather than two
     pdf("../figs/tshk_class_example.pdf", width=6, height=2.6)
+    all_figs <- do.call(grid.arrange, c(figs,list(nrow=1)))
+    print(all_figs)
+    dev.off()
+    return (figs)
+}
+
+save_plots_tshk_all <- function()
+{
+    figs <- list()
+
+
+    # Illumina body map:
+    p <- plot_tshk_example("emtab", 0.15)
+    p <- p + labs(title="Illumina Body Map 2.0")
+    figs <- c(figs, list(p))
+
+    # GeneAtlas
+    p <- plot_tshk_example("gene_atlas", 0.15)
+    p <- p + labs(title="Gene Atlas")
+    figs <- c(figs, list(p))
+
+    # RNAseq atlas
+    p <- plot_tshk_example("rnaseq_atlas", 0.15)
+    p <- p + labs(title="RNAseq Atlas")
+    figs <- c(figs, list(p))
+
+    # TODO: HPA
+    p <- plot_tshk_example("hpa", 0.15)
+    p <- p + labs(title="Human Protein Atlas")
+    figs <- c(figs, list(p))
+
+
+    par(mfrow=c(2,2))
+
+
+    #all_figs <- do.call(grid.arrange, figs)
+    all_figs <- do.call(arrangeGrob, figs)
+
+    # actually plot:
+
+    pdf("../figs/tshk_all.pdf", width=6, height=4.8)
     print(all_figs)
     dev.off()
 }
