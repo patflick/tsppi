@@ -1,9 +1,10 @@
 library(ggplot2)
+library(reshape2) # for `melt`
 library(gridExtra) # for `grid.arrange`
 
 get_exprs <- function()
 {
-    exprs <- c("emtab", "gene_atlas", "rnaseq_atlas", "hpa", "hpa_all")
+    exprs <- c("emtab", "gene_atlas", "rnaseq_atlas", "hpa") #, "hpa_all")
     return(exprs)
 }
 
@@ -55,7 +56,7 @@ to_expr_name <- function(s)
     }
     else if (s == "hpa_all")
     {
-        return ("Human Protein Atlas all")
+        return ("Human Protein Atlas (all)")
     }
     else
     {
@@ -115,6 +116,75 @@ plot_hist_normalized_expr <- function(expr_name="gene_atlas")
 }
 
 
+plot_tissue_expr_count_hist <- function(expr_name="gene_atlas")
+{
+    # load the ts/hk summary data from the database
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount*1.0/TotalCount")
+
+    data <- dbGetQuery(con, query)
+    data$Gene <- 1:length(data$Gene)
+
+    fig <- ggplot(data, aes(x=Gene, y=ExpressedCount/TotalCount)) +
+            labs(title=to_expr_name(expr_name)) +
+            xlab("Genes") +
+            ylab("Tissue expression") +
+            # plot as line + area underneath
+            geom_area(position="identity") 
+            #scale_fill_manual(values=c("gray70", "gray20"))
+    return(fig)
+}
+
+
+plot_tshk_example <- function(expr_name="hpa", threshold=0.15)
+{
+    # load the ts/hk summary data from the database
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    expr_count_table <- paste(expr_name, "expr_counts", sep="_")
+    query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount*1.0/TotalCount")
+
+    data <- dbGetQuery(con, query)
+    # replace gene names with numbers from {1,...,n}
+    data$Gene <- 1:length(data$Gene)
+
+    expr_frac <- data$ExpressedCount/data$TotalCount
+
+    # find the index for thresholds t and 1-t
+    ts_index <- binsearch_for(expr_frac, threshold)
+    hk_index <- binsearch_for(expr_frac, 1-threshold)
+
+    fig <- ggplot(data, aes(x=Gene, y=ExpressedCount/TotalCount)) +
+            labs(title=paste("TS and HK classification with t = ",100*threshold, "%",sep="")) +
+            xlab("Genes") +
+            ylab("Tissue expression") +
+            # plot as line + area underneath
+            geom_area(position="identity") 
+
+    # add annotations
+    t <- threshold
+    # TS
+    fig <- fig + annotate("segment", x = 0,  xend = ts_index, y = t, yend = t, colour = "blue", lty="dashed")
+    fig <- fig + annotate("text", y = t, x=0, label=paste("t = ",t*100,"%",sep=""), vjust=-1, hjust=0, size=3.8,  colour="blue")
+    fig <- fig + annotate("segment", x = ts_index,  xend = ts_index, y = -.1, yend = 1, colour = "blue", lty="dashed")
+    fig <- fig + annotate("segment", x = ts_index,  xend = 0, y = 0.5, yend = 0.5, colour = "blue", arrow=arrow(type="closed",length = unit(0.1, "inches")))
+    fig <- fig + annotate("text", y = 0.5, x=ts_index/2, label="TS", vjust=-1, size=5,  colour="blue")
+    # HK
+    fig <- fig + annotate("segment", x = 0,  xend = hk_index, y = 1-t, yend = 1-t, colour = "red", lty="dashed")
+    fig <- fig + annotate("text", y = 1-t, x=0, label=paste("t = ",(1-t)*100,"%",sep=""), vjust=-1, hjust=0, size=3.8,  colour="red")
+    fig <- fig + annotate("segment", x = hk_index,  xend = hk_index, y = -.1, yend = 1, colour = "red", lty="dashed")
+    fig <- fig + annotate("segment", x = hk_index,  xend = hk_index+500, y = 0.5, yend = 0.5, colour = "red", arrow=arrow(type="closed",length = unit(0.1, "inches")))
+    fig <- fig + annotate("text", y = 0.5, x=hk_index+250, label="HK", vjust=-1, size=5,  colour="red")
+
+
+    return(fig)
+}
+
+
 # gets the discrete cds of the data
 inverse_cdf <- function(data)
 {
@@ -147,7 +217,38 @@ inverse_cdf <- function(data)
     return (df)
 }
 
+binsearch_for <- function(data, value)
+{
+    n <- length(data)
+    # binary search
+    left <- 1
+    right <- n
+    while (left < right - 1)
+    {
+        # integer divide
+        mid <- (right + left)%/%2
+        if (data[mid] < value)
+        {
+            # bottom half
+            left <- mid
+        }
+        else
+        {
+            # top half
+            right <- mid
+        }
+    }
 
+    # return the index of the first element with the given value
+    if (data[left] == value)
+    {
+        return(left)
+    }
+    else
+    {
+        return(right)
+    }
+}
 
 get_thres_freq <- function(df, t)
 {
@@ -285,7 +386,54 @@ plot_expr_inv_cdf_nolog <- function(expr_name="hpa", threshold = 1, t_lbl=thresh
     return(fig)
 }
 
+for_all_expr <- function(func)
+{
+    exprs <- get_exprs()
+    for (e in exprs)
+    {
+        func(e)
+    }
+}
 
+plot_all_expr <- function(plot_func)
+{
+    exprs <- get_exprs()
+    figs <- list()
+    for (e in exprs)
+    {
+        fig <- plot_func(e)
+        figs <- c(figs, list(fig))
+    }
+    all_figs <- do.call(grid.arrange, figs)
+    return(all_figs)
+}
+
+save_plots_tissue_expr_distr <- function()
+{
+    pdf("../figs/tissue_expression_distr.pdf", width=6, height=4.6)
+    p <- plot_all_expr(plot_tissue_expr_count_hist)
+    print(p)
+    dev.off()
+}
+
+save_plots_tshk_example <- function()
+{
+    figs <- list()
+    p <- plot_tshk_example("hpa", 0.15)
+    figs <- c(figs, list(p))
+
+    figs <- list()
+    p <- plot_tshk_example("hpa", 0.25)
+    figs <- c(figs, list(p))
+
+    par(mfrow=c(1,2))
+    all_figs <- do.call(arrangeGrob, figs)
+
+    # TODO: FIXME this still plots one plot rather than two
+    pdf("../figs/tshk_class_example.pdf", width=6, height=2.6)
+    print(all_figs)
+    dev.off()
+}
 
 save_plots_expr_value_hist <- function()
 {
@@ -321,7 +469,6 @@ save_plots_expr_value_hist <- function()
     # actually plot:
 
     pdf("../figs/expression_thresholding.pdf", width=6, height=4.8)
-    #print(all_figs)
     print(all_figs)
     dev.off()
 }
