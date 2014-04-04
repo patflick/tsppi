@@ -62,6 +62,12 @@ get_ppi_graph_stats <- function(ppi_name="string")
     }
 
     # TODO: summarize node wise data
+    degrees <- node_props$degree
+    props[["avg_degree"]] <- mean(degrees)
+    props[["max_degree"]] <- max(degrees)
+
+    local_cc <- node_props$ClusteringCoeff
+    props[["avg_local_cc"]] <- mean(local_cc)
 
 
     # return result
@@ -69,15 +75,15 @@ get_ppi_graph_stats <- function(ppi_name="string")
 }
 
 
-ppi_stats_table <- function()
+get_ppi_global_stats_table <- function()
 {
+    stats_tbl <- data.frame()
     for (p in get_ppis())
     {
         stats <- get_ppi_graph_stats(p)
-        # todo output as table! (i.e. somehow reformat as data frame and then
-        # output as LaTeX table with the columns that i want!
-        print(stats)
+        stats_tbl <- rbind(stats_tbl, t(stats))
     }
+    return(stats_tbl)
 }
 
 
