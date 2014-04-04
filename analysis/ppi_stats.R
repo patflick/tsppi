@@ -1,5 +1,6 @@
 
 library(ggplot2)
+library(xtable) # for converting a data frame into a latex table
 
 get_ppis <- function()
 {
@@ -8,6 +9,61 @@ get_ppis <- function()
     return(ppis)
 }
 
+to_short_expr_name <- function(s)
+{
+    if (s == "bossi")
+    {
+        return ("Bossi")
+    }
+    else if (s == "string")
+    {
+        return ("STRING")
+    }
+    else if (s == "psicquic_all")
+    {
+        return ("IMEx")
+    }
+    else if (s == "havu")
+    {
+        return ("Havugimana")
+    }
+    else if (s == "ccsb")
+    {
+        return ("HI-2012")
+    }
+    else
+    {
+        return ("ERROR ERROR ERROR FIXME")
+    }
+}
+
+to_expr_name <- function(s)
+{
+    if (s == "bossi")
+    {
+        return ("Bossi & Lehner")
+    }
+    else if (s == "string")
+    {
+        return ("STRING DB")
+    }
+    else if (s == "psicquic_all")
+    {
+        return ("IMEx PSICQUIC")
+    }
+    else if (s == "havu")
+    {
+        return ("Havugimana et al.")
+    }
+    else if (s == "ccsb")
+    {
+        return ("CCSB HI-2012")
+    }
+    else
+    {
+        return ("ERROR ERROR ERROR FIXME")
+    }
+}
 
 get_node_properties <- function(ppi_name = "string")
 {
@@ -81,11 +137,24 @@ get_ppi_global_stats_table <- function()
     for (p in get_ppis())
     {
         stats <- get_ppi_graph_stats(p)
+        stats$ppi <- p
         stats_tbl <- rbind(stats_tbl, t(stats))
     }
     return(stats_tbl)
 }
 
+get_latex_summary_stats <- function()
+{
+    # get data and map alias to actual PPI name
+    data <- get_ppi_global_stats_table()
+    data$ppi_name <- sapply(data$ppi, to_short_expr_name)
+
+    # select columns to output
+    out_data <- data[,c("ppi_name", "n", "m", "avg_deg", "max_deg", "conn_comp")]
+
+    # actually output the latex table to be copy-pasted into the report
+    xtable(out_data)
+}
 
 # TODO: degree distribution fit
 #   - print fit of degree distr to binomial, poisson and scale-free
