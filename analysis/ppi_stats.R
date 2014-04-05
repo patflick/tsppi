@@ -1,6 +1,7 @@
 
 library(ggplot2)
 library(xtable) # for converting a data frame into a latex table
+library(igraph) # for power.law.fit
 
 get_ppis <- function()
 {
@@ -161,6 +162,83 @@ get_latex_summary_stats <- function()
 #   - and according distribution parameters
 #   - maybe plot showing the different degree distributions and the real one
 #     (to show the actual goodness of fit)
+
+fit_binom_degree_distr <- function(degrees)
+{
+    n <- length(degrees)
+    m <- sum(degrees) / 2
+    k <- max(degrees)
+    p <- 2 * n / (n*(n-1))
+    max_degr = k
+
+    # Random graph model with binomial distribution
+    x <- 1:max_degr
+    freq <- dbinom(x, n-1, p)
+    binom_model <- data.frame(degree=x, Freq=freq)
+
+    return(binom_model)
+}
+
+fit_poisson_degree_distr <- function(degrees)
+{
+    avg_deg <- mean(degrees)
+    # the lambda of the poisson distribution is the average degree
+    lambda <- avg_deg
+
+    # Random graph model with binomial distribution
+    x <- 1:max_degr
+    freq <- dpois(x, lambda)
+    pois_model <- data.frame(degree=x, Freq=freq)
+    return(pois_model)
+}
+
+fit_powerlaw_degree_distr <- function(degrees)
+{
+    # use igraph power.law.fit
+    fit <- power.law.fit(degrees)
+
+    return(fit)
+}
+
+# plot degree distribution of the networks
+plot_degree_distr <- function(ppi_name="string")
+{
+    # get the data
+    data <- get_node_properties(ppi_name)
+
+    # get the degrees
+    degree <- as.integer(data$degree)
+
+    degree_distr <- as.data.frame(prop.table(table(degree)))
+    degree_distr$degree <- as.integer(degree_distr$degree)
+
+
+    # random graph (Erdos Renyi, or Gilbert)
+
+    # get parameters for Gilbert random graph model G(N,p)
+    # get binomial random model
+    binom_model <- fit_binom_degree_distr(degree)
+    # cut of zero freq
+    binom_model <- binom_model[which(binom_model$Freq > 1e-20),]
+
+    # poisson model
+    pois_model <- fit_poisson_degree_distr(degree)
+
+    # cut of zero freq
+    pois_model <- pois_model[which(pois_model$Freq > 1e-20),]
+
+
+    fig <- ggplot(degree_distr, aes(x=degree, y=Freq)) + geom_point(colour="grey60")
+    fig <- fig + scale_x_log10() + scale_y_log10()
+    fig <- fig + geom_line(data=binom_model, aes(x=degree, y=Freq), lty="dashed")
+    fig <- fig + geom_line(data=pois_model, aes(x=degree, y=Freq), lty="dotted")
+    fig <- fig + coord_cartesian(ylim =c(min(degree_distr$Freq)/5, max(degree_distr$Freq) * 5))
+
+
+    return(fig)
+}
+
+
 
 
 # TODO: plot clustering coeff against p (N-1) [ see barabasi book ]
