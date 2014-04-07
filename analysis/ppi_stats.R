@@ -185,6 +185,21 @@ get_latex_summary_stats <- function()
 #   - maybe plot showing the different degree distributions and the real one
 #     (to show the actual goodness of fit)
 
+dpowerlaw <- function(x, alpha, xmin=1)
+{
+    pdf <- ((alpha - 1)/xmin) * (x / xmin)**(-alpha)
+    return (pdf)
+}
+
+ppowerlaw <- function(x, alpha, xmin=1)
+{
+    # integral over pdf starting from xmin
+    # http://www.wolframalpha.com/input/?i=integral+from+b+to+t+of+%28%28a-1%29%2Fb%29%28x%2Fb%29%5E%28-a%29
+    cdf <- 1 - (x / xmin)**(-alpha+1)
+    return(cdf)
+}
+
+
 fit_binom_degree_distr <- function(degrees)
 {
     n <- length(degrees)
@@ -309,7 +324,7 @@ plot_degree_distr <- function(ppi_name="string")
     degree <- as.integer(data$degree)
 
     degree_distr <- as.data.frame(prop.table(table(degree)))
-    degree_distr$degree <- as.integer(degree_distr$degree)
+    degree_distr$degree <- as.integer(levels(degree_distr$degree))
 
 
     # random graph (Erdos Renyi, or Gilbert)
@@ -336,7 +351,31 @@ plot_degree_distr <- function(ppi_name="string")
     #fig <- fig + geom_line(data=pois_model, aes(x=degree, y=Freq), lty="dotted")
     fig <- fig + geom_line(data=powerlaw_model, aes(x=degree, y=Freq), colour="red")
     fig <- fig + geom_line(data=exp_model, aes(x=degree, y=Freq), colour="blue", lty="dotted")
-    fig <- fig + xlab("Degree") + ylab("Frequency")
+    fig <- fig + xlab("Degree") + ylab("Rel. Frequency")
+    #fig <- fig + coord_cartesian(xlim=c(0,1000), ylim =c(min(degree_distr$Freq)/5, max(degree_distr$Freq) * 5))
+
+    fig$degrees <- degree
+    fig$degree_distr <- degree_distr
+
+    return(fig)
+}
+
+# plot degree distribution of the networks
+plot_degree_distr_no_fit <- function(ppi_name="string")
+{
+    # get the data
+    data <- get_node_properties(ppi_name)
+
+    # get the degrees
+    degree <- as.integer(data$degree)
+
+    degree_distr <- as.data.frame(prop.table(table(degree)))
+    degree_distr$degree <- as.integer(levels(degree_distr$degree))
+
+
+    fig <- ggplot(degree_distr, aes(x=degree, y=Freq)) + geom_point(colour="grey60")
+    #fig <- fig + scale_x_log10() + scale_y_log10()
+    fig <- fig + xlab("Degree") + ylab("Rel. Frequency")
     #fig <- fig + coord_cartesian(xlim=c(0,1000), ylim =c(min(degree_distr$Freq)/5, max(degree_distr$Freq) * 5))
 
     fig$degrees <- degree
@@ -359,6 +398,20 @@ plot_degree_distr_linear <- function(ppi_name="string")
     return (fig)
 }
 
+plot_degree_distr_linear_no_fit <- function(ppi_name="string")
+{
+    # get basic plot
+    fig <- plot_degree_distr_no_fit(ppi_name)
+    degrees <- fig$degrees
+    degree_distr <- fig$degree_distr
+
+    # plots on linear scale (i.e. no log scale)
+    adj_max <- quantile(degrees, 0.99) # throw away the top 1000th elements
+    fig <- fig + coord_cartesian(xlim=c(0,adj_max), ylim =c(0, max(degree_distr$Freq)*1.05))
+
+    return (fig)
+}
+
 
 plot_degree_distr_log <- function(ppi_name="string")
 {
@@ -376,18 +429,33 @@ plot_degree_distr_log <- function(ppi_name="string")
     return (fig)
 }
 
+plot_degree_distr_log_no_fit <- function(ppi_name="string")
+{
+    # get basic plot
+    fig <- plot_degree_distr_no_fit(ppi_name)
+    degrees <- fig$degrees
+    degree_distr <- fig$degree_distr
+
+    # plots on linear scale (i.e. no log scale)
+    adj_max <- max(degrees) # throw away the top 1000th elements
+    y_range <- c(min(degree_distr$Freq)/2, max(degree_distr$Freq) * 2)
+    fig <- fig + scale_x_log10() + scale_y_log10()
+    fig <- fig + coord_cartesian(xlim=c(1-0.,adj_max),ylim=y_range)
+
+    return (fig)
+}
 
 #######################################################################
 #                          string db example                          #
 #######################################################################
 
-plot_example <- function(ppi_name="string")
+plot_example_2 <- function(ppi_name="string")
 {
     p <- ppi_name
     figs <- list()
     # plot linear plot (maybe without any distribution lines?)
     fig <- plot_degree_distr_linear(p)
-    fig <- fig + labs(title=to_expr_name(p))
+    fig <- fig + labs(title="Degree Distribution of STRING")
     figs <- c(figs, list(fig))
     # TODO TODO
 
@@ -399,6 +467,83 @@ plot_example <- function(ppi_name="string")
 }
 
 
+plot_example_1 <- function(ppi_name="string")
+{
+    # simple linear plot of degree distribution
+    p <- ppi_name
+    figs <- list()
+    fig <- plot_degree_distr_linear_no_fit(p)
+    fig <- fig + labs(title="Degree Distribution of STRING")
+    figs <- c(figs, list(fig))
+
+    fig <- plot_degree_distr_log_no_fit(p)
+    fig <- fig + labs(title="... with log-log scaling")
+    figs <- c(figs, list(fig))
+
+    all_figs <- do.call(grid.arrange, c(figs,list(nrow=1)))
+    return(all_figs)
+}
+
+save_example_1 <- function()
+{
+    pdf("../figs/ppi_degr_distr.pdf", width=6.3, height=2.6)
+    fig <- plot_example_1("string")
+    print(fig)
+    dev.off()
+}
+
+explode_degree_distr <- function(degree_distr)
+{
+    max_degr <- max(degree_distr$degree)
+    expl_degree_distr <- data.frame(degree=1:max_degr, Freq=rep(0, max_degr))
+    # fill the new distr with the old values where they fit
+    for (i in 1:length(degree_distr$degree))
+    {
+        deg <- degree_distr$degree[i]
+        frq <- degree_distr$Freq[i]
+        expl_degree_distr$Freq[deg] = frq
+    }
+    return(expl_degree_distr)
+}
+
+
+test_fits <- function(ppi_name="string")
+{
+    # get the data
+    data <- get_node_properties(ppi_name)
+
+    # get the degrees
+    degree <- as.integer(data$degree)
+
+    degree_distr <- as.data.frame(table(degree))
+    degree_distr$degree <- as.integer(levels(degree_distr$degree))
+
+    degree_distr <- explode_degree_distr(degree_distr)
+
+    # random graph (Erdos Renyi, or Gilbert)
+
+    # get binomial random model
+    binom_model <- fit_binom_degree_distr(degree)
+    # cut of zero freq
+
+    fit <- chisq.test(degree_distr$Freq, p=binom_model$Freq, rescale.p=TRUE)
+    print(fit)
+
+
+    # poisson model
+    pois_model <- fit_poisson_degree_distr(degree)
+    # cut of zero freq
+
+    # power law fit
+    powerlaw_model <- fit_powerlaw_degree_distr(degree)
+    # TODO: this might fail because of xmin
+    fit <- chisq.test(degree_distr$Freq, p=powerlaw_model$Freq, rescale.p=TRUE)
+    print(fit)
+    # exponential distribution
+    exp_model <- fit_exp_degree_distr(degree)
+    fit <- chisq.test(degree_distr$Freq, p=exp_model$Freq, rescale.p=TRUE)
+    print(fit)
+}
 
 #######################################################################
 #                               all ppis distr                        #
