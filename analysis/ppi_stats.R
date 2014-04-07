@@ -200,39 +200,38 @@ ppowerlaw <- function(x, alpha, xmin=1)
 }
 
 
-fit_binom_degree_distr <- function(degrees)
+#######################################################################
+#           Fit degree distributions (parameter estimation)           #
+#######################################################################
+
+fit_binom <- function(degrees)
 {
     n <- length(degrees)
     m <- sum(degrees) / 2
-    k <- max(degrees)
     p <- 2 * m / (n*(n-1))
-    max_degr = k
 
-    # Random graph model with binomial distribution
-    x <- 1:max_degr
-    freq <- dbinom(x, n-1, p)
-    binom_model <- data.frame(degree=x, Freq=freq)
-
-    return(binom_model)
+    params <- list(size=n-1, prob=p)
+    return(params)
 }
 
-fit_poisson_degree_distr <- function(degrees)
+fit_poisson <- function(degrees)
 {
     avg_deg <- mean(degrees)
     # the lambda of the poisson distribution is the average degree
     lambda <- avg_deg
-    max_degr <- max(degrees)
-
-    # Random graph model with binomial distribution
-    x <- 1:max_degr
-    freq <- dpois(x, lambda)
-    pois_model <- data.frame(degree=x, Freq=freq)
-    return(pois_model)
+    params <- list(lambda=lambda)
+    return(params)
 }
 
-fit_powerlaw_degree_distr <- function(degrees)
+fit_exp <- function(degrees)
 {
-    # use igraph power.law.fit to get alpha and xmin
+    rate <- 1 / mean(degrees)
+    params <- list(rate=rate)
+    return(params)
+}
+
+fit_powerlaw <- function(degrees)
+{
     if (TRUE)
     {
         fit <- power.law.fit(degrees, implementation="R.mle")
@@ -245,37 +244,63 @@ fit_powerlaw_degree_distr <- function(degrees)
         alpha <- fit$alpha
         xmin <- fit$xmin
     }
+    params <- list(alpha=alpha, xmin=xmin)
+    return(params)
+}
 
+
+#######################################################################
+#              Fit degree distribution to 1:max(degrees)              #
+#######################################################################
+
+# fits the given degree distribution with the given fitter
+# and applies the pdf with the fitted parameters to the range 1:max(degrees)
+# and returns these values
+fit_degree_distr <- function(degrees, fitter, pdf)
+{
+    # get pdf parameters
+    params <- fitter(degrees)
+    # get maximum degree and with it the input range
     max_degr <- max(degrees)
-    x <- xmin:max_degr
+    x <- 1:max_degr
 
-    # apply power law to input range of degrees
-    freq <- (alpha-1)/xmin * (x / xmin)**(-alpha)
+    # get the pdf at the given points
+    freq <- do.call(pdf, c(list(x), params))
+    model <- data.frame(degree=x, Freq=freq)
 
-    # combine results
-    powerlaw_model <- data.frame(degree=x, Freq=freq)
+    return(model)
+}
 
-    return(powerlaw_model)
+
+#######################################################################
+#                  wrapper functions for convenience                  #
+#######################################################################
+
+fit_binom_degree_distr <- function(degrees)
+{
+    return(fit_degree_distr(degrees, fit_binom, dbinom))
+}
+
+
+fit_poisson_degree_distr <- function(degrees)
+{
+    return(fit_degree_distr(degrees, fit_poisson, dpois))
+}
+
+fit_powerlaw_degree_distr <- function(degrees)
+{
+    return(fit_degree_distr(degrees, fit_powerlaw, dpowerlaw))
 }
 
 fit_exp_degree_distr <- function(degrees)
 {
-    # the lambda of the exponential distribution is simply given by
-    # the 1/ mean()
-
-    lambda <- 1 / mean(degrees)
-
-    max_degr <- max(degrees)
-    x <- 1:max_degr
-
-    # apply exponential probability distribution
-    freq <- lambda * exp(- lambda*x)
-
-    # combine results
-    exp_model <- data.frame(degree=x, Freq=freq)
-    return(exp_model)
+    return(fit_degree_distr(degrees, fit_exp, dexp))
 }
 
+
+#######################################################################
+#                      Plotting: generate legend                      #
+#######################################################################
 
 #extract legend
 #https://github.com/hadley/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs
@@ -312,6 +337,11 @@ degr_distr_legend <- function()
     dev.off()
     return(leg)
 }
+
+
+#######################################################################
+#                    Plotting degree distributions                    #
+#######################################################################
 
 
 # plot degree distribution of the networks
@@ -492,6 +522,12 @@ save_example_1 <- function()
     dev.off()
 }
 
+
+#######################################################################
+#                          Helper functions                           #
+#######################################################################
+
+
 explode_degree_distr <- function(degree_distr)
 {
     max_degr <- max(degree_distr$degree)
@@ -506,6 +542,21 @@ explode_degree_distr <- function(degree_distr)
     return(expl_degree_distr)
 }
 
+expected_freq <- function(brks, cdf, cdf_params)
+{
+    est_freqs <- c()
+    # for all intervals of the breaks
+    for (i in 2:length(brks))
+    {
+        from <- brks[i-1]
+        to <- brks[i]
+
+        from_val <- do.call(cdf, c(from, cdf_params))
+        to_val <- do.call(cdf, c(to, cdf_params))
+        est_freqs <- c(est_freqs, to_val - from_val)
+    }
+    return(est_freqs)
+}
 
 test_fits <- function(ppi_name="string")
 {
@@ -515,33 +566,56 @@ test_fits <- function(ppi_name="string")
     # get the degrees
     degree <- as.integer(data$degree)
 
-    degree_distr <- as.data.frame(table(degree))
-    degree_distr$degree <- as.integer(levels(degree_distr$degree))
+#    degree_distr <- as.data.frame(table(degree))
+#    degree_distr$degree <- as.integer(levels(degree_distr$degree))
+#
+#    degree_distr <- explode_degree_distr(degree_distr)
 
-    degree_distr <- explode_degree_distr(degree_distr)
+    # TODO: unify the fits and tests into a single function
+    # TODO: output table of fits per PPI (all are bad fits, but most are much
+    #       much worse than powerlaw)
+    # TODO: only fit for tail of degree distribution (i.e. ignoring low degree
+    #       nodes in the evaluation of fit) [HOW? do i calc the freq for only the tail?]
+
+    brks <- unique(quantile(degree, probs=seq(0,1, by=0.1)))
+    c <- cut(degree, breaks=brks, include.lowest=TRUE)
+    t <- as.data.frame(table(c))
 
     # random graph (Erdos Renyi, or Gilbert)
 
     # get binomial random model
-    binom_model <- fit_binom_degree_distr(degree)
+    bin_expected_freq <- expected_freq(brks, pbinom, fit_binom(degree))
+    #binom_model <- fit_binom_degree_distr(degree)
     # cut of zero freq
 
-    fit <- chisq.test(degree_distr$Freq, p=binom_model$Freq, rescale.p=TRUE)
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    print("Fit Binom")
     print(fit)
 
 
     # poisson model
-    pois_model <- fit_poisson_degree_distr(degree)
+    #pois_model <- fit_poisson_degree_distr(degree)
+    bin_expected_freq <- expected_freq(brks, ppois, fit_poisson(degree))
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    print("Fit Poisson")
+    print(fit)
     # cut of zero freq
 
     # power law fit
-    powerlaw_model <- fit_powerlaw_degree_distr(degree)
+    #powerlaw_model <- fit_powerlaw_degree_distr(degree)
     # TODO: this might fail because of xmin
-    fit <- chisq.test(degree_distr$Freq, p=powerlaw_model$Freq, rescale.p=TRUE)
+    bin_expected_freq <- expected_freq(brks, ppowerlaw, fit_powerlaw(degree))
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    #fit <- chisq.test(degree_distr$Freq, p=powerlaw_model$Freq, rescale.p=TRUE)
+    print("Fit powerlaw")
     print(fit)
+
     # exponential distribution
-    exp_model <- fit_exp_degree_distr(degree)
-    fit <- chisq.test(degree_distr$Freq, p=exp_model$Freq, rescale.p=TRUE)
+    #exp_model <- fit_exp_degree_distr(degree)
+    bin_expected_freq <- expected_freq(brks, pexp, fit_exp(degree))
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    #fit <- chisq.test(degree_distr$Freq, p=exp_model$Freq, rescale.p=TRUE)
+    print("Fit exp")
     print(fit)
 }
 
