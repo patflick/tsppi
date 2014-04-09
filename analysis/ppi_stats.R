@@ -179,11 +179,6 @@ get_latex_summary_stats <- function()
     xtable(out_data)
 }
 
-# TODO: degree distribution fit
-#   - print fit of degree distr to binomial, poisson and scale-free
-#   - and according distribution parameters
-#   - maybe plot showing the different degree distributions and the real one
-#     (to show the actual goodness of fit)
 
 dpowerlaw <- function(x, alpha, xmin=1)
 {
@@ -230,20 +225,24 @@ fit_exp <- function(degrees)
     return(params)
 }
 
+fit_powerlaw_tail <- function(degrees)
+{
+    # use PLFit fitter, to only fit the tail (self optimizing)
+    fit <- power.law.fit(degrees, implementation="plfit")
+    alpha <- fit$alpha
+    xmin <- fit$xmin
+
+    params <- list(alpha=alpha, xmin=xmin)
+    return(params)
+}
+
 fit_powerlaw <- function(degrees)
 {
-    if (TRUE)
-    {
-        fit <- power.law.fit(degrees, implementation="R.mle")
-        alpha <- coef(fit)
-        xmin <- min(degrees)
-    }
-    else
-    {
-        fit <- power.law.fit(degrees, implementation="plfit")
-        alpha <- fit$alpha
-        xmin <- fit$xmin
-    }
+    # use max likelihood estimator (fits whole degree distribution)
+    fit <- power.law.fit(degrees, implementation="R.mle")
+    alpha <- coef(fit)
+    xmin <- min(degrees)
+
     params <- list(alpha=alpha, xmin=xmin)
     return(params)
 }
@@ -262,10 +261,21 @@ fit_degree_distr <- function(degrees, fitter, pdf)
     params <- fitter(degrees)
     # get maximum degree and with it the input range
     max_degr <- max(degrees)
-    x <- 1:max_degr
+    min_degr <- max(1, params$xmin)
+    x <- min_degr:max_degr
 
-    # get the pdf at the given points
+    # get the relative frequency (i.e. the pdf)
     freq <- do.call(pdf, c(list(x), params))
+
+    # maybe needs adjusting
+    if (min_degr > 1)
+    {
+        # normalization
+        freq_normalization <- length(degrees[which(degrees >= min_degr)]) / length(degrees)
+        freq <- freq * freq_normalization
+    }
+
+    # get the model
     model <- data.frame(degree=x, Freq=freq)
 
     return(model)
@@ -292,6 +302,11 @@ fit_powerlaw_degree_distr <- function(degrees)
     return(fit_degree_distr(degrees, fit_powerlaw, dpowerlaw))
 }
 
+fit_powerlaw_tail_degree_distr <- function(degrees)
+{
+    return(fit_degree_distr(degrees, fit_powerlaw_tail, dpowerlaw))
+}
+
 fit_exp_degree_distr <- function(degrees)
 {
     return(fit_degree_distr(degrees, fit_exp, dexp))
@@ -314,24 +329,26 @@ degr_distr_legend <- function()
 {
     # TODO: create some plot using all the previous data
     x <- 1:10
-    df <- data.frame(x=x, y=x, z=as.character(x), y1=x, y2=x, y3=x)
+    df <- data.frame(x=x, y=x, z=as.character(x), y1=x, y2=x, y3=x, y4=x)
 
     dists <- c("Actual Distribution", "Binomial Distribution",
-               "Exponential Distribution", "Power-law Distribution")
+               "Exponential Distribution", "Power-law Distribution",
+               "Power-law Distribution (tail only)")
     x11()
     fig <- ggplot(data=df, aes(x=x, y=y, lty="a", color="a", shape="a")) + geom_point()+
             geom_line(data=df, aes(x=x,y=-y1/2,lty="b", color="b", shape="b")) +
             geom_line(data=df, aes(x=x,y=-y2,lty="c", color="c", shape="c")) +
             geom_line(data=df, aes(x=x,y=y3,lty="d", color="d", shape="d")) +
+            geom_line(data=df, aes(x=x,y=y4,lty="e", color="e", shape="e")) +
             scale_colour_manual(name = "Distributions",
                       labels = dists,
-                      values = c("grey60", "black", "blue", "red")) +
+                      values = c("grey60", "black", "blue", "red", "orange")) +
             scale_linetype_manual(name = "Distributions",
                       labels = dists,
-                      values = c("blank", "dashed", "dotted", "solid")) +
+                      values = c("blank", "dotdash", "dotted", "dashed", "solid")) +
             scale_shape_manual(name = "Distributions",
                       labels = dists,
-                      values = c(16, 26, 26, 26))
+                      values = c(16, 26, 26, 26, 26))
 
     leg <- g_legend(fig)
     dev.off()
@@ -371,15 +388,17 @@ plot_degree_distr <- function(ppi_name="string")
 
     # power law fit
     powerlaw_model <- fit_powerlaw_degree_distr(degree)
+    powerlaw_tail_model <- fit_powerlaw_tail_degree_distr(degree)
     # exponential distribution
     exp_model <- fit_exp_degree_distr(degree)
 
 
     fig <- ggplot(degree_distr, aes(x=degree, y=Freq)) + geom_point(colour="grey60")
     #fig <- fig + scale_x_log10() + scale_y_log10()
-    fig <- fig + geom_line(data=binom_model, aes(x=degree, y=Freq), lty="dashed")
+    fig <- fig + geom_line(data=binom_model, aes(x=degree, y=Freq), lty="dotdash")
     #fig <- fig + geom_line(data=pois_model, aes(x=degree, y=Freq), lty="dotted")
-    fig <- fig + geom_line(data=powerlaw_model, aes(x=degree, y=Freq), colour="red")
+    fig <- fig + geom_line(data=powerlaw_tail_model, aes(x=degree, y=Freq), colour="orange", lty="solid", size=1)
+    fig <- fig + geom_line(data=powerlaw_model, aes(x=degree, y=Freq), lty="dashed", colour="red")
     fig <- fig + geom_line(data=exp_model, aes(x=degree, y=Freq), colour="blue", lty="dotted")
     fig <- fig + xlab("Degree") + ylab("Rel. Frequency")
     #fig <- fig + coord_cartesian(xlim=c(0,1000), ylim =c(min(degree_distr$Freq)/5, max(degree_distr$Freq) * 5))
@@ -558,6 +577,23 @@ expected_freq <- function(brks, cdf, cdf_params)
     return(est_freqs)
 }
 
+# returns the breaks for quantile binning
+quantile_brks <- function(x, q=0.1)
+{
+    brks <- unique(quantile(x, probs=seq(0,1, by=q)))
+    return(brks)
+}
+
+# creates quantiled bins and returns a data frame of frequencies
+quantile_binning <- function(x, q=0.1)
+{
+    brks <- quantile_brks(x, q)
+    c <- cut(x, breaks=brks, include.lowest=TRUE)
+    t <- as.data.frame(table(c))
+    return (t)
+}
+
+
 test_fits <- function(ppi_name="string")
 {
     # get the data
@@ -571,52 +607,71 @@ test_fits <- function(ppi_name="string")
 #
 #    degree_distr <- explode_degree_distr(degree_distr)
 
-    # TODO: unify the fits and tests into a single function
     # TODO: output table of fits per PPI (all are bad fits, but most are much
     #       much worse than powerlaw)
     # TODO: only fit for tail of degree distribution (i.e. ignoring low degree
     #       nodes in the evaluation of fit) [HOW? do i calc the freq for only the tail?]
+    brks <- quantile_brks(degree)
+    t <- quantile_binning(degree)
 
-    brks <- unique(quantile(degree, probs=seq(0,1, by=0.1)))
-    c <- cut(degree, breaks=brks, include.lowest=TRUE)
-    t <- as.data.frame(table(c))
-
-    # random graph (Erdos Renyi, or Gilbert)
+    result <- list()
+    result[["ppi"]] <- ppi_name
 
     # get binomial random model
     bin_expected_freq <- expected_freq(brks, pbinom, fit_binom(degree))
-    #binom_model <- fit_binom_degree_distr(degree)
-    # cut of zero freq
-
     fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
-    print("Fit Binom")
-    print(fit)
-
+    result$binomial_chi <- fit$statistic
+    result$binomial_p <- fit$p.value
 
     # poisson model
-    #pois_model <- fit_poisson_degree_distr(degree)
     bin_expected_freq <- expected_freq(brks, ppois, fit_poisson(degree))
     fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
-    print("Fit Poisson")
-    print(fit)
-    # cut of zero freq
-
-    # power law fit
-    #powerlaw_model <- fit_powerlaw_degree_distr(degree)
-    # TODO: this might fail because of xmin
-    bin_expected_freq <- expected_freq(brks, ppowerlaw, fit_powerlaw(degree))
-    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
-    #fit <- chisq.test(degree_distr$Freq, p=powerlaw_model$Freq, rescale.p=TRUE)
-    print("Fit powerlaw")
-    print(fit)
+    result$poisson_chi <- fit$statistic
+    result$poisson_p <- fit$p.value
 
     # exponential distribution
-    #exp_model <- fit_exp_degree_distr(degree)
     bin_expected_freq <- expected_freq(brks, pexp, fit_exp(degree))
     fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
-    #fit <- chisq.test(degree_distr$Freq, p=exp_model$Freq, rescale.p=TRUE)
-    print("Fit exp")
-    print(fit)
+    result$exp_chi <- fit$statistic
+    result$exp_p <- fit$p.value
+
+    # power law fit
+    bin_expected_freq <- expected_freq(brks, ppowerlaw, fit_powerlaw(degree))
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    result$powerlaw_chi <- fit$statistic
+    result$powerlaw_p <- fit$p.value
+
+    # power law fit (PLfit: tail only)
+    params <- fit_powerlaw_tail(degree)
+    # resample breaks by filtered degrees
+    deg_over_xmin <- degree[which(degree >= params$xmin)]
+    brks <- quantile_brks(deg_over_xmin)
+    t <- quantile_binning(deg_over_xmin)
+    bin_expected_freq <- expected_freq(brks, ppowerlaw, params)
+    fit <- chisq.test(t$Freq, p=bin_expected_freq, rescale.p=TRUE)
+    result$powerlaw_tail_chi <- fit$statistic
+    result$powerlaw_tail_p <- fit$p.value
+
+    return(result)
+}
+
+fit_test_table <- function()
+{
+    df <- data.frame()
+    for (p in get_ppis())
+    {
+        chi_fits <- test_fits(p)
+        #chi_fits$ppi <- to_short_expr_name(p)
+        df <- rbind(df, as.data.frame(chi_fits))
+        #df$ppi[length(df$ppi)] <- to_short_expr_name(p)
+    }
+
+    # now transpose the data frame
+    dft <- as.data.frame(t(df[,2:ncol(df)]))
+    colnames(dft) <- df[,1]
+    df <- dft
+
+    return(df)
 }
 
 #######################################################################
@@ -647,7 +702,6 @@ save_all_ppi_degr_distr <- function()
     all_figs <- plot_all_ppis_degr_distr()
     print(all_figs)
     dev.off()
-    return (figs)
 }
 
 # TODO: plot clustering coeff against p (N-1) [ see barabasi book ]
