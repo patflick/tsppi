@@ -4,89 +4,8 @@ library(xtable) # for converting a data frame into a latex table
 library(gridExtra) # for `grid.arrange`
 library(igraph) # for power.law.fit
 
-get_ppis <- function()
-{
-    # FIXME: do this properly (not hardcoded)
-    ppis <- c("bossi", "string", "psicquic_all", "havu", "ccsb")
-    return(ppis)
-}
-
-to_short_expr_name <- function(s)
-{
-    if (s == "bossi")
-    {
-        return ("Bossi")
-    }
-    else if (s == "string")
-    {
-        return ("STRING")
-    }
-    else if (s == "psicquic_all")
-    {
-        return ("IMEx")
-    }
-    else if (s == "havu")
-    {
-        return ("Havugimana")
-    }
-    else if (s == "ccsb")
-    {
-        return ("HI-2012")
-    }
-    else
-    {
-        return ("ERROR ERROR ERROR FIXME")
-    }
-}
-
-to_expr_name <- function(s)
-{
-    if (s == "bossi")
-    {
-        return ("Bossi & Lehner")
-    }
-    else if (s == "string")
-    {
-        return ("STRING")
-    }
-    else if (s == "psicquic_all")
-    {
-        return ("IMEx (PSICQUIC)")
-    }
-    else if (s == "havu")
-    {
-        return ("Havugimana et al.")
-    }
-    else if (s == "ccsb")
-    {
-        return ("CCSB HI-2012")
-    }
-    else
-    {
-        return ("ERROR ERROR ERROR FIXME")
-    }
-}
-
-
-plot_all_ppis <- function(plot_func, addTitle=FALSE, ...)
-{
-    figs <- list()
-    for (p in get_ppis())
-    {
-        fig <- plot_func(p, ...)
-        if (addTitle)
-        {
-            fig <- fig + labs(title=to_short_expr_name(p))
-        }
-        figs <- c(figs, list(fig))
-    }
-
-    figs <- c(figs, list(degr_distr_legend()))
-
-    all_figs <- do.call(grid.arrange, figs)
-    return(all_figs)
-}
-
+# load PPI name mapping
+source("ppi_utils.R")
 
 get_node_properties <- function(ppi_name = "string")
 {
@@ -170,7 +89,7 @@ get_latex_summary_stats <- function()
 {
     # get data and map alias to actual PPI name
     data <- get_ppi_global_stats_table()
-    data$ppi_name <- sapply(data$ppi, to_short_expr_name)
+    data$ppi_name <- sapply(data$ppi, to_short_ppi_name)
 
     # select columns to output
     out_data <- data[,c("ppi_name", "n", "m", "avg_deg", "max_deg", "conn_comp")]
@@ -661,9 +580,9 @@ fit_test_table <- function()
     for (p in get_ppis())
     {
         chi_fits <- test_fits(p)
-        #chi_fits$ppi <- to_short_expr_name(p)
+        #chi_fits$ppi <- to_short_ppi_name(p)
         df <- rbind(df, as.data.frame(chi_fits))
-        #df$ppi[length(df$ppi)] <- to_short_expr_name(p)
+        #df$ppi[length(df$ppi)] <- to_short_ppi_name(p)
     }
 
     # now transpose the data frame
@@ -685,7 +604,7 @@ plot_all_ppis_degr_distr <- function()
     for (p in get_ppis())
     {
         fig <- plot_degree_distr_log(p)
-        fig <- fig + labs(title=to_expr_name(p))
+        fig <- fig + labs(title=to_ppi_name(p))
         figs <- c(figs, list(fig))
     }
 

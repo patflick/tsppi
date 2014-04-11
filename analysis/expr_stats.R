@@ -2,67 +2,8 @@ library(ggplot2)
 library(reshape2) # for `melt`
 library(gridExtra) # for `grid.arrange`
 
-get_exprs <- function()
-{
-    exprs <- c("emtab", "gene_atlas", "rnaseq_atlas", "hpa") #, "hpa_all")
-    return(exprs)
-}
-
-to_short_expr_name <- function(s)
-{
-    if (s == "emtab")
-    {
-        return ("Body Map")
-    }
-    else if (s == "gene_atlas")
-    {
-        return ("Gene Atlas")
-    }
-    else if (s == "rnaseq_atlas")
-    {
-        return ("RNAseq Atlas")
-    }
-    else if (s == "hpa")
-    {
-        return ("HPA")
-    }
-    else if (s == "hpa_all")
-    {
-        return ("HPA All")
-    }
-    else
-    {
-        return ("ERROR ERROR ERROR FIXME")
-    }
-}
-
-to_expr_name <- function(s)
-{
-    if (s == "emtab")
-    {
-        return ("Illumina Body Map 2.0")
-    }
-    else if (s == "gene_atlas")
-    {
-        return ("Gene Atlas")
-    }
-    else if (s == "rnaseq_atlas")
-    {
-        return ("RNAseq Atlas")
-    }
-    else if (s == "hpa")
-    {
-        return ("Human Protein Atlas")
-    }
-    else if (s == "hpa_all")
-    {
-        return ("Human Protein Atlas (all)")
-    }
-    else
-    {
-        return ("ERROR ERROR ERROR FIXME")
-    }
-}
+# load Expr name mapping
+source("expr_utils.R")
 
 get_all_expr_size_stats <- function()
 {
