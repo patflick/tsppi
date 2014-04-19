@@ -5,10 +5,13 @@ library(plyr) # for `round_any`
 library(gridExtra) # for `grid.arrange`
 library(Hmisc) # for spearman correlation + p-value
 library(reshape2) # for `melt`
+library(scales) # for muted
 
 # returns a list of all PPIs that can be analyzed
-# TODO: put this as a unified function somewhere (using the SQL database)
-# TODO: also so that the order of PPIs is always the same for all plots
+
+source("./ppi_utils.R")
+source("./expr_utils.R")
+
 get_ppis <- function()
 {
     # FIXME: do this properly (not hardcoded)
@@ -43,7 +46,6 @@ lower_se <- function(x) mean(x) - std(x)
 # data getter:
 get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="degree_test")
 {
-
     # load sql config and get connection
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
@@ -65,9 +67,8 @@ get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas"
 
 
 # reproducing the Bossi&Lehner plot (Fig. 1 B)
-plot_degree_vs_expr <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="maxts_degree")
+plot_degree_vs_expr <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="coexpr_degree")
 {
-
     data <- get_expression_property_data(ppi_name, expr_name, prop_name)
 
     # round off the exressedcount as simple "binning"
@@ -84,7 +85,7 @@ plot_degree_vs_expr <- function(ppi_name="bossi",expr_name="gene_atlas",prop_nam
 
     error_width <- max_expr_count / 20
 
-    print(paste(ppi_name, expr_name,":",length(data$ExpressedCount)))
+    #print(paste(ppi_name, expr_name,":",length(data$ExpressedCount)))
 
     # plot using ggplot2
     fig <- ggplot(data, aes(x=ExpressedCount, y=Value)) +
@@ -93,7 +94,7 @@ plot_degree_vs_expr <- function(ppi_name="bossi",expr_name="gene_atlas",prop_nam
           # draw error bars:
           stat_summary(fun.ymin="lower_se", fun.ymax="upper_se",
                        geom="errorbar", width=error_width) +
-          labs(title=paste("PPI:", ppi_name, ", Expr:", expr_name)) +
+          labs(title=paste("PPI:", to_short_ppi_name(ppi_name), ", Expr:", to_short_expr_name(expr_name))) +
           xlab("Num. Tissues") +
           ylab("Degree")
 
@@ -166,7 +167,6 @@ test_bossi_1 <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="co
 test_bossi_1_ttest <- function(ppi_name="bossi", expr_name="gene_atlas", prop_name="coexpr_degree")
 {
     data <- get_expression_property_data(ppi_name, expr_name, prop_name)
-
 
     #max_expr_count <- max(data$ExpressedCount)
     nTissues <- max(data$TotalCount)
@@ -244,6 +244,10 @@ plot_tiles_for_ppi_expr <- function(plot_data, font_size=4)
         plot_data$label = paste(round(plot_data$value, 1), " %", sep="")
     }
 
+    # translate the db aliases into the real names of PPIs and Expression sets
+    plot_data$expr <- to_short_expr_name(plot_data$expr)
+    plot_data$ppi <- to_short_ppi_name(plot_data$ppi)
+
     # plot as heatmap table
     # TODO generalize the heatmap table into a separate function
     p <- ggplot(plot_data, aes(expr, ppi)) +
@@ -300,6 +304,52 @@ fill_ppi_expr_dataframe <- function(func, ...)
     return(data_frame)
 }
 
+# calls the function for each combination and concatenates all returned
+# data frames
+concat_ppi_expr_dataframe <- function(func, ...)
+{
+    # result:
+    df <- NULL
+
+    ppis <- get_ppis()
+    exprs <- get_exprs()
+    # for all ppis and expression data sets
+    for (p in ppis)
+    {
+        for (e in exprs)
+        {
+            # print out?
+            print(paste("getting output for: ",p, " and ", e))
+            #call the given function
+            result <- func(p,e, ...)
+
+            if (is.null(df))
+            {
+                # first call
+                df <- result
+            }
+            else
+            {
+                # concat
+                df <- rbind(df, result)
+            }
+        }
+    }
+    return (df)
+}
+
+# plots the threshold trends for the given threshold -> percentage data
+plot_threshold_trends <- function(data)
+{
+    data$grp <- paste(data$ppi, data$expr)
+    fig <- ggplot(data, aes(x=threshold, y=value, group=grp, colour=value)) +
+            geom_line()+
+            scale_colour_gradient2("Percent", midpoint=50, limits=c(0,100), mid="gray70") +
+            xlab("Threshold") +
+            ylab("========== REPLACE ME ===========")
+    return(fig)
+}
+
 
 # finds the TS/HK classification threshold for which at least 50% of tissue
 # specific proteins interact with housekeeping proteins
@@ -340,9 +390,6 @@ where_reaches_50_percent_interaction <- function(ppi_name="bossi", expr_name="ge
 
 # 2.) to which extend to tissue-specific proteins interact with most widely expressed proteins?
 
-# TODO: ok this can be plotted now, the plot has to be made `nicer`
-#       especially considering the graident colors. Also add more than one label
-#       per square
 test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125)
 {
     # get the data
@@ -356,11 +403,39 @@ test_bossi_2 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
                             data$Max > (1-threshold) * nTissues)
 
     # TODO actually output/plot this data
-    print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
+    #print(paste(ppi_name, expr_name, ": ", n_ts_hk_neighbor, "/", nTS, " max expr neighbor ", max(data$Max), "/",nTissues, " total size:", length(data$ExpressedCount) ))
     result <- n_ts_hk_neighbor*100.0/nTS
     return (list(value=result, label=paste(round(result, 1), "%")))
 }
 
+test_bossi_2_all_t <- function(ppi_name="bossi", expr_name="gene_atlas")
+{
+    # prepare the output data frame
+    df <- data.frame(ppi=character(0), expr=character(0), value=double(0), thres=double(0), stringsAsFactors=FALSE)
+
+    # get the data
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
+
+    # get size
+    nTissues <- max(data$TotalCount)
+    halfTissues <- nTissues %/% 2
+    # for all possible threshold values
+    for (tsTissues in 1:halfTissues)
+    {
+        nTS <- sum(data$ExpressedCount <= tsTissues & data$ExpressedCount != 0)
+        n_ts_hk_neighbor <- sum(data$ExpressedCount <= tsTissues &
+                                data$ExpressedCount != 0 &
+                                data$Max > (nTissues - tsTissues))
+        threshold <- tsTissues / nTissues
+        result <- n_ts_hk_neighbor*100.0/nTS
+
+        # save result into dataframe
+        new_row <- data.frame(ppi=ppi_name, expr=expr_name, value=result, threshold=threshold, stringsAsFactors=FALSE)
+        df <- rbind(df, new_row)
+    }
+
+    return (df)
+}
 
 test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125, account_for_ts=FALSE)
 {
@@ -428,6 +503,36 @@ test_bossi_3 <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.1
     # get result (percentage of HK that interact with non HK)
     result <- n_hk_non_hk_neighbor*100.0/nHK
     return (list(value=result, label=paste(round(result, 1), "%")))
+}
+
+test_bossi_3_all_t <- function(ppi_name="bossi", expr_name="gene_atlas")
+{
+    # prepare the output data frame
+    df <- data.frame(ppi=character(0), expr=character(0), value=double(0), thres=double(0), stringsAsFactors=FALSE)
+
+    # get the data
+    data <- get_min_max_neighbor_expr_data(ppi_name, expr_name)
+
+    # get size
+    nTissues <- max(data$TotalCount)
+    halfTissues <- nTissues %/% 2
+    # for all possible threshold values
+    for (tsTissues in 1:halfTissues)
+    {
+        nHK <- sum(data$ExpressedCount >= (nTissues - tsTissues) & data$ExpressedCount != 0)
+        # get the number of HK proteins that interact directly with non HK proteins
+        n_hk_non_hk_neighbor <- sum(data$ExpressedCount >= (nTissues - tsTissues) &
+                                    data$ExpressedCount != 0 &
+                                    data$Min < (nTissues - tsTissues))
+        threshold <- tsTissues / nTissues
+        result <- n_hk_non_hk_neighbor*100.0/nHK
+
+        # save result into dataframe
+        new_row <- data.frame(ppi=ppi_name, expr=expr_name, value=result, threshold=threshold, stringsAsFactors=FALSE)
+        df <- rbind(df, new_row)
+    }
+
+    return (df)
 }
 
 test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125, account_for_hk=FALSE)
@@ -736,6 +841,15 @@ bossi_2 <- function()
     }
     # TODO? output single plot examples
 
+    # threshold trends
+    data <- concat_ppi_expr_dataframe(test_bossi_2_all_t)
+    fig <- plot_threshold_trends(data)
+    fig <- fig + ylab("Percentage")
+    fig <- fig + labs(title="TS interacting with HK by threshold")
+    pdf("../figs/bossi2_thres_trends.pdf",  width=5, height=2.6)
+    print(fig)
+    dev.off()
+
     # Random expectation:
     for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
     {
@@ -777,6 +891,15 @@ bossi_3 <- function()
         print(p)
         dev.off()
     }
+
+    # threshold trends
+    data <- concat_ppi_expr_dataframe(test_bossi_3_all_t)
+    fig <- plot_threshold_trends(data)
+    fig <- fig + ylab("Percentage")
+    fig <- fig + labs(title="HK interacting with non HK by threshold")
+    pdf("../figs/bossi3_thres_trends.pdf",  width=5, height=2.6)
+    print(fig)
+    dev.off()
 
     # Random expectation
     for (t in c(0.1, 0.125, 0.15, 0.2, 0.5))
