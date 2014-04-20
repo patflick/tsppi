@@ -441,11 +441,14 @@ test_bossi_2_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", t
 {
     # get the data
     # TODO: test different degree sources
-    if (account_for_ts){
-        data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
-    } else {
-        data <- get_expression_property_data(ppi_name, expr_name, "degree")
-    }
+    #if (account_for_ts){
+    #    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    #} else {
+    #    data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    #}
+
+    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+
     data <- data[which(data$ExpressedCount != 0),]
 
     nTissues <- max(data$TotalCount)
@@ -538,11 +541,12 @@ test_bossi_3_all_t <- function(ppi_name="bossi", expr_name="gene_atlas")
 test_bossi_3_expectation <- function(ppi_name="bossi", expr_name="gene_atlas", threshold=0.125, account_for_hk=FALSE)
 {
     # get the data
-    if (account_for_hk){
-        data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
-    } else {
-        data <- get_expression_property_data(ppi_name, expr_name, "degree")
-    }
+    #if (account_for_hk){
+    #    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
+    #} else {
+    #    data <- get_expression_property_data(ppi_name, expr_name, "degree")
+    #}
+    data <- get_expression_property_data(ppi_name, expr_name, "coexpr_degree")
     data <- data[which(data$ExpressedCount != 0),]
 
     nTissues <- max(data$TotalCount)
@@ -723,8 +727,9 @@ plot_expectation_corr <- function(data, threshold)
 
     r <- cor(data$value, data$expected_value)
 
-    fig <- ggplot(data, aes(x = value, y = expected_value)) +
+    fig <- ggplot(data, aes(x = value, y = expected_value, colour=value)) +
         geom_point() +
+        scale_colour_gradient2("Percent", midpoint=50, limits=c(0,100), mid="gray70") +
         coord_fixed(1, xlim=c(0,100), ylim=c(0,100)) +
         geom_abline(intercept = 0, slope = 1, colour="grey60",lty="dotted") +
         geom_abline(intercept = lm_intercept, slope = lm_slope, colour="grey40") +
@@ -865,14 +870,14 @@ bossi_2 <- function()
         # random expectation correlation
         data <- bossi_2_expectation_corr(t, FALSE)
         p <- plot_expectation_corr(data, t)
-        pdf(paste("../figs/bossi2_expected_corr_t",t*100,".pdf",sep=""), width=4, height=4)
+        pdf(paste("../figs/bossi2_expected_corr_t",t*100,".pdf",sep=""), width=5, height=4)
         print(p)
         dev.off()
 
         # random expectation correlation accounting for TS degree distr
         data <- bossi_2_expectation_corr(t, TRUE)
         p <- plot_expectation_corr(data, t)
-        pdf(paste("../figs/bossi2_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=4, height=4)
+        pdf(paste("../figs/bossi2_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=5, height=4)
         print(p)
         dev.off()
     }
@@ -915,14 +920,14 @@ bossi_3 <- function()
         # random expectation correlation
         data <- bossi_3_expectation_corr(t, FALSE)
         p <- plot_expectation_corr(data, t)
-        pdf(paste("../figs/bossi3_expected_corr_t",t*100,".pdf",sep=""), width=4, height=4)
+        pdf(paste("../figs/bossi3_expected_corr_t",t*100,".pdf",sep=""), width=5, height=4)
         print(p)
         dev.off()
 
         # random expectation correlation accounting for TS degree distr
         data <- bossi_3_expectation_corr(t, TRUE)
         p <- plot_expectation_corr(data, t)
-        pdf(paste("../figs/bossi3_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=4, height=4)
+        pdf(paste("../figs/bossi3_expected_corr_tsdegree_t",t*100,".pdf",sep=""), width=5, height=4)
         print(p)
         dev.off()
     }
