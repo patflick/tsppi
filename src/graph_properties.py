@@ -21,6 +21,12 @@ save_results = False
 #  get and save graph properties  #
 ###################################
 
+# TODO: abstract and do the get/save for node and graph properties for all of
+#       these classes of graphs:
+#       - global graph (ppi, property)
+#       - global ts graph (ppi, expr, property)
+#       - all the ts graphs (ppi, expr, tissue, property) [actually put each ppi X expr into own table !?]
+
 def save_node_properties(graph_name, gene_names, properties, sql_conn):
     for prop_name, props in properties.items():
         if len(gene_names) != len(props):
@@ -105,7 +111,7 @@ def save_graph_properties(graph_name, props, sql_conn):
     cur.close()
     sql_conn.commit()
 
-
+# TODO: this for tsppi subgraphs
 def get_graph_properties(ppi, con, verbose=True, timings={}):
     # get graph and name
     g = ppi.getGraph()
