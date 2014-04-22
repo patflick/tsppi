@@ -13,6 +13,9 @@ import pappi.id_mapping
 import pappi.sql
 from pappi.data_config import *
 
+# whether to save the calculated results
+save_results = False
+
 
 ###################################
 #  get and save graph properties  #
@@ -79,7 +82,8 @@ def get_node_properties(ppi, con, verbose=True, timings={}):
     # save the node properties to the database
     if verbose:
         print("saving node properties")
-    #save_node_properties(ppi_name, ppi.getAllGenes(), props, con)
+    if save_results:
+        save_node_properties(ppi_name, ppi.getAllGenes(), props, con)
     return timings
 
 
@@ -153,7 +157,8 @@ def get_graph_properties(ppi, con, verbose=True, timings={}):
         print("    ! graph not connected -> setting diameter = 0")
         props['diameter'] = 0
     timings[(ppi_name, "diameter")] = time.time() - t
-    #save_graph_properties(ppi_name, props, con)
+    if save_results:
+        save_graph_properties(ppi_name, props, con)
     return timings
 
 
