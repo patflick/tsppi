@@ -359,10 +359,11 @@ for ppi_name in PPI_NAMES:
         tsppi = sqlio.load_tsppi_graph(ppi_name, expr_name)
 
         # global ts graph properties
-        timings = get_graph_properties(ppi, con, True, timings)
+        timings = get_graph_properties(tsppi, con, True, timings)
         timings = get_node_properties(tsppi, con, True, timings)
         save_timings(timings, con, "ppi_graph_stats_timings")
 
+sys.exit(1)
 
 ###########################################
 #  Get tissue specific tissue properties  #
