@@ -73,12 +73,20 @@ get_ts_node_properties_exprcount <- function(ppi_name="string",expr_name="gene_a
 
     # create table names
     ppi_node_prop_tbl <- paste(ppi_name,expr_name, "ts_node_properties", sep="_")
+    # for TS<->HK classification
     expr_count_table <- paste(expr_name,"core_expr_counts", sep="_")
+    # for filtering of expressed genes
+    expr_core_table <- paste(expr_name, "core", sep="_")
 
-    # create SQL query to get ExpressionCount vs Degree
+    # create SQL query to
+    #         get only those that are actually expressed in the tissue we are
+    #         looking at, otherwise the results will be highly skewedby
+    #         including all the degree 0 nodes with betweenness zero
     query <- paste("SELECT a.*, b.ExpressedCount, b.TotalCount FROM ",
                    ppi_node_prop_tbl, " AS a INNER JOIN ", expr_count_table,
-                   " AS b ON a.Gene = b.Gene WHERE ExpressedCount > 0")
+                   " AS b ON a.Gene = b.Gene INNER JOIN ", expr_core_table,
+                   " AS c ON a.Gene = c.Gene AND a.Tissue = c.Type ",
+                   " WHERE c.Expressed = 1")
 
     # load ppi network from db
     data <- dbGetQuery(con, query)
