@@ -17,9 +17,12 @@ from pappi.data_config import *
 save_results = True
 
 # TODO: do this kind of analysis later (nodes with higher betweenness as before)
-#SELECT * FROM ccsb_hpa_ts_node_properties AS a INNER JOIN hpa as B ON a.Gene =
-# b.Gene AND a.Tissue = b.Type INNER JOIN ccsb_node_properties AS c ON a.Gene =
-# c.Gene WHERE b.Expressed = 1 AND a.Betweenness > c.Betweenness
+# SELECT Gene, Tissue, a.Betweenness AS ts_betweenness, c.Betweenness as betweenness, a.degree AS ts_degree, c.degree AS degree, d.ExpressionCount, d.TotalCount
+#   FROM ccsb_hpa_ts_node_properties AS a
+#   INNER JOIN hpa_core as B ON a.Gene =  b.Gene AND a.Tissue = b.Type
+#   INNER JOIN ccsb_node_properties AS c ON a.Gene = c.Gene
+#   INNER JOIN hpa_core_expr_counts AS d ON a.Gene = d.Gene
+# WHERE b.Expressed = 1 AND a.Betweenness > c.Betweenness
 
 # TODO: put these somewhere unified
 PPI_NAMES = ["string", "ccsb", "bossi", "psicquic_all", "havu"]
