@@ -77,6 +77,20 @@ plot_betw_incr_distr <- function()
     data <- get_incr_betweenness_nodes()
 }
 
+# step 1: get number of unique genes per PPIxEXPR
+get_num_genes <- function()
+{
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    query <- paste("SELECT ppi, expr, COUNT(DISTINCT Gene) FROM ",
+                   SQL_INCR_TABLE_NAME,
+                   " GROUP BY ppi, expr")
+    data <- dbGetQuery(con, query)
+
+    return(data)
+}
+
 # TODO:
 # - further aggregation of data for analysis
 # - find genes that "profit" in tissue specific networks
