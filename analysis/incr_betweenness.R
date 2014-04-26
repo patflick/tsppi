@@ -91,6 +91,25 @@ get_num_genes <- function()
     return(data)
 }
 
+# step 2: find genes that appear multiple times
+get_genes_count <- function()
+{
+    source("sql_config.R")
+    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+
+    query <- paste("SELECT Gene, COUNT(DISTINCT (ppi || expr)) as cnt, ",
+                   " AVG(ts_betweenness *1.0 / betweenness) as avg_bw_factor, ",
+                   " AVG(ExpressedCount *1.0 / TotalCount) as avg_expr",
+                   " FROM ", SQL_INCR_TABLE_NAME,
+                   " GROUP BY Gene ",
+                   " HAVING cnt >= 2 AND avg_expr <= 0.1",
+                   " ORDER BY avg_bw_factor DESC ")
+    data <- dbGetQuery(con, query)
+
+    return(data)
+}
+
+
 # TODO:
 # - further aggregation of data for analysis
 # - find genes that "profit" in tissue specific networks
