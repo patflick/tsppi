@@ -97,12 +97,14 @@ get_genes_count <- function()
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
 
-    query <- paste("SELECT Gene, COUNT(DISTINCT (ppi || expr)) as cnt, ",
+    query <- paste("SELECT Gene, COUNT(DISTINCT ppi) as cnt_ppi, ",
+                   " COUNT(DISTINCT expr) as cnt_expr, ",
+                   " COUNT(DISTINCT ppi||expr) as cnt, ",
                    " AVG(ts_betweenness *1.0 / betweenness) as avg_bw_factor, ",
                    " AVG(ExpressedCount *1.0 / TotalCount) as avg_expr",
                    " FROM ", SQL_INCR_TABLE_NAME,
                    " GROUP BY Gene ",
-                   " HAVING cnt >= 2 AND avg_expr <= 0.1",
+                   " HAVING cnt_ppi >= 2 AND cnt_expr >= 2 AND avg_expr <= 0.2",
                    " ORDER BY avg_bw_factor DESC ")
     data <- dbGetQuery(con, query)
 
@@ -110,8 +112,6 @@ get_genes_count <- function()
 }
 
 
-# TODO:
-# - further aggregation of data for analysis
 # - find genes that "profit" in tissue specific networks
 # - highest scoring: -> get some biological background on these (maybe they are good genes)
 # - obviously this method has its limitations, since the betweenness centrality is also close
