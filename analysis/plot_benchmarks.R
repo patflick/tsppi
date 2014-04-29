@@ -117,7 +117,7 @@ plot_bw_benchmark <- function()
             coord_flip() +
             xlab("") +
             ylab("Run time [s]") +
-            labs(title="Run time of methods for computation of clustering coefficients")
+            labs(title="Run time of methods for computation of the betweenness centrality")
     return (fig)
 }
 

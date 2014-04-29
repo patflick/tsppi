@@ -1,0 +1,26 @@
+,ppi,expr,outerloop,innerloop,pe
+3,STRING,HPA All,316.327,320.721,STRING - HPA All
+5,STRING,RNAseq Atlas,111.096,131.616,STRING - RNAseq Atlas
+2,STRING,Gene Atlas,106.085,67.5713,STRING - Gene Atlas
+4,STRING,Body Map,103.89,92.1763,STRING - Body Map
+18,IMEx,HPA All,78.7306,76.4317,IMEx - HPA All
+13,Bossi,HPA All,69.4709,68.3277,Bossi - HPA All
+20,IMEx,RNAseq Atlas,36.8177,35.1199,IMEx - RNAseq Atlas
+17,IMEx,Gene Atlas,33.1703,20.7754,IMEx - Gene Atlas
+15,Bossi,RNAseq Atlas,33.0257,32.3545,Bossi - RNAseq Atlas
+12,Bossi,Gene Atlas,32.727,23.1341,Bossi - Gene Atlas
+19,IMEx,Body Map,31.7813,28.0399,IMEx - Body Map
+14,Bossi,Body Map,27.1182,24.061,Bossi - Body Map
+1,STRING,HPA,15.6106,17.2162,STRING - HPA
+23,Havugimana,HPA All,4.70868,4.88025,Havugimana - HPA All
+11,Bossi,HPA,4.70613,5.06357,Bossi - HPA
+16,IMEx,HPA,4.62163,4.97113,IMEx - HPA
+8,HI-2012,HPA All,4.56971,4.7818,HI-2012 - HPA All
+22,Havugimana,Gene Atlas,3.61054,3.9077,Havugimana - Gene Atlas
+25,Havugimana,RNAseq Atlas,2.82404,2.77413,Havugimana - RNAseq Atlas
+10,HI-2012,RNAseq Atlas,2.44345,2.34542,HI-2012 - RNAseq Atlas
+24,Havugimana,Body Map,2.16371,2.0469,Havugimana - Body Map
+7,HI-2012,Gene Atlas,1.78465,0.567865,HI-2012 - Gene Atlas
+9,HI-2012,Body Map,1.42588,1.39794,HI-2012 - Body Map
+21,Havugimana,HPA,0.624344,0.646303,Havugimana - HPA
+6,HI-2012,HPA,0.098503,0.08912,HI-2012 - HPA
