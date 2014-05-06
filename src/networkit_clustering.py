@@ -131,7 +131,7 @@ con = pappi.sql.get_conn(DATABASE)
 class mywriter:
     def __init__(self):
         pass
-    def writerow(row):
+    def writerow(self, row):
         print(row)
 
 
