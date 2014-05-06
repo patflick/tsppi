@@ -19,6 +19,17 @@ from pappi.data_config import *
 # histogram function using counter
 from collections import Counter
 
+# import EnrichmentStudy
+import sys
+sys.path.append("/home/patrick/dev/bio/goatools")
+#from goatools.go_enrichment import GOEnrichmentStudy
+# import PPI networkit
+#sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
+sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
+#import NetworKit
+import ppi_networkit
+# set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
+ppi_networkit.setLogLevel("ERROR")
 
 def cluster_hist(clusters):
     c = Counter()
@@ -69,10 +80,6 @@ def print_sorted_hist(hist):
     for size, num in iter(sorted(hist.items())):
         print(str(size) + ":\t" + str(num))
 
-# import EnrichmentStudy
-import sys
-sys.path.append("/home/patrick/dev/bio/goatools")
-#from goatools.go_enrichment import GOEnrichmentStudy
 
 
 def enrichment_scoring(cluster, all_genes, assoc):
@@ -111,6 +118,21 @@ def score_clusters(clusters, tsppi, sim_scorer):
     return scores
 
 
+def clusters_modul(clusters, graph):
+    modsPerCluster = ppi_networkit.ModularityPerCluster()
+    mods = modsPerCluster.getModularities(clusters, graph)
+
+    modNK = ppi_networkit.Modularity()
+    mod = modNK.getQuality(clusters, graph)
+
+    # get sum and check if same:
+    if not (mod == sum(mods)):
+        print("ERROR ERROR ERROR")
+
+    print("modularities: " + str(sum(mods)))
+    print("modularity: " + str(mod))
+
+
 #############################
 #  get database connection  #
 #############################
@@ -139,6 +161,9 @@ def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=Non
     start = time.time()
     scores = score_clusters(clusters, tsppi, scorer)
     t_score = time.time() - start
+
+    # cluster modularities
+    clusters_modul(clusters, graph)
 
     avg_score = numpy.mean([score for size, score in scores])
 
@@ -178,10 +203,12 @@ def run_ts_clustering(tsppi, clusterer, scorer, writer=None):
         ts_graph = tsppi.getTsGraph(t)
         run_and_score_clustering(ts_graph, clusterer, scorer, writer, tissue_name)
 
+
 def run_edgescore_clustering(tsppi, clusterer, scorer, writer=None):
     print("Scoring on EdgeScore graph (TS/Global hybrid via edge weighting)")
     g = tsppi.getEdgeScoreGraph()
     run_and_score_clustering(g, clusterer, scorer, writer, "EdgeScoring")
+
 
 def run_global_clustering(tsppi, clusterer, scorer, writer=None):
     print("scoring on global graph:")
@@ -204,12 +231,6 @@ def get_scorer(con):
     return scorer
 
 
-#sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
-sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
-#import NetworKit
-import ppi_networkit
-# set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
-ppi_networkit.setLogLevel("ERROR")
 sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
 #ppi = "string"
@@ -218,6 +239,8 @@ ppi = "ccsb"
 ppi = "bossi"
 expr = "hpa"
 expr = "hpa_all"
+ppi = "string"
+expr = "gene_atlas"
 tsppi = sqlio.load_tsppi_graph(ppi, expr)
 g = tsppi.getGraph()
 
@@ -231,7 +254,7 @@ import csv
 filename = "PLM_g_" + str(gamma) + "_" + ppi + "_" + expr + ".csv"
 with open(filename, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(["PPI","ClusterSize", "ClusterScore"])
+    writer.writerow(["PPI", "ClusterSize", "ClusterScore"])
     run_global_clustering(tsppi, clusterer, scorer, writer)
     run_ts_clustering(tsppi, clusterer, scorer, writer)
     run_edgescore_clustering(tsppi, clusterer, scorer, writer)
