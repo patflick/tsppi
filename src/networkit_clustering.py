@@ -105,32 +105,20 @@ def score_clusters(clusters, tsppi, sim_scorer):
         #enrichment_scoring(cl_node_names, all_genes, assoc)
 
         # calculate the cluster score
-        if len(cl_node_names) < 4:
-            #print("cluster too small: " + str(cl_node_names))
-            continue
-        in_score, ext_score = sim_scorer.gene_cluster_score(cl_node_names)
-        scores.append((size, in_score - ext_score))
-        # print it (TODO: do something with it (for statistics)
-        #print(str(cluster) + "\t" + str(size) + "\t" + str(in_score)
-        #      + "\t" + str(ext_score) + "\t" + str(in_score - ext_score))
-    #return numpy.percentile([score for size, score in scores], 75)
-    #return sum(score for size, score in scores)/len(scores)
+        if len(cl_node_names) >= 2:
+            in_score, ext_score = sim_scorer.gene_cluster_score(cl_node_names)
+            scores.append((cluster, size, in_score - ext_score))
+        else:
+            scores.append((cluster, size, 0.0))
+
     return scores
 
 
 def clusters_modul(clusters, graph):
     modsPerCluster = ppi_networkit.ModularityPerCluster()
     mods = modsPerCluster.getModularities(clusters, graph)
+    return mods
 
-    modNK = ppi_networkit.Modularity()
-    mod = modNK.getQuality(clusters, graph)
-
-    # get sum and check if same:
-    if not (mod == sum(mods)):
-        print("ERROR ERROR ERROR")
-
-    print("modularities: " + str(sum(mods)))
-    print("modularity: " + str(mod))
 
 
 #############################
@@ -139,6 +127,12 @@ def clusters_modul(clusters, graph):
 
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
+
+class mywriter:
+    def __init__(self):
+        pass
+    def writerow(row):
+        print(row)
 
 
 #################################
@@ -163,13 +157,14 @@ def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=Non
     t_score = time.time() - start
 
     # cluster modularities
-    clusters_modul(clusters, graph)
+    mods = clusters_modul(clusters, graph)
 
-    avg_score = numpy.mean([score for size, score in scores])
+    avg_score = numpy.mean([score for i, size, score in scores])
 
+    # write out result
     if not writer is None:
-        for size, score in scores:
-            writer.writerow([category, size, score])
+        for i, size, score in scores:
+            writer.writerow([category, i, size, score, mods[i]])
 
     # print some scoring results:
     print("avg score: " + str(avg_score) + ", time clustering: "
@@ -240,7 +235,8 @@ ppi = "bossi"
 expr = "hpa"
 expr = "hpa_all"
 ppi = "string"
-expr = "gene_atlas"
+expr = "rnaseq_atlas"
+ppi = "ccsb"
 tsppi = sqlio.load_tsppi_graph(ppi, expr)
 g = tsppi.getGraph()
 
@@ -253,7 +249,8 @@ scorer = get_scorer(con)
 import csv
 filename = "PLM_g_" + str(gamma) + "_" + ppi + "_" + expr + ".csv"
 with open(filename, 'w') as f:
-    writer = csv.writer(f)
+    #writer = csv.writer(f)
+    writer = mywriter()
     writer.writerow(["PPI", "ClusterSize", "ClusterScore"])
     run_global_clustering(tsppi, clusterer, scorer, writer)
     run_ts_clustering(tsppi, clusterer, scorer, writer)
