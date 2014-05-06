@@ -31,6 +31,12 @@ import ppi_networkit
 # set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
 ppi_networkit.setLogLevel("ERROR")
 
+
+# TODO: put these somewhere unified
+PPI_NAMES = ["string", "ccsb", "bossi", "psicquic_all", "havu"]
+EXPR_NAMES = ["hpa", "hpa_all", "emtab", "rnaseq_atlas", "gene_atlas"]
+
+
 def cluster_hist(clusters):
     c = Counter()
     cluster_sizes = clusters.subsetSizes()
@@ -120,7 +126,6 @@ def clusters_modul(clusters, graph):
     return mods
 
 
-
 #############################
 #  get database connection  #
 #############################
@@ -128,11 +133,53 @@ def clusters_modul(clusters, graph):
 # get new database connection
 con = pappi.sql.get_conn(DATABASE)
 
-class mywriter:
+
+class StdoutWriter:
     def __init__(self):
         pass
+
     def writerow(self, row):
         print(row)
+
+
+class SQLWriter:
+    def __init__(self, con, drop_table=True):
+        self.con = con
+        self.ppi = ""
+        self.expr = ""
+        self.cur = con.cursor()
+        if drop_table:
+            self.cur.execute('DROP TABLE IF EXISTS clustering_scoring_results')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS clustering_scoring_results '
+                         '(ppi, expr, clusterer, type, cluster_id, size, '
+                         ' bpscore, modularity)')
+
+    def set_ppi(self, ppi):
+        self.ppi = ppi
+
+    def set_expr(self, ppi):
+        self.expr = expr
+
+    def set_clusterer(self, clusterer):
+        self.clusterer = clusterer
+
+    def writerow(self, row):
+        self.cur.execute('INSERT INTO clustering_scoring_results '
+                         'VALUES (?,?,?,?,?,?,?,?)',
+                         tuple([self.ppi, self.expr, self.clusterer]
+                               + list(row)))
+
+    def commit(self):
+        """"
+        Commits all current changes and re-opens the cursor.
+        """
+        self.cur.close()
+        self.con.commit()
+        self.cur = self.con.cursor()
+
+    def __del__(self):
+        self.cur.close()
+        self.con.commit()
 
 
 #################################
@@ -228,33 +275,40 @@ def get_scorer(con):
 
 sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
-#ppi = "string"
-#expr = "gene_atlas"
-ppi = "ccsb"
-ppi = "bossi"
-expr = "hpa"
-expr = "hpa_all"
-ppi = "string"
-expr = "rnaseq_atlas"
-ppi = "ccsb"
-tsppi = sqlio.load_tsppi_graph(ppi, expr)
-g = tsppi.getGraph()
+# initialize GO/BP scorer
+scorer = get_scorer(con)
 
+# create results writer
+writer = SQLWriter(con)
+
+# get clusterer
 #clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
-
 gamma = 1
 clusterer = ppi_networkit.PLM(gamma=gamma)
-scorer = get_scorer(con)
-#run_multiple_clusterers(g, scorer)
-import csv
-filename = "PLM_g_" + str(gamma) + "_" + ppi + "_" + expr + ".csv"
-with open(filename, 'w') as f:
-    #writer = csv.writer(f)
-    writer = mywriter()
-    writer.writerow(["PPI", "ClusterSize", "ClusterScore"])
-    run_global_clustering(tsppi, clusterer, scorer, writer)
-    run_ts_clustering(tsppi, clusterer, scorer, writer)
-    run_edgescore_clustering(tsppi, clusterer, scorer, writer)
+writer.set_clusterer("PLM-gamma-1.0")
+
+for ppi in PPI_NAMES:
+    for expr in EXPR_NAMES:
+        print()
+        print("##################################################")
+        print(" getting graph properties of `" + ppi + "_" + expr + "`")
+        print("##################################################")
+
+        # set the current ppi and expr
+        writer.set_ppi(ppi)
+        writer.set_expr(expr)
+
+        # get graph
+        tsppi = sqlio.load_tsppi_graph(ppi, expr)
+        g = tsppi.getGraph()
+
+        # run the clustering algos
+        run_global_clustering(tsppi, clusterer, scorer, writer)
+        run_ts_clustering(tsppi, clusterer, scorer, writer)
+        run_edgescore_clustering(tsppi, clusterer, scorer, writer)
+
+        # commit all current changes to the SQL server
+        writer.commit()
 
 
 ##############################
