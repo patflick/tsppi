@@ -279,36 +279,38 @@ sqlio = ppi_networkit.SQLiteIO(DATABASE)
 scorer = get_scorer(con)
 
 # create results writer
-writer = SQLWriter(con)
+writer = SQLWriter(con, False)
 
 # get clusterer
 #clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
-gamma = 1
-clusterer = ppi_networkit.PLM(gamma=gamma)
-writer.set_clusterer("PLM-gamma-1.0")
+#gamma = 1
+# ("PLM-gamma-1.0", ppi_networkit.PLM(gamma=1)),
+clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)), ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)), ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)), ("PLP", ppi_networkit.PLP()), ("CNM", ppi_networkit.CNM())]
+for clusterer_name, clusterer in clusterers:
+    writer.set_clusterer(clusterer_name)
 
-for ppi in PPI_NAMES:
-    for expr in EXPR_NAMES:
-        print()
-        print("##################################################")
-        print(" getting graph properties of `" + ppi + "_" + expr + "`")
-        print("##################################################")
+    for ppi in PPI_NAMES:
+        for expr in EXPR_NAMES:
+            print()
+            print("##################################################")
+            print(" getting graph properties of `" + ppi + "_" + expr + "`")
+            print("##################################################")
 
-        # set the current ppi and expr
-        writer.set_ppi(ppi)
-        writer.set_expr(expr)
+            # set the current ppi and expr
+            writer.set_ppi(ppi)
+            writer.set_expr(expr)
 
-        # get graph
-        tsppi = sqlio.load_tsppi_graph(ppi, expr)
-        g = tsppi.getGraph()
+            # get graph
+            tsppi = sqlio.load_tsppi_graph(ppi, expr)
+            g = tsppi.getGraph()
 
-        # run the clustering algos
-        run_global_clustering(tsppi, clusterer, scorer, writer)
-        run_ts_clustering(tsppi, clusterer, scorer, writer)
-        run_edgescore_clustering(tsppi, clusterer, scorer, writer)
+            # run the clustering algos
+            run_global_clustering(tsppi, clusterer, scorer, writer)
+            run_ts_clustering(tsppi, clusterer, scorer, writer)
+            run_edgescore_clustering(tsppi, clusterer, scorer, writer)
 
-        # commit all current changes to the SQL server
-        writer.commit()
+            # commit all current changes to the SQL server
+            writer.commit()
 
 
 ##############################
