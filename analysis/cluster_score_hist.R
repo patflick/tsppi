@@ -109,9 +109,6 @@ get_top_cluster_distr <- function(ppi_name="string", expr_name="gene_atlas")
     return(df)
 }
 
-# 
-
-
 plot_scores_box <- function()
 {
     data <- get_cluster_data()
@@ -169,7 +166,7 @@ concat_ppi_expr_dataframe <- function(func, ...)
 }
 
 # get top 10% of clusters
-get_top <- function(ppi_name="string", expr_name="gene_atlas", clusterer=clusterers[1])
+get_top <- function(ppi_name="string", expr_name="gene_atlas", clusterer=clusterers[1], types=NA)
 {
     # TODO: top 10% PER PxExCxT
     data <- get_cluster_data(ppi_name, expr_name, clusterer)
@@ -177,7 +174,10 @@ get_top <- function(ppi_name="string", expr_name="gene_atlas", clusterer=cluster
 
     # per T
     df <- data.frame()
-    types <- unique(data$type)
+    if (is.na(types))
+    {
+        types <- unique(data$type)
+    }
     for (t in types)
     {
         data_t <- data[which(data$type == t),]
@@ -220,11 +220,26 @@ get_top <- function(ppi_name="string", expr_name="gene_atlas", clusterer=cluster
     return(df)
 }
 
-get_top_summary <- function(ppi_name="string", expr_name="gene_atlas")
+get_top_global <- function()
 {
+    # use the PLM-gamma-50 clustering
+    clusterer <- "PLM-gamma-50.0"
+    expr <- "rnaseq_atlas"
 
-    top_data <- get_top(ppi_name, expr_name)
-    # can't do accumulated z-scores, because we don't have any
+    df <- data.frame()
+
+    for (p in get_ppis())
+    {
+        top_data <- get_top(p, expr, clusterer, "EdgeScoring")
+        df <- rbind(df, top_data)
+    }
+
+    # make the table look nice
+    df <- df[,c("ppi", "n_clusters", "mean_cl_size", "mean_top", "mean_other", "greater", "pval")]
+    df$ppi <- to_short_ppi_name(df$ppi)
+
+
+    return(df)
 }
 
 get_all_top <- function(clusterer=clusterers[1])
