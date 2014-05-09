@@ -285,7 +285,8 @@ writer = SQLWriter(con, False)
 #clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
 #gamma = 1
 # ("PLM-gamma-1.0", ppi_networkit.PLM(gamma=1)),
-clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)), ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)), ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)), ("PLP", ppi_networkit.PLP()), ("CNM", ppi_networkit.CNM())]
+#clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)), ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)), ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)), ("PLP", ppi_networkit.PLP()), ("CNM", ppi_networkit.CNM())]
+clusterers = [("PLM-gamma-100.0", ppi_networkit.PLM(gamma=100))]
 for clusterer_name, clusterer in clusterers:
     writer.set_clusterer(clusterer_name)
 
@@ -306,8 +307,8 @@ for clusterer_name, clusterer in clusterers:
 
             # run the clustering algos
             run_global_clustering(tsppi, clusterer, scorer, writer)
-            run_ts_clustering(tsppi, clusterer, scorer, writer)
-            run_edgescore_clustering(tsppi, clusterer, scorer, writer)
+            #run_ts_clustering(tsppi, clusterer, scorer, writer)
+            #run_edgescore_clustering(tsppi, clusterer, scorer, writer)
 
             # commit all current changes to the SQL server
             writer.commit()
