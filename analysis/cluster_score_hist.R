@@ -1,5 +1,7 @@
 
 library(ggplot2)
+library(scales) # for muted
+
 source("expr_utils.R")
 source("plot_tiles.R")
 
@@ -280,73 +282,114 @@ get_top_ts <- function()
     return(df)
 }
 
-get_top_ts_vs_global <- function(ppi_name="string", expr_name="gene_atlas", clusterer=clusterers[1])
+get_top_ts_vs_global <- function(ppi_name="string", expr_name="gene_atlas")
 {
     # define good clusters
     top_percent <- 0.2
+    clusterer <- "PLM-gamma-50.0"
+    excl_types <- c("Global", "GLOBAL", "EdgeScoring")
 
     # get data
     data <- get_cluster_data(ppi_name, expr_name, clusterer)
     data$mod_by_size <- data$modularity/data$size
 
     # per T
+    types <- unique(data$type)
+    # exclude the given types
+    ts_types <- types[which(!types %in% excl_types)]
+
+    # get global data
+    data_g <- data[which(data$type == "GLOBAL"),]
+    data_g <- data_g[with(data_g, order(-modularity)), ]
+    top20_idx <- ceiling(dim(data_g)[1] * top_percent)
+    data_g <- data_g[1:top20_idx,]
+
+
     df <- data.frame()
-    if (is.na(types))
-    {
-        types <- unique(data$type)
-        if (!is.na(excl_types))
-        {
-            # exclude the given types
-            types <- types[which(!types %in% excl_types)]
-        }
-    }
-    for (t in types)
+    for (t in ts_types)
     {
         data_t <- data[which(data$type == t),]
-        n_clusters <- dim(data_t)[1]
-        mean_cl_size <- mean(data_t$size)
         # sort by columns
         data_t <- data_t[with(data_t, order(-modularity)), ]
         top20_idx <- ceiling(dim(data_t)[1] * top_percent)
-        data_top20 <- data_t[1:top20_idx,]
-        data_other <- data_t[(top20_idx+1):(dim(data_t)[1]),]
-        if (dim(data_top20)[1] < 2 || dim(data_other)[1] < 2)
+        data_t <- data_t[1:top20_idx,]
+
+        # compare top TS with top global
+        if (dim(data_t)[1] < 2 || dim(data_g)[1] < 2)
         {
             # too few for statistics
             ndf <- data.frame(ppi=ppi_name, expr=expr_name,
                               type=t,
-                              n_clusters=n_clusters, mean_cl_size=mean_cl_size,
                               mean_top=NA, mean_other=NA,
                               greater=FALSE, pval=NA,
                               stringsAsFactors=FALSE)
         } else {
             # get statistics
-            tt <- t.test(data_top20$bpscore, data_other$bpscore)
-            mean_top10 <- tt$estimate[1]
-            mean_other <- tt$estimate[2]
-            greater <- mean_top10 > mean_other
+            tt <- t.test(data_t$bpscore, data_g$bpscore)
+            mean_t <- tt$estimate[1]
+            mean_g <- tt$estimate[2]
+            greater <- mean_t > mean_g
             t_pvalue <- tt$p.value
             ndf <- data.frame(ppi=ppi_name, expr=expr_name,
                               type=t,
-                              n_clusters=n_clusters, mean_cl_size=mean_cl_size,
-                              mean_top=mean_top10, mean_other=mean_other,
+                              mean_ts=mean_t, mean_global=mean_g,
                               greater=greater, pval=t_pvalue,
                               stringsAsFactors=FALSE)
         }
-        if (dim(df)[1] == 0) {
-            df <- ndf
-        } else {
-            df <- rbind(df, ndf)
-        }
+        df <- rbind(df, ndf)
     }
     return(df)
 }
+
+get_top_ts_vs_global_sum <- function()
+{
+    df <- data.frame()
+
+    for (p in get_ppis())
+    {
+        for (e in get_exprs())
+        {
+            top_data <- get_top_ts_vs_global(p, e)
+
+            # which are significantly greater
+            top_data$sig_smaller <- (!top_data$greater)& top_data$pval < 0.05
+            top_data$sig_greater <- top_data$greater & top_data$pval < 0.05
+
+            perc_sig_greater <- sum(top_data$sig_greater) / dim(top_data)[1]
+            perc_sig_smaller <- sum(top_data$sig_smaller) / dim(top_data)[1]
+
+            #count those and spit out percentage
+            ndf <- data.frame(ppi=p, expr=e,
+                              perc_greater=perc_sig_greater,
+                              perc_smaller=perc_sig_smaller,
+                              value=100*(perc_sig_greater-perc_sig_smaller),
+                              label=paste(round(100*perc_sig_smaller, 1), "% / ", round(100*perc_sig_greater, 1), "%", sep=""),
+                              stringsAsFactors=FALSE)
+            df <- rbind(df, ndf)
+        }
+    }
+
+    return(df)
+}
+
 save_top_ts <- function()
 {
     pdf(paste("../figs/cluster_scoring_top_ts.pdf",sep=""), width=7, height=3)
     data <- get_top_ts()
     p <- plot_tiles_for_ppi_expr(data)
     p <- p + labs(title="Tissue specific cluster scoring")
+    print(p)
+    dev.off()
+}
+
+save_top_ts_vs_global <- function()
+{
+    pdf(paste("../figs/cluster_scoring_ts_vs_global.pdf",sep=""), width=7, height=3)
+    data <- get_top_ts_vs_global_sum()
+    p <- plot_tiles_for_ppi_expr(data)
+    p <- p + scale_fill_gradient2("Percent",na.value=alpha(muted("blue"),0.9),midpoint=0, mid="white",high=alpha(muted("blue")), low=muted("red"),limits=c(-100,100))
+    p <- p + scale_colour_gradient2(mid="black", high="black", low="black", guide=FALSE)
+    p <- p + labs(title="Clustering TS vs Global (lower/higher score)")
     print(p)
     dev.off()
 }
