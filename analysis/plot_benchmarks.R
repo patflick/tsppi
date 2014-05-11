@@ -121,6 +121,44 @@ plot_bw_benchmark <- function()
     return (fig)
 }
 
+get_plp_data <- function()
+{
+    # get serial benchmark
+    data <- read.csv("./data/benchmark_tsPLP.csv", header=TRUE, sep=";")
+
+    # sort by naive time
+    data <- data[with(data, order(-naive)),]
+
+    # map to short name
+    data$ppi <- to_short_ppi_name(data$ppi)
+    data$expr <- to_short_expr_name(data$expr)
+
+    data$pe <- paste(data$ppi, "-", data$expr)
+
+    return (data)
+}
+
+plot_plp_benchmark <- function()
+{
+    data <- get_plp_data()
+
+    plot_data <- data[1:6,c("pe", "naive", "ts")]
+    colnames(plot_data) <- c("PPI.Expr", "Create Subgraphs", "Use Tissue Vectors")
+
+    # for plotting
+    plot_data <- melt(plot_data, id=c("PPI.Expr"))
+    colnames(plot_data) <- c("PPI.Expr", "Method", "Runtime")
+
+    fig <- ggplot(plot_data, aes(PPI.Expr, Runtime, fill=Method)) +
+            geom_bar(stat="identity", position="dodge") +
+            geom_text(aes(PPI.Expr, pmin(max(Runtime)*.60,Runtime),  label=paste(round(Runtime,1),"s"), hjust=0), size=3.5, position = position_dodge(width=1)) +
+            coord_flip() +
+            xlab("") +
+            ylab("Run time [s]") +
+            labs(title="Run time of PLP for adapted algorithm")
+    return (fig)
+}
+
 save_plots <- function()
 {
     # clustering coeff. benchmark
@@ -132,6 +170,12 @@ save_plots <- function()
     # betweenness benchmarks
     fig <- plot_bw_benchmark()
     pdf("../figs/benchmark_bw.pdf", width=8, height=3.5)
+    print(fig)
+    dev.off()
+
+    # PLP benchmarks
+    fig <- plot_plp_benchmark()
+    pdf("../figs/benchmark_plp.pdf", width=8, height=3.2)
     print(fig)
     dev.off()
 }

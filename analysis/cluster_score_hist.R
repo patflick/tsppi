@@ -256,7 +256,7 @@ get_top_global <- function()
 get_top_ts <- function()
 {
     clusterer <- "PLM-gamma-50.0"
-    excl_types <- c("Global", "GLOBAL", "EdgeScoring")
+    excl_types <- c("Global", "GLOBAL", "EdgeScoring", "EdgeCorrelation", "EdgeCoexprCount")
 
     df <- data.frame()
 
@@ -287,7 +287,7 @@ get_top_ts_vs_global <- function(ppi_name="string", expr_name="gene_atlas")
     # define good clusters
     top_percent <- 0.2
     clusterer <- "PLM-gamma-50.0"
-    excl_types <- c("Global", "GLOBAL", "EdgeScoring")
+    excl_types <- c("Global", "GLOBAL", "EdgeScoring", "EdgeCorrelation", "EdgeCoexprCount")
 
     # get data
     data <- get_cluster_data(ppi_name, expr_name, clusterer)
@@ -340,6 +340,56 @@ get_top_ts_vs_global <- function(ppi_name="string", expr_name="gene_atlas")
     }
     return(df)
 }
+
+get_top_edge_vs_global <- function(ppi_name="string", expr_name="gene_atlas", edge_score_type="EdgeCoexprCount")
+{
+    # define good clusters
+    top_percent <- 0.2
+    clusterer <- "PLM-gamma-50.0"
+    global_type <- "GLOBAL"
+    edge_type <- edge_score_type
+
+    # get data
+    data <- get_cluster_data(ppi_name, expr_name, clusterer)
+    data$mod_by_size <- data$modularity/data$size
+
+    # get global data
+    data_g <- data[which(data$type == global_type),]
+    data_g <- data_g[with(data_g, order(-modularity)), ]
+    top20_idx <- ceiling(dim(data_g)[1] * top_percent)
+    data_g <- data_g[1:top20_idx,]
+
+    # get edge scoring data
+    data_e <- data[which(data$type == edge_type),]
+    data_e <- data_e[with(data_e, order(-modularity)), ]
+    top20_idx <- ceiling(dim(data_e)[1] * top_percent)
+    data_e <- data_e[1:top20_idx,]
+
+    if (dim(data_e)[1] < 2 || dim(data_g)[1] < 2)
+    {
+        # too few for statistics
+        df <- data.frame(ppi=ppi_name, expr=expr_name,
+                          mean_edge=NA, mean_global=NA,
+                          greater=FALSE, pval=NA,
+                          stringsAsFactors=FALSE)
+    } else {
+        # get statistics
+        tt <- t.test(data_e$bpscore, data_g$bpscore)
+        mean_e <- tt$estimate[1]
+        mean_g <- tt$estimate[2]
+        greater <- mean_e > mean_g
+        t_pvalue <- tt$p.value
+        df <- data.frame(ppi=ppi_name, expr=expr_name,
+                          mean_edge=mean_e, mean_global=mean_g,
+                          greater=greater, pval=t_pvalue,
+                          stringsAsFactors=FALSE)
+    }
+
+    df$ppi <- to_short_ppi_name(df$ppi)
+    df$expr <- to_short_expr_name(df$expr)
+    return(df)
+}
+
 
 get_top_ts_vs_global_sum <- function()
 {

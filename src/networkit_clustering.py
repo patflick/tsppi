@@ -189,7 +189,7 @@ class SQLWriter:
 def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=None):
     # run clustering
     start = time.time()
-    clusters = clusterer.run(g)
+    clusters = clusterer.run(graph)
     t_cluster = time.time() - start
     # print histogram
     #hist = cluster_hist(clusters)
@@ -248,8 +248,10 @@ def run_ts_clustering(tsppi, clusterer, scorer, writer=None):
 
 def run_edgescore_clustering(tsppi, clusterer, scorer, writer=None):
     print("Scoring on EdgeScore graph (TS/Global hybrid via edge weighting)")
-    g = tsppi.getEdgeScoreGraph()
-    run_and_score_clustering(g, clusterer, scorer, writer, "EdgeScoring")
+    #g = tsppi.getEdgeCorrelationGraph()
+    #run_and_score_clustering(g, clusterer, scorer, writer, "EdgeCorrelation")
+    g = tsppi.getEdgeCoexprCountGraph()
+    run_and_score_clustering(g, clusterer, scorer, writer, "EdgeCoexprCount")
 
 
 def run_global_clustering(tsppi, clusterer, scorer, writer=None):
@@ -286,7 +288,8 @@ writer = SQLWriter(con, False)
 #gamma = 1
 # ("PLM-gamma-1.0", ppi_networkit.PLM(gamma=1)),
 #clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)), ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)), ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)), ("PLP", ppi_networkit.PLP()), ("CNM", ppi_networkit.CNM())]
-clusterers = [("PLM-gamma-100.0", ppi_networkit.PLM(gamma=100))]
+#clusterers = [("PLM-gamma-100.0", ppi_networkit.PLM(gamma=100))]
+clusterers = [("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50))]
 for clusterer_name, clusterer in clusterers:
     writer.set_clusterer(clusterer_name)
 
@@ -303,11 +306,10 @@ for clusterer_name, clusterer in clusterers:
 
             # get graph
             tsppi = sqlio.load_tsppi_graph(ppi, expr)
-            g = tsppi.getGraph()
 
             # run the clustering algos
-            run_global_clustering(tsppi, clusterer, scorer, writer)
-            #run_ts_clustering(tsppi, clusterer, scorer, writer)
+            #run_global_clustering(tsppi, clusterer, scorer, writer)
+            run_ts_clustering(tsppi, clusterer, scorer, writer)
             #run_edgescore_clustering(tsppi, clusterer, scorer, writer)
 
             # commit all current changes to the SQL server
