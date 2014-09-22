@@ -43,27 +43,31 @@ lower_se <- function(x) mean(x) - std(x)
 #  Bossi & Lehner Fig1B  #
 ##########################
 
-# data getter:
-get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="degree_test")
+
+get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas",prop_name="coexpr_degree")
 {
     # load sql config and get connection
     source("sql_config.R")
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
 
     # create table names
-    prop_table <- paste("prop", ppi_name, expr_name, prop_name, sep="_")
+    prop_table <- paste(ppi_name, expr_name, "agg_node_properties", sep="_")
     expr_count_table <- paste(expr_name,"core_expr_counts", sep="_")
 
     # create SQL query to get ExpressionCount vs Degree
-    query <- paste("SELECT a.Gene, a.Value, b.ExpressedCount, b.TotalCount
-                    FROM ", prop_table, " AS a",
-                   "INNER JOIN ", expr_count_table, " AS b",
-                   "ON a.Gene = b.Gene WHERE ExpressedCount > 0")
+    query <- paste("SELECT a.Gene, a.", prop_name, " AS Value, ",
+                   "b.ExpressedCount, b.TotalCount FROM ",
+                   prop_table, " AS a ",
+                   "INNER JOIN ", expr_count_table, " AS b ",
+                   "ON a.Gene = b.Gene WHERE ExpressedCount > 0", sep="")
+
+    print(query)
 
     # load ppi network from db
     data <- dbGetQuery(con, query)
     return(data);
 }
+
 
 
 # reproducing the Bossi&Lehner plot (Fig. 1 B)
@@ -208,17 +212,16 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
     # have to load from `core`, as the min and max counts are also
     # calculated in the `core` of the expression data set.
     expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
-    min_table <- paste("prop", ppi_name, expr_name, "min_neighbor_expr_count", sep="_")
-    max_table <- paste("prop", ppi_name, expr_name, "max_neighbor_expr_count", sep="_")
+    prop_table <- paste(ppi_name, expr_name, "agg_node_properties", sep="_")
     # Joining ExpressionCount with Min and Max
     # Min and Max are the minimum and maximum tissue expression of all neighbors
     # (i.e. the minimum and maximum amount of tissues a neighbor of the
     # according gene is expressed in)
     query <- paste("SELECT a.Gene, a.ExpressedCount, a.TotalCount, ",
-                   "b.Value AS Min, c.Value AS Max",
+                   "b.min_neighbor_expr_count AS Min, ",
+                   "b.max_neighbor_expr_count AS Max ",
                    "FROM ", expr_count_table, " AS a INNER JOIN ",
-                   min_table, " AS b ON a.Gene = b.Gene INNER JOIN ",
-                   max_table, " AS c ON a.Gene = c.Gene ",
+                   prop_table, " AS b ON a.Gene = b.Gene ",
                    # TODO: this excludes all genes that are not expressed at all
                    #       the TODO here is to figure out if this is the right
                    #       position to do this

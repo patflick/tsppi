@@ -16,25 +16,14 @@ from pappi.data_config import *
 # whether to save the calculated results
 save_results = True
 
-
 # TODO: put these somewhere unified
 PPI_NAMES = ["string", "ccsb", "bossi", "psicquic_all", "havu"]
 EXPR_NAMES = ["hpa", "hpa_all", "emtab", "rnaseq_atlas", "gene_atlas"]
 
-# FIXME: limited testing set (that doesn't need 12h)
-#PPI_NAMES = ["ccsb", "havu"]
-#EXPR_NAMES = ["hpa", "rnaseq_atlas"]
 
 ###################################
 #  get and save graph properties  #
 ###################################
-
-# TODO: abstract and do the get/save for node and graph properties for all of
-#       these classes of graphs:
-#       - global graph (ppi, property)
-#       - global ts graph (ppi, expr, property)
-#       - all the ts graphs (ppi, expr, tissue, property) [actually put each ppi X expr into own table !?]
-
 
 # save the properties from the TS graphs (PxExT)
 def save_ts_node_properties(graph_name, gene_names, ts_names, properties, sql_conn):
@@ -71,7 +60,7 @@ def get_ts_node_properties(tsppi, con, verbose=True, timings={}):
     if verbose:
         print("getting degrees")
     t = time.time()
-    props['degree'] = tsppi.getTsDegrees()
+    props['degree'] = tsppi.getSubgraphs().calcDegrees()
     timings[(ppi_name,'ts_degrees')] = time.time() - t
 
     g = tsppi.getGraph()
@@ -80,20 +69,68 @@ def get_ts_node_properties(tsppi, con, verbose=True, timings={}):
     if verbose:
         print("getting graph betweenness")
     t = time.time()
-    betweenness_scores = tsppi.getTsBetweenness()
+    betweenness_scores = tsppi.getSubgraphs().calcBW()
     props['Betweenness'] = betweenness_scores
     timings[(ppi_name,'ts_betweenness')] = time.time() - t
 
     # calculate clustering coeff
     if verbose:
         print("getting graph clustering coeff")
-    # TODO: clustering coeff for Ts graphs
+    t = time.time()
+    props['clcoeff'] = tsppi.getSubgraphs().calcCC()
+    timings[(ppi_name,'ts_cc')] = time.time() - t
 
     # save the node properties to the database
     if verbose:
         print("saving node properties")
     if save_results:
         save_ts_node_properties(graph_name, tsppi.getAllGenes(), tsppi.getAllTissues(), props, con)
+    return timings
+
+
+# aggregate node properties in tsppis (a value per node in the full graph
+# but dependening on the subgraph structure)
+def get_agg_ts_node_properties(tsppi, con, verbose=True, timings={}):
+    graph_name = tsppi.getPpiName()
+
+    print("actual graph name: " + graph_name)
+
+    props = dict()
+    if verbose:
+        print("getting degrees")
+    t = time.time()
+    props['degree'] = tsppi.getSubgraphs().calcGlobalDegrees()
+    timings[(graph_name, 'degrees')] = time.time() - t
+
+    if verbose:
+        print("getting maxts degrees")
+    t = time.time()
+    props['maxts_degree'] = tsppi.getSubgraphs().calcMaxDegrees()
+    timings[(graph_name, 'maxts_degrees')] = time.time() - t
+
+    if verbose:
+        print("getting coexpr degrees")
+    t = time.time()
+    props['coexpr_degree'] = tsppi.getSubgraphs().calcEdgeExistDegrees()
+    timings[(graph_name, 'coexpr_degrees')] = time.time() - t
+
+    if verbose:
+        print("getting min neighbor expr")
+    t = time.time()
+    props['min_neighbor_expr_count'] = tsppi.getSubgraphs().calcNeighborMinExistsCount()
+    timings[(graph_name, 'min_neighbor_expr_count')] = time.time() - t
+
+    if verbose:
+        print("getting max neighbor expr")
+    t = time.time()
+    props['max_neighbor_expr_count'] = tsppi.getSubgraphs().calcNeighborMaxExistsCount()
+    timings[(graph_name, 'max_neighbor_expr_count')] = time.time() - t
+
+    # save the node properties to the database
+    if verbose:
+        print("saving node properties")
+    if save_results:
+        save_node_properties(graph_name + "_agg", tsppi.getAllGenes(), props, con)
     return timings
 
 
@@ -316,7 +353,6 @@ con = pappi.sql.get_conn(DATABASE)
 #  Import PPI NetworKit module  #
 #################################
 
-#sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
 # TODO: into same module
 sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
 #import NetworKit
@@ -358,9 +394,10 @@ for ppi_name in PPI_NAMES:
         # global ts graph properties
         timings = get_graph_properties(tsppi, con, True, timings)
         timings = get_node_properties(tsppi, con, True, timings)
-        save_timings(timings, con, "ppi_graph_stats_timings")
+        timings = get_agg_ts_node_properties(tsppi, con, True, timings)
+        save_timings(timings, con, "tsppi_graph_stats_timings")
 
-sys.exit(1)
+#sys.exit(1)
 
 ###########################################
 #  Get tissue specific tissue properties  #
@@ -383,22 +420,11 @@ for ppi_name in PPI_NAMES:
         timings = get_ts_node_properties(tsppi, con, True, timings)
 
 
-##########################################
-#  Get tissue-specific graph properties  #
-##########################################
-
-#ppi = "ccsb"
-#ppi = "bossi"
-#expr = "hpa"
-#expr = "hpa_all"
-#tsppi = sqlio.load_tsppi_graph(ppi, expr)
-#g = tsppi.getGraph()
-#
 
 ################################
 #  enable for interactive use  #
 ################################
 
-import readline
-import rlcompleter
-readline.parse_and_bind("tab: complete")
+#import readline
+#import rlcompleter
+#readline.parse_and_bind("tab: complete")
