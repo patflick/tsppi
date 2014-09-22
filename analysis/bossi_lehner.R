@@ -639,7 +639,7 @@ compare_test_degrees <- function(ppi_name="bossi",expr_name="gene_atlas",prop_na
     con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
 
     # create table names
-    prop_table_1 <- paste("prop", ppi_name, expr_name, "_degree", sep="_")
+    prop_table_1 <- paste("prop", ppi_name, expr_name, "degree", sep="_")
     prop_table_2 <- paste("prop", ppi_name, expr_name, "degree_test", sep="_")
 
     query <- paste("SELECT a.Gene, a.Value AS Value1, b.Value AS Value2 ",

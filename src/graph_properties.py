@@ -317,6 +317,7 @@ con = pappi.sql.get_conn(DATABASE)
 #################################
 
 #sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
+# TODO: into same module
 sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
 #import NetworKit
 import ppi_networkit
