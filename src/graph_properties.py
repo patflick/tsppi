@@ -339,92 +339,90 @@ def save_timings(timings, sql_conn, table):
     cur.close()
     sql_conn.commit()
 
-
-
-#############################
-#  get database connection  #
-#############################
-
-# get new database connection
-con = pappi.sql.get_conn(DATABASE)
-
-
-#################################
-#  Import PPI NetworKit module  #
-#################################
-
-# TODO: into same module
+# import PPI_NetworKit module
 sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
 #import NetworKit
 import ppi_networkit
-# set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
-ppi_networkit.setLogLevel("ERROR")
-sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
+if __name__ == "__main__":
 
-#################################
-#  Get global-graph properties  #
-#################################
+    #############################
+    #  get database connection  #
+    #############################
 
-timings = {}
-for ppi_name in PPI_NAMES:
-    print()
-    print("##################################################")
-    print(" getting graph properties of `" + ppi_name + "`")
-    print("##################################################")
-    ppi = sqlio.load_ppi_graph(ppi_name)
-    timings = get_graph_properties(ppi, con, True, timings)
-    timings = get_node_properties(ppi, con, True, timings)
-    save_timings(timings, con, "ppi_graph_stats_timings")
+    # get new database connection
+    con = pappi.sql.get_conn(DATABASE)
 
-##########################################
-#  Get tissue-specific graph properties  #
-##########################################
+    #################################
+    #  Import PPI NetworKit module  #
+    #################################
 
-timings = {}
-for ppi_name in PPI_NAMES:
-    for expr_name in EXPR_NAMES:
-        graph_name = ppi_name + "_" + expr_name
+    # TODO: into same module
+    # set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
+    ppi_networkit.setLogLevel("ERROR")
+    sqlio = ppi_networkit.SQLiteIO(DATABASE)
+
+    #################################
+    #  Get global-graph properties  #
+    #################################
+
+    timings = {}
+    for ppi_name in PPI_NAMES:
         print()
         print("##################################################")
-        print(" getting graph properties of `" + graph_name + "`")
+        print(" getting graph properties of `" + ppi_name + "`")
         print("##################################################")
-        tsppi = sqlio.load_tsppi_graph(ppi_name, expr_name)
+        ppi = sqlio.load_ppi_graph(ppi_name)
+        timings = get_graph_properties(ppi, con, True, timings)
+        timings = get_node_properties(ppi, con, True, timings)
+        save_timings(timings, con, "ppi_graph_stats_timings")
 
-        # global ts graph properties
-        timings = get_graph_properties(tsppi, con, True, timings)
-        timings = get_node_properties(tsppi, con, True, timings)
-        timings = get_agg_ts_node_properties(tsppi, con, True, timings)
-        save_timings(timings, con, "tsppi_graph_stats_timings")
+    ##########################################
+    #  Get tissue-specific graph properties  #
+    ##########################################
 
-#sys.exit(1)
+    timings = {}
+    for ppi_name in PPI_NAMES:
+        for expr_name in EXPR_NAMES:
+            graph_name = ppi_name + "_" + expr_name
+            print()
+            print("##################################################")
+            print(" getting graph properties of `" + graph_name + "`")
+            print("##################################################")
+            tsppi = sqlio.load_tsppi_graph(ppi_name, expr_name)
 
-###########################################
-#  Get tissue specific tissue properties  #
-###########################################
+            # global ts graph properties
+            timings = get_graph_properties(tsppi, con, True, timings)
+            timings = get_node_properties(tsppi, con, True, timings)
+            timings = get_agg_ts_node_properties(tsppi, con, True, timings)
+            save_timings(timings, con, "tsppi_graph_stats_timings")
 
-timings = {}
-prepare_ts_graph_property_table(con)
-for ppi_name in PPI_NAMES:
-    for expr_name in EXPR_NAMES:
-        graph_name = ppi_name + "_" + expr_name
-        print()
-        print("##################################################")
-        print(" getting TS tissue properties of `" + graph_name + "`")
-        print("##################################################")
-        tsppi = sqlio.load_tsppi_graph(ppi_name, expr_name)
+    ###########################################
+    #  Get tissue specific tissue properties  #
+    ###########################################
 
-        # get tissue specific graph properties (no timing for this available)
-        get_ts_graph_properties(tsppi, ppi_name, expr_name, con, True)
-        # get tissue specific node properties
-        timings = get_ts_node_properties(tsppi, con, True, timings)
+    timings = {}
+    prepare_ts_graph_property_table(con)
+    for ppi_name in PPI_NAMES:
+        for expr_name in EXPR_NAMES:
+            graph_name = ppi_name + "_" + expr_name
+            print()
+            print("##################################################")
+            print(" getting TS tissue properties of `" + graph_name + "`")
+            print("##################################################")
+            tsppi = sqlio.load_tsppi_graph(ppi_name, expr_name)
+
+            # get tissue specific graph properties (no timing for this
+            # available)
+            get_ts_graph_properties(tsppi, ppi_name, expr_name, con, True)
+            # get tissue specific node properties
+            timings = get_ts_node_properties(tsppi, con, True, timings)
 
 
+    ################################
+    #  enable for interactive use  #
+    ################################
 
-################################
-#  enable for interactive use  #
-################################
-
-#import readline
-#import rlcompleter
-#readline.parse_and_bind("tab: complete")
+    #import readline
+    #import rlcompleter
+    #readline.parse_and_bind("tab: complete")

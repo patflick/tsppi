@@ -1,4 +1,4 @@
-# this file is for interactive tests
+# this file is for interactive tests of the ppi_networkit cython API
 # thus it just loads the configuration and
 # database connection and enables tab completion
 

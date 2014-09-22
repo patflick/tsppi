@@ -17,12 +17,16 @@ DATA_FOLDER = os.path.join(base_folder, 'data')
 PPI_DATA_FOLDER = os.path.join(DATA_FOLDER, 'ppis')
 EXPR_DATA_FOLDER = os.path.join(DATA_FOLDER, 'expr')
 GO_DATA_FOLDER = os.path.join(DATA_FOLDER, 'go')
+MAP_DATA_FOLDER = os.path.join(DATA_FOLDER, 'mapping')
 
 # TODO add these files into the repo data folder !?
-HGNC_FILE = os.path.join(EXT_DATA_FOLDER, 'hgnc_downloads.txt')
-BIOMART_FILE = os.path.join(EXT_DATA_FOLDER, 'mart_export.csv')
 DATABASE = os.path.join(EXT_DATA_FOLDER, 'test_matching.sqlite')
 
+# mapping
+HGNC_FILE = os.path.join(MAP_DATA_FOLDER, 'hgnc_downloads.txt')
+BIOMART_FILE = os.path.join(MAP_DATA_FOLDER, 'mart_export.csv')
+
+# Gene Atlas mapping
 GNF1H_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'gnf1h.annot2007.tsv')
 U133A_ANNOT_FILE = os.path.join(EXPR_DATA_FOLDER, 'GPL96-15653.txt')
 

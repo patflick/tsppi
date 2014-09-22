@@ -7,7 +7,7 @@ such that the underlying database can easily be exchanged here.
 @author: Patrick Flick
 '''
 
-from .config import PAPPI_SQLITE_DEFAULT_DB
+from .data_config import DATABASE
 import sqlite3
 import csv
 import re
@@ -269,7 +269,7 @@ def get_column_names(table, sql_conn=PAPPI_SQL_CONN):
     return names
 
 
-def get_conn(db=PAPPI_SQLITE_DEFAULT_DB):
+def get_conn(db=DATABASE):
     """
     Returns the current SQL connection object. Connects and returns a
     new object if there is no current SQL connection.

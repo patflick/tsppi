@@ -1,6 +1,32 @@
 Data Sources
 ============
 
+The majority of data sources are either provided in this repository or
+automatically downloaded via scripts. However, some need to be manually obtained
+and saved into the folder structure prior to executing the analysis pipeline.
+
+### Automatic download
+
+To download most of the data sources, simply execute:
+
+```sh
+./download.sh
+```
+
+and (**note:** requires python 3 to run):
+
+```sh
+python3 download_psicquic.py
+```
+
+### Manual download
+
+The following data sources need to be manually obtained, since they are not
+(yet) publicly available:
+
+- Dana Farber CCSB HI-2012 PPI network (see below)
+
+
 Protein-Protein Interaction Networks
 ------------------------------------
 
@@ -24,7 +50,7 @@ Download the `HI_2012_PRE.tsv` file and save it into the `ppis/` folder.
 ### Havugimana et al. protein complexes PPI network
 
 This is the protein complex network from the paper ["A Census of Human Soluble Protein Complexes"](http://www.ncbi.nlm.nih.gov/pubmed/22939629)
-by Havugimana et al. 
+by Havugimana et al.
 
 Download the network from the supplemental information Table S2 [here](http://www.sciencedirect.com/science/article/pii/S0092867412010069)
 
@@ -34,9 +60,9 @@ Copy the first two columns into a tab-separated text file with headers
 
 #### Note:
 
-Right now this network is already part of the repository. This might complicate giving free access to the
-repo, as I am currently unsure about the licencing of the PPI network from Havugimana et al.
-
+Right now this network is already part of the repository. This might complicate
+giving free access to the repo, as I am currently unsure about the licensing of
+the PPI network from Havugimana et al.
 
 
 ### string-db
@@ -57,7 +83,10 @@ Save this file into the `data/download` folder, and then run
 the `download_data.sh` script, which will pre-filter the
 string-db interactions for human interactions with score >= 0.7
 
+### PSICQUIC Composite network
 
+Run the `download_psicquic.py` python script in this folder in order to download
+the different *PSICQUIC* provided PPI networks.
 
 
 Protein Expression data sets
@@ -93,4 +122,61 @@ The RNAseq data from Illumina Body Map can be downloaded from EBI
 
 The automatic script removes all filters (no gene selection, especially not only protein coding genes; and a cutoff of 0).
 
+### RNAseq Atlas from medicalgenomics.org
 
+This data is also publicly available and can be downloaded from
+[here](http://medicalgenomics.org/rna_seq_atlas).
+
+This is also automatically downloaded with the `download.sh` script.
+
+
+Mapping files
+-------------
+
+### BioMart id mapping
+Go to: [ensembl.org](http://www.ensembl.org/biomart/martview)
+
+Choose "Ensembl Genes 71" (or current version) and table "Homo sapiens genes"
+
+Include following fields for the table:
+
+- Ensembl Gene ID
+- Ensembl Protein ID
+- Associated Gene Name
+- UniProt/SwissProt ID
+- HGNC ID(s)
+- EntrezGene ID
+
+Export the table as CSV (and choose "Unique results only") and save this into
+the file `mapping/mart_export.csv`.
+
+Currently BioMart version 71 is provided in the repository.
+
+### HGNC mapping
+
+Get data from: [genenames.org](http://www.genenames.org/cgi-bin/hgnc_stats)
+Goto `Locus Group`: "protein-coding gene" and click "Custom".
+Choose only the Columns:
+
+- HGNC ID
+- Approved Symbol
+- Approved Name
+- Status
+- Entrez Gene ID
+- Ensembl Gene ID
+(and from external sources)
+- Entrez Gene ID (supplied by NCBI)
+- UniProt ID (supplied by UniProt)
+- Ensembl ID (supplied by Ensembl)
+
+Make sure to deselect (exclude) the status: "Entry and Symbol Withdrawn"
+
+
+Full URL to results:
+[HGNC Mapping](http://www.genenames.org/cgi-bin/hgnc_downloads?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_pub_eg_id&col=gd_pub_ensembl_id&col=md_eg_id&col=md_prot_id&col=md_ensembl_id&status=Approved&status_opt=2&where=%28%28gd_pub_chrom_map+not+like+%27%25patch%25%27+and+gd_pub_chrom_map+not+like+%27%25ALT_REF%25%27%29+or+gd_pub_chrom_map+IS+NULL%29+and+gd_locus_type+%3D+%27gene+with+protein+product%27&order_by=gd_hgnc_id&format=text&limit=&submit=submit)
+
+This should return all 19060 genes.
+
+Save this file into the `mapping/hgnc_downloads.txt`.
+A version of this file is provided in the repository (not guaranteed to be up
+to date).

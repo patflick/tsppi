@@ -1,6 +1,10 @@
-# this file is for interactive tests
-# thus it just loads the configuration and
-# database connection and enables tab completion
+#!/usr/bin/env python3
+#
+# Uses clustering/community detection algorithms to find functionally related
+# modules in tissue-specific PPI networks.
+# - executes PLM, PLP and CNM clusterers from NetworKit on different graphs
+# - saves modularities and per cluster modularities and BPScores into SQL table
+#   for later analysis
 
 import os
 import re
@@ -12,22 +16,15 @@ import pappi.id_mapping
 import pappi.sql
 from pappi.data_config import *
 
-##############################################################
-#  TODO: temporary content (needs to be put into a module)   #
-##############################################################
-
 # histogram function using counter
 from collections import Counter
 
-# import EnrichmentStudy
-import sys
-sys.path.append("/home/patrick/dev/bio/goatools")
-#from goatools.go_enrichment import GOEnrichmentStudy
+
 # import PPI networkit
-#sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
+import sys
 sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
-#import NetworKit
 import ppi_networkit
+
 # set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs
 ppi_networkit.setLogLevel("ERROR")
 
@@ -87,19 +84,6 @@ def print_sorted_hist(hist):
         print(str(size) + ":\t" + str(num))
 
 
-
-def enrichment_scoring(cluster, all_genes, assoc):
-    print("got cluster of size " + str(len(cluster)) + " and #genes: "
-          + str(len(all_genes)))
-    print("Performing gene enrichment study:")
-    population = set(all_genes)
-    study = set(cluster)
-    ge = GOEnrichmentStudy(population, assoc, obo_dag, alpha=0.05,
-                           study=study,
-                           methods=["bonferroni", "sidak", "holm"])
-    ge.print_summary(pval=0.05)
-
-
 def score_clusters(clusters, tsppi, sim_scorer):
     cluster_sizes = clusters.subsetSizeMap()
     # loop through all the clusters, get the associated gene names
@@ -108,7 +92,6 @@ def score_clusters(clusters, tsppi, sim_scorer):
     for cluster, size in cluster_sizes.items():
         cluster_nodes = clusters.getMembers(cluster)
         cl_node_names = [tsppi.getGeneName(x) for x in cluster_nodes]
-        #enrichment_scoring(cl_node_names, all_genes, assoc)
 
         # calculate the cluster score
         if len(cl_node_names) >= 2:
@@ -150,8 +133,8 @@ class SQLWriter:
         self.cur = con.cursor()
         if drop_table:
             self.cur.execute('DROP TABLE IF EXISTS clustering_scoring_results')
-        self.cur.execute('CREATE TABLE IF NOT EXISTS clustering_scoring_results '
-                         '(ppi, expr, clusterer, type, cluster_id, size, '
+        self.cur.execute('CREATE TABLE IF NOT EXISTS clustering_scoring_results'
+                         ' (ppi, expr, clusterer, type, cluster_id, size, '
                          ' bpscore, modularity)')
 
     def set_ppi(self, ppi):
@@ -186,7 +169,8 @@ class SQLWriter:
 #  Import PPI NetworKit module  #
 #################################
 
-def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=None):
+def run_and_score_clustering(graph, clusterer, scorer,
+                             writer=None, category=None):
     # run clustering
     start = time.time()
     clusters = clusterer.run(graph)
@@ -222,7 +206,8 @@ def run_and_score_clustering(graph, clusterer, scorer, writer=None, category=Non
 
 def run_multiple_clusterers(graph, scorer):
     clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
-    for gamma in [1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 50.0, 100.0, 200.0, 500.0, 1000.0]:
+    for gamma in [1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 40.0,
+                  50.0, 100.0, 200.0, 500.0, 1000.0]:
         clusterer = ppi_networkit.PLM(gamma=gamma)
         print("PLM with gamma = " + str(gamma))
         run_and_score_clustering(graph, clusterer, scorer)
@@ -243,7 +228,8 @@ def run_ts_clustering(tsppi, clusterer, scorer, writer=None):
         tissue_name = tsppi.getTissueName(t)
         print("Tissue: " + tissue_name)
         ts_graph = tsppi.getTsGraph(t)
-        run_and_score_clustering(ts_graph, clusterer, scorer, writer, tissue_name)
+        run_and_score_clustering(ts_graph, clusterer,
+                                 scorer, writer, tissue_name)
 
 
 def run_edgescore_clustering(tsppi, clusterer, scorer, writer=None):
@@ -275,50 +261,55 @@ def get_scorer(con):
     return scorer
 
 
-sqlio = ppi_networkit.SQLiteIO(DATABASE)
+if __name__ == "__main__":
 
-# initialize GO/BP scorer
-scorer = get_scorer(con)
+    sqlio = ppi_networkit.SQLiteIO(DATABASE)
 
-# create results writer
-writer = SQLWriter(con, False)
+    # initialize GO/BP scorer
+    scorer = get_scorer(con)
 
-# get clusterer
-#clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
-#gamma = 1
-# ("PLM-gamma-1.0", ppi_networkit.PLM(gamma=1)),
-#clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)), ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)), ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)), ("PLP", ppi_networkit.PLP()), ("CNM", ppi_networkit.CNM())]
-#clusterers = [("PLM-gamma-100.0", ppi_networkit.PLM(gamma=100))]
-clusterers = [("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50))]
-for clusterer_name, clusterer in clusterers:
-    writer.set_clusterer(clusterer_name)
+    # create results writer
+    writer = SQLWriter(con, True)
 
-    for ppi in PPI_NAMES:
-        for expr in EXPR_NAMES:
-            print()
-            print("##################################################")
-            print(" getting graph properties of `" + ppi + "_" + expr + "`")
-            print("##################################################")
+    # get clusterer
+    #clusterers = [ppi_networkit.PLP, ppi_networkit.PLM, ppi_networkit.CNM]
+    clusterers = [("PLM-gamma-5.0", ppi_networkit.PLM(gamma=5)),
+                  ("PLM-gamma-10.0", ppi_networkit.PLM(gamma=10)),
+                  ("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50)),
+                  ("PLP", ppi_networkit.PLP()),
+                  ("CNM", ppi_networkit.CNM())]
+    #clusterers = [("PLM-gamma-100.0", ppi_networkit.PLM(gamma=100))]
+    #clusterers = [("PLM-gamma-50.0", ppi_networkit.PLM(gamma=50))]
 
-            # set the current ppi and expr
-            writer.set_ppi(ppi)
-            writer.set_expr(expr)
+    # run each clusterer on all ppis and expression datasets
+    for clusterer_name, clusterer in clusterers:
+        writer.set_clusterer(clusterer_name)
 
-            # get graph
-            tsppi = sqlio.load_tsppi_graph(ppi, expr)
+        for ppi in PPI_NAMES:
+            for expr in EXPR_NAMES:
+                print()
+                print("##################################################")
+                print(" getting graph properties of " + ppi + "_" + expr)
+                print("##################################################")
 
-            # run the clustering algos
-            #run_global_clustering(tsppi, clusterer, scorer, writer)
-            run_ts_clustering(tsppi, clusterer, scorer, writer)
-            #run_edgescore_clustering(tsppi, clusterer, scorer, writer)
+                # set the current ppi and expr
+                writer.set_ppi(ppi)
+                writer.set_expr(expr)
 
-            # commit all current changes to the SQL server
-            writer.commit()
+                # get graph
+                tsppi = sqlio.load_tsppi_graph(ppi, expr)
 
+                # run the clustering algos
+                run_global_clustering(tsppi, clusterer, scorer, writer)
+                run_ts_clustering(tsppi, clusterer, scorer, writer)
+                run_edgescore_clustering(tsppi, clusterer, scorer, writer)
 
-##############################
-# enable tab completion
-##############################
-import readline
-import rlcompleter
-readline.parse_and_bind("tab: complete")
+                # commit all current changes to the SQL server
+                writer.commit()
+
+    ##############################
+    # enable tab completion
+    ##############################
+    import readline
+    import rlcompleter
+    readline.parse_and_bind("tab: complete")

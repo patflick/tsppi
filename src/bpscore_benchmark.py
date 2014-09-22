@@ -1,4 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+#
+# This script executes different GO BPScore algorithms
+# in order to compare their run times.
 
 # for timing
 import time
