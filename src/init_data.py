@@ -50,10 +50,10 @@ pappi.id_mapping.import_hgnc_file(HGNC_FILE, con)
 #####################
 
 # load GO terms
-import pappi.go_import
+import pappi.go.import_ass
 
 # import GO associations
-pappi.go_import.import_go_association(GO_ASSOC_FILE, con)
+pappi.go.import_ass.import_go_association(GO_ASSOC_FILE, con)
 
 
 ##############################

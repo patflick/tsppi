@@ -11,7 +11,7 @@ get_node_properties <- function(ppi_name = "string")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_node_prop_tbl <- paste(ppi_name, "node_properties", sep="_")
     query <- paste("SELECT * FROM ", ppi_node_prop_tbl)
@@ -24,7 +24,7 @@ get_graph_properties <- function(ppi_name="string")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_prop_tbl <- paste(ppi_name, "properties", sep="_")
     query <- paste("SELECT * FROM ", ppi_prop_tbl)

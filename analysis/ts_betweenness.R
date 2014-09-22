@@ -21,7 +21,7 @@ get_node_properties <- function(ppi_name = "string", expr_name = "gene_atlas")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_node_prop_tbl <- paste(ppi_name,expr_name, "node_properties", sep="_")
     query <- paste("SELECT * FROM ", ppi_node_prop_tbl)
@@ -36,7 +36,7 @@ get_ts_node_properties <- function(ppi_name = "string", expr_name = "gene_atlas"
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_node_prop_tbl <- paste(ppi_name,expr_name, "ts_node_properties", sep="_")
     query <- paste("SELECT * FROM ", ppi_node_prop_tbl)
@@ -49,7 +49,7 @@ get_node_properties_exprcount <- function(ppi_name="string",expr_name="gene_atla
 {
     # load sql config and get connection
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # create table names
     ppi_node_prop_tbl <- paste(ppi_name,expr_name, "node_properties", sep="_")
@@ -69,7 +69,7 @@ get_ts_node_properties_exprcount <- function(ppi_name="string",expr_name="gene_a
 {
     # load sql config and get connection
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # create table names
     ppi_node_prop_tbl <- paste(ppi_name,expr_name, "ts_node_properties", sep="_")

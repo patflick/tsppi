@@ -20,7 +20,7 @@ GO_DATA_FOLDER = os.path.join(DATA_FOLDER, 'go')
 MAP_DATA_FOLDER = os.path.join(DATA_FOLDER, 'mapping')
 
 # TODO add these files into the repo data folder !?
-DATABASE = os.path.join(EXT_DATA_FOLDER, 'test_matching.sqlite')
+DATABASE = os.path.join(DATA_FOLDER, 'sql_database.sqlite')
 
 # mapping
 HGNC_FILE = os.path.join(MAP_DATA_FOLDER, 'hgnc_downloads.txt')

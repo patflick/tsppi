@@ -14,7 +14,7 @@ get_graph_properties <- function(ppi_name="string", expr_name="gene_atlas")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_prop_tbl <- paste(ppi_name, expr_name, "properties", sep="_")
     query <- paste("SELECT * FROM ", ppi_prop_tbl)
@@ -27,7 +27,7 @@ get_ts_graph_properties <- function()
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     ppi_prop_tbl <- "ts_graph_properties"
     query <- paste("SELECT ppi, expr, Property, AVG(Value) as avg_value FROM ",

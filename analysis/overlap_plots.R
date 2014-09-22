@@ -7,7 +7,7 @@ plot_pairwise_table <- function(src_table)
 {
     # load sql config and get connection
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # load ppi network from db
     data <- dbGetQuery(con, paste("SELECT * FROM ", src_table))

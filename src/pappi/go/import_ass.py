@@ -1,4 +1,4 @@
-from . import sql
+from .. import sql
 
 GO_ASSOC_TABLE = "go_gene_assoc"
 

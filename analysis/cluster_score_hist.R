@@ -18,7 +18,7 @@ clusterers <- c('PLP','PLM-gamma-1.0', 'PLM-gamma-5.0', 'PLM-gamma-10.0', 'PLM-g
 get_cluster_data <- function(ppi_name="string", expr_name="gene_atlas", clusterer=clusterers[1])
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
     query <- paste("SELECT * FROM clustering_scoring_results ",
                    "WHERE size >= 4 AND ppi='", ppi_name,
                    "' AND expr='",expr_name, "'",
@@ -31,7 +31,7 @@ get_clusterer_data <- function(ppi_name="string", expr_name="gene_atlas")
 {
     type <- "Global"
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
     query <- paste("SELECT ppi, expr, clusterer, SUM(modularity) as total_mod, COUNT(), MIN(size), AVG(size), MAX(size) FROM clustering_scoring_results ",
                    "WHERE",
                    " size >= 4",
@@ -48,7 +48,7 @@ plot_cluster_distr <- function(ppi_name="string", expr_name="gene_atlas")
 {
     type <- "GLOBAL"
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
     query <- paste("SELECT * FROM clustering_scoring_results ",
                    "WHERE ppi='", ppi_name,
                    "' AND expr='",expr_name, "'",
@@ -85,7 +85,7 @@ get_top_cluster_distr <- function(ppi_name="string", expr_name="gene_atlas")
 {
     type <- "GLOBAL"
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
     query <- paste("SELECT * FROM clustering_scoring_results ",
                    "WHERE ppi='", ppi_name,
                    "' AND expr='",expr_name, "'",

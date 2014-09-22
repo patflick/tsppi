@@ -40,7 +40,7 @@ get_incr_query <- function(ppi_name="ccsb", expr_name="hpa")
 create_union_incr_table <- function()
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     queries <- c()
     for (p in get_ppis())
@@ -64,7 +64,7 @@ create_union_incr_table <- function()
 get_incr_betweenness_nodes <- function()
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     query <- paste("SELECT * FROM ", SQL_INCR_TABLE_NAME)
     data <- dbGetQuery(con, query)
@@ -81,7 +81,7 @@ plot_betw_incr_distr <- function()
 get_num_genes <- function()
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     query <- paste("SELECT ppi, expr, COUNT(DISTINCT Gene) FROM ",
                    SQL_INCR_TABLE_NAME,
@@ -95,7 +95,7 @@ get_num_genes <- function()
 get_genes_count <- function()
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     query <- paste("SELECT Gene, COUNT(DISTINCT ppi) as cnt_ppi, ",
                    " COUNT(DISTINCT expr) as cnt_expr, ",

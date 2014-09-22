@@ -2,7 +2,7 @@
 # 
 # Author: flick
 ###############################################################################
-DEFAULT_DATABASE_FILE = 'hpaDB.sqlite'
+DEFAULT_DATABASE_FILE = '../data/sql_database.sqlite'
 
 
 get_sql_conn <- function(database_file=DEFAULT_DATABASE_FILE)

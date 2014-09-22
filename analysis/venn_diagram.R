@@ -13,7 +13,7 @@ plot_venn_diagram <- function(agg_table)
 
     # load sql config and get connection
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
 
     # load ppi network from db

@@ -8,6 +8,7 @@ tmp/
 # the actual download folder:
 download/
 
+*.sqlite
 
 ################
 #  PPIs

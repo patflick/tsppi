@@ -1,7 +1,7 @@
 
 # load sql config and get connection
 source("sql_config.R")
-con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+con <- get_sql_conn()
 
 table <- "overlap_pairwise_ppi_ids"
 ppi_id_data <- dbGetQuery(con, paste("SELECT * FROM ", table))

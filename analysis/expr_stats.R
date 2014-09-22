@@ -8,7 +8,7 @@ source("expr_utils.R")
 get_all_expr_size_stats <- function()
 {
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     for (e in get_exprs())
     {
@@ -27,7 +27,7 @@ get_expr_values <- function(expr_name="gene_atlas")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     expr_normalized_table <- paste(expr_name, "normalized", sep="_")
     query <- paste("SELECT * FROM ", expr_normalized_table)
@@ -61,7 +61,7 @@ plot_tissue_expr_count_hist <- function(expr_name="gene_atlas")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     expr_count_table <- paste(expr_name, "expr_counts", sep="_")
     query <- paste("SELECT * FROM ", expr_count_table, " ORDER BY ExpressedCount*1.0/TotalCount")
@@ -84,7 +84,7 @@ plot_tshk_example <- function(expr_name="hpa", threshold=0.15)
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     expr_count_table <- paste(expr_name, "expr_counts", sep="_")
     query <- paste("SELECT * FROM ", expr_count_table, " WHERE ExpressedCount > 0 ORDER BY ExpressedCount*1.0/TotalCount")
@@ -129,7 +129,7 @@ plot_tshk_thresholds <- function(expr_name="hpa")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     expr_count_table <- paste(expr_name, "expr_counts", sep="_")
     query <- paste("SELECT * FROM ", expr_count_table, " WHERE ExpressedCount > 0 ORDER BY ExpressedCount*1.0/TotalCount")

@@ -13,7 +13,7 @@ is_core <- function(expr_name="hpa")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     query <- paste("SELECT COUNT(DISTINCT Gene) FROM ", expr_name)
     gene_count <- dbGetQuery(con, query)

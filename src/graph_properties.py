@@ -242,8 +242,8 @@ def graph_stats(g, verbose=True, timings={}):
     if verbose:
         print("get connected components")
     t = time.time()
-    cc = ppi_networkit.ConnectedComponents()
-    cc.run(g)
+    cc = ppi_networkit.ConnectedComponents(g)
+    cc.run()
     props['conn_comp'] = cc.numberOfComponents()
     timings[(ppi_name, "conn_comp")] = time.time() - t
 

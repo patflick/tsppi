@@ -48,7 +48,7 @@ get_expression_property_data <- function(ppi_name="bossi",expr_name="gene_atlas"
 {
     # load sql config and get connection
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # create table names
     prop_table <- paste(ppi_name, expr_name, "agg_node_properties", sep="_")
@@ -109,7 +109,7 @@ plot_tissue_expr_count_hist <- function(expr_name="gene_atlas")
 {
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     expr_count_table <- paste(expr_name, "core_expr_counts", sep="_")
     #expr_count_table <- paste(expr_name, "expr_counts", sep="_")
@@ -207,7 +207,7 @@ get_min_max_neighbor_expr_data <- function(ppi_name="bossi", expr_name="gene_atl
 
     # load the ts/hk summary data from the database
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # have to load from `core`, as the min and max counts are also
     # calculated in the `core` of the expression data set.
@@ -594,7 +594,7 @@ get_hkts_edge_summary <- function(ppi_name="bossi", expr_name="gene_atlas", prop
     # tissue specific proteins by only using SQL:
 
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # what's the definition of tissuespecific vs. housekeeping?
     hkts_table <- get_hkts_sym_threshold_table(expr_name, 0.2)
@@ -616,7 +616,7 @@ create_test_degrees <- function(ppi_name="bossi",expr_name="gene_atlas",prop_nam
 {
 
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # create table names
     prop_table <- paste("prop", ppi_name, expr_name, prop_name, sep="_")
@@ -639,7 +639,7 @@ compare_test_degrees <- function(ppi_name="bossi",expr_name="gene_atlas",prop_na
 {
 
     source("sql_config.R")
-    con <- get_sql_conn('/home/patrick/dev/bio/data/test_matching.sqlite')
+    con <- get_sql_conn()
 
     # create table names
     prop_table_1 <- paste("prop", ppi_name, expr_name, "degree", sep="_")
