@@ -26,6 +26,13 @@ The following data sources need to be manually obtained, since they are not
 
 - Dana Farber CCSB HI-2012 PPI network (see below)
 
+If you don't want to sign up to get this data, you can instead download one of
+the older Human Interactomes from their website and name it `HI_2012_PRE.tsv` in
+the `ppi/` folder. Note that the results from the analysis pipeline will be
+different for this network, since it uses different data. All other results
+should remain identical. The pipeline will not execute if this file is not
+available.
+
 
 Protein-Protein Interaction Networks
 ------------------------------------

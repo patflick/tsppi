@@ -44,16 +44,27 @@ The code is organized into different parts:
 
 ### Dependencies
 
-- python3 (sqlite3)
-- NetworKit
-- C++11 compiler
-- fastSemSim
-- 
+- `python3` (sqlite3)
+- `g++` (version >= 4.7)
+- TODO: fastSemSim
+- `scons` (for NetworKit compilation)
+- `cython`
+- `sqlite3-dev`
+- `mercurial`
 
 
 ### Compiling
 
-TODO (building python modules
+To compile the NetworKit interacting cython module (including the extended
+algorithms for Subgraph datastructures), first install the before mentioned
+dependencies.
+
+Then you can simply run the `build.sh` script in the main directory of the
+repository:
+
+```sh
+./build.sh
+```
 
 
 ### Data
