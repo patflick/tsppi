@@ -31,16 +31,19 @@ heavy use of the **ggplot2** visualizations library.
 
 The code is organized into different parts:
 
-- `src` contains the python pipeline and other python scripts
+- [`src`](src) contains the python pipeline and other python scripts
 - `src/pappi` contains all custom python modules used for the python pipeline
-- `analysis` contains **R** scripts for analyzing data and generating figures
-  and plots
-- `figs` contains generated figures which are saved by the **R** scripts in
-  `analysis`
-- `data` contains the raw data and scripts to automatically download it
-- `ppi_networkit` contains the Subgraph algorithms and the custom cython module,
-  both of which extend the `NetworKit` graph library and it's cython python
-  module.
+- [`analysis`](analysis) contains **R** scripts for analyzing data and
+  generating figures and plots
+- [`figs`](figs) contains generated figures which are saved by the **R** scripts
+  in [`analysis`](analysis)
+- [`data`](data) contains the raw data and scripts to automatically download it
+- [`ppi_networkit`](ppi_networkit) contains the Subgraph algorithms and the
+  custom cython module, both of which extend the [`NetworKit`](NetworKit) graph
+  library and it's cython python module.
+- [`docs`](docs) contains the master thesis document. This documents the
+  algorithms and analysis implemented, and shows and interprets the results
+  achieved.
 - TODO: add submodule for fastSemSim
 
 ## Installation
