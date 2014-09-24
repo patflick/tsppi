@@ -37,8 +37,10 @@ The code is organized into different parts:
 - `figs` contains generated figures which are saved by the **R** scripts in
   `analysis`
 - `data` contains the raw data and scripts to automatically download it
-- TODO: add other repos (ppi_networkit, networkit and fastSemSim) and their
-  dependencies
+- `ppi_networkit` contains the Subgraph algorithms and the custom cython module,
+  both of which extend the `NetworKit` graph library and it's cython python
+  module.
+- TODO: add submodule for fastSemSim
 
 ## Installation
 
