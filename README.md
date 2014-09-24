@@ -17,8 +17,9 @@ in text format (tab separated or comma separated) from various sources. This
 data is imported and processed into a unified format and saved into a **SQLite**
 table.
 
-Graph analysis is done with the **NetworKit** parallel graph analysis library in
-order to speed up graph analysis tasks. To this end we implement our own
+Graph analysis is performed with the
+[**NetworKit**](https://networkit.iti.kit.edu/) parallel graph analysis library
+in order to speed up graph analysis tasks. To this end we implement our own
 extensions and extended algorithms for analyzing multiple Subgraphs
 simultaneously. This is useful, since all **tsPPIs** are represented as a set of
 subgraphs or a common **PPI** *parent* network. We implement this `Subgraphs`
