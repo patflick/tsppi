@@ -33,7 +33,7 @@ The code is organized into different parts:
 - `src` contains the python pipeline and other python scripts
 - `src/pappi` contains all custom python modules used for the python pipeline
 - `analysis` contains **R** scripts for analyzing data and generating figures
-  and oplots
+  and plots
 - `figs` contains generated figures which are saved by the **R** scripts in
   `analysis`
 - `data` contains the raw data and scripts to automatically download it
@@ -50,19 +50,55 @@ The code is organized into different parts:
 - fastSemSim
 - 
 
-### Data
-
-(see data folder readme)
 
 ### Compiling
 
 TODO (building python modules
 
 
+### Data
+
+Most of the datasets can can be automatically downloaded. Only a few need
+to be manually procured. See the [`data/README.md`](data/README.md) for details.
+
 
 ## Running
 
-executing python pipeline
-executing benchmarks and tests of ppi_networkit
-plot all results
+### Analysis Pipeline
 
+Make sure all needed data is available in the `data` folder before proceeding.
+
+Running the python pipeline consists of running 3 steps:
+(approximate run times are on a 4 core 3.4Ghz Intel CPU with 8 GiB RAM)
+
+1. Data import and preprocessing (~10-20 minutes)
+2. Running the graph analysis on all networks (~4-8 hours)
+3. Running graph clustering/community-detection on all graphs (~6 hours)
+
+To run this pipeline, execute the following:
+
+```sh
+cd src
+python3 init_data.py
+python3 graph_properties.py
+python3 networkit_clustering.py
+```
+
+The final analysis and data visualization is implemented in R, all scripts are
+available in the `analysis` folder. Run these scripts to get the individual
+figures and graphs.
+
+### Algorithm benchmarks and tests
+
+#### BPScore
+
+The different *BPScore* algorithms can be benchmarked using the
+`bpscore_benchmark.py` script. To run this execute:
+
+```sh
+cd src
+python3 bpscore_benchmark.py
+```
+
+#### TODO
+executing benchmarks and tests of ppi_networkit
