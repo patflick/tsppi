@@ -32,7 +32,8 @@ heavy use of the **ggplot2** visualizations library.
 The code is organized into different parts:
 
 - [`src`](src) contains the python pipeline and other python scripts
-- `src/pappi` contains all custom python modules used for the python pipeline
+- [`src/pappi`](src/pappi) contains all custom python modules used for the
+  python pipeline
 - [`analysis`](analysis) contains **R** scripts for analyzing data and
   generating figures and plots
 - [`figs`](figs) contains generated figures which are saved by the **R** scripts
