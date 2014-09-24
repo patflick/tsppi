@@ -60,11 +60,13 @@ The code is organized into different parts:
 
 - `python3` (sqlite3)
 - `g++` (version >= 4.7)
-- TODO: fastSemSim
 - `scons` (for NetworKit compilation)
 - `cython`
 - `sqlite3-dev`
 - `mercurial`
+- [`fastSemSim`](http://sourceforge.net/projects/fastsemsim) (only needed for
+  running the BPScore benchmarks with
+  [`bpscore_benchmark.py`](src/bpscore_benchmark.py) )
 
 
 ### Compiling
@@ -73,8 +75,8 @@ To compile the NetworKit interacting cython module (including the extended
 algorithms for Subgraph datastructures), first install the before mentioned
 dependencies.
 
-Then you can simply run the `build.sh` script in the main directory of the
-repository:
+Then you can simply run the [`build.sh`](build.sh) script in the main directory
+of the repository:
 
 ```sh
 ./build.sh
@@ -91,7 +93,8 @@ to be manually procured. See the [`data/README.md`](data/README.md) for details.
 
 ### Analysis Pipeline
 
-Make sure all needed data is available in the `data` folder before proceeding.
+Make sure all needed data is available in the [`data`](data) folder before
+proceeding.
 
 Running the python pipeline consists of running 3 steps:
 (approximate run times are on a 4 core 3.4Ghz Intel CPU with 8 GiB RAM)
@@ -110,15 +113,15 @@ python3 networkit_clustering.py
 ```
 
 The final analysis and data visualization is implemented in R, all scripts are
-available in the `analysis` folder. Run these scripts to get the individual
-figures and graphs.
+available in the [`analysis`](analysis) folder. Run these scripts to get the
+individual figures and graphs.
 
 ### Algorithm benchmarks and tests
 
 #### BPScore
 
 The different *BPScore* algorithms can be benchmarked using the
-`bpscore_benchmark.py` script. To run this execute:
+[`bpscore_benchmark.py`](src/bpscore_benchmark.py) script. To run this execute:
 
 ```sh
 cd src
@@ -129,7 +132,7 @@ python3 bpscore_benchmark.py
 
 In order to execute the benchmarks and tests for the modified Subgraph
 algorithms implemented in the `ppi_networkit` cython module,
-run in the `ppi_networkit` folder:
+run in the [`ppi_networkit`](ppi_networkit) folder:
 
 For the tests:
 
