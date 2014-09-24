@@ -132,4 +132,11 @@ And for the benchmarks:
 ./build/benchmark
 ```
 
+## Copyright Notice / Licensing
 
+The code (`src`, `ppi_networkit`, `analysis`) is licensed under the **MIT**
+license (see [LICENSE](LICENSE)).
+
+The Master Thesis and all figures (folder `docs` and `figs`) are licensed under
+the **CC BY 4.0** (Creative Commons Attribution 4.0 International) license
+(see [docs/LICENSE](docs/LICENSE)).
