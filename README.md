@@ -111,5 +111,22 @@ cd src
 python3 bpscore_benchmark.py
 ```
 
-#### TODO
-executing benchmarks and tests of ppi_networkit
+#### Subgraph algoritms (ppi_networkit)
+
+In order to execute the benchmarks and tests for the modified Subgraph
+algorithms implemented in the `ppi_networkit` cython module,
+run in the `ppi_networkit` folder:
+
+For the tests:
+
+```sh
+./build/tests
+```
+
+And for the benchmarks:
+
+```sh
+./build/benchmark
+```
+
+
