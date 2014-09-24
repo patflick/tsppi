@@ -9,6 +9,12 @@ In this text we use the following abbreviations:
 - **PP**: protein-protein interaction network
 - **tsPPI**: tissue-specific PPI
 
+This is the Master thesis project of *Patrick Flick*. The Master thesis is
+available
+[here](https://github.com/r4d2/tsppi/blob/master/docs/master_thesis_tsppi.pdf?raw=true).
+(See also [`docs`](docs)). The thesis is licensed under the **CC-BY 4.0**
+license.
+
 ## Code organization
 
 Different parts of the pipeline are accomplished by different programming
