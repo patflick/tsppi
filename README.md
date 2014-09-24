@@ -46,8 +46,9 @@ The code is organized into different parts:
   in [`analysis`](analysis)
 - [`data`](data) contains the raw data and scripts to automatically download it
 - [`ppi_networkit`](ppi_networkit) contains the Subgraph algorithms and the
-  custom cython module, both of which extend the [`NetworKit`](NetworKit) graph
-  library and it's cython python module.
+  custom cython module, both of which extend the
+  [**NetworKit**](https://networkit.iti.kit.edu/) graph library and it's cython
+  python module.
 - [`docs`](docs) contains the master thesis document. This documents the
   algorithms and analysis implemented, and shows and interprets the results
   achieved.
