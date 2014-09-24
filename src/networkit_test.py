@@ -26,8 +26,7 @@ con = pappi.sql.get_conn(DATABASE)
 #  Import PPI NetworKit module  #
 #################################
 
-#sys.path.append("/home/patrick/dev/bio/NetworKit-Flick/cython")
-sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
+sys.path.append(os.path.join(os.path.dirname(__file__), "../ppi_networkit/cython"))
 #import NetworKit
 import ppi_networkit
 # set the log-level to "ERROR", this will ignore the [INFO] and [WARN] logs

@@ -340,7 +340,7 @@ def save_timings(timings, sql_conn, table):
     sql_conn.commit()
 
 # import PPI_NetworKit module
-sys.path.append("/home/patrick/dev/bio/ppi_networkit/cython")
+sys.path.append(os.path.join(os.path.dirname(__file__), "../ppi_networkit/cython"))
 #import NetworKit
 import ppi_networkit
 
