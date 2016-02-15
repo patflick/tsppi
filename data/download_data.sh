@@ -44,7 +44,7 @@ cp $TMP_FOLDER/CRG-human-interactome/CRG.integrated.human.interactome.txt ppis/
 #      an account to download)
 
 # 3.) string-db
-STRING_VERSION=9.05
+STRING_VERSION=10
 STRING_CUTOFF=500 # cutoff at a reliability of 700 for import
 STRING_URL=http://string-db.com/newstring_download/protein.links.v$STRING_VERSION.txt.gz
 STRING_GZ=$DOWNLOAD_FOLDER/protein.links.v$STRING_VERSION.txt.gz

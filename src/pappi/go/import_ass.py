@@ -13,4 +13,4 @@ def import_go_association(filename, sql_conn, table=GO_ASSOC_TABLE):
     """
     sql.import_csv(filename, table, '\t', False, import_columns=[2, 4],
                    column_names=["Gene", "GOTerm"], sql_conn=sql_conn,
-                   skip_rows=9)
+                   skip_rows=12)
