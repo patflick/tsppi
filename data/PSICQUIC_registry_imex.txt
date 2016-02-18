@@ -1,7 +1,7 @@
 IntAct=http://www.ebi.ac.uk/Tools/webservices/psicquic/intact/webservices/psicquic
 DIP=http://imex.mbi.ucla.edu/psicquic-ws/webservices/psicquic
-MatrixDB=http://matrixdb.ibcp.fr:8080/webservices/psicquic
-MINT=http://mint.bio.uniroma2.it/mint/psicquic/webservices/psicquic
+MatrixDB=http://matrixdb.ibcp.fr:8080/psicquic/webservices
+MINT=http://www.ebi.ac.uk/Tools/webservices/psicquic/mint/webservices/psicquic
 I2D-IMEx=http://www.ebi.ac.uk/Tools/webservices/psicquic/i2d/webservices/psicquic
 InnateDB-IMEx=http://www.ebi.ac.uk/Tools/webservices/psicquic/innatedb/webservices/psicquic
 MolCon=http://www.ebi.ac.uk/Tools/webservices/psicquic/molcon/webservices/psicquic

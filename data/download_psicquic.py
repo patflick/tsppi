@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import urllib.request
+import time
 import os.path
 import re
 
@@ -21,6 +22,22 @@ def get_psicquic_services(filename):
             service, url = line.split("=")
             services[service] = url
     return services
+
+
+def urlopen_retry(url, retry = 3, delay = 1):
+    print("opening " + url)
+    i = 0
+    while (i < retry):
+        try:
+            cf = urllib.request.urlopen(url)
+            return cf
+        except urllib.error.HTTPError as e:
+            # try again
+            print("Failed to connect, retrying...")
+            time.sleep(delay)
+            i = i+1
+            if (i == retry):
+                return e
 
 
 def download_all_ppis(folder, basename):
@@ -49,8 +66,17 @@ def download_all_ppis(folder, basename):
         # first get row count
         count_url = service_url + '/' + psicquic_query_url + '?format=count'
         tab25_url = service_url + '/' + psicquic_query_url + '?format=tab25'
-        with urllib.request.urlopen(count_url) as cf:
+
+        # try opening URL
+        #with urllib.request.urlopen(count_url) as cf:
+        #    count = int(cf.read())
+        try:
+            cf = urlopen_retry(count_url)
             count = int(cf.read())
+            cf.close()
+        except:
+            print("[ERROR] Failed to download PPI " + service_name + ", skipping...")
+            continue
 
         print("Downloading from '" + service_name + "': " + str(count)
               + " rows ...")
