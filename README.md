@@ -6,7 +6,7 @@ protein-protein interaction networks.
 
 In this text we use the following abbreviations:
 
-- **PP**: protein-protein interaction network
+- **PPI**: protein-protein interaction network
 - **tsPPI**: tissue-specific PPI
 
 This is the Master thesis project of *Patrick Flick*. The Master thesis is
