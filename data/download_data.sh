@@ -163,7 +163,7 @@ fi
 
 # 3.) RNAseq Illumina Body Map from EBI
 
-EBI_MTAB_URL="http://www-test.ebi.ac.uk/gxa/experiments/E-MTAB-513.tsv?cutoff=0&geneQuery="
+EBI_MTAB_URL="http://www.ebi.ac.uk/gxa/experiments/E-MTAB-513.tsv?cutoff=0&geneQuery="
 EBI_MTAB_FILE=expr/E-MTAB-513.tsv
 
 if [ -f $EBI_MTAB_FILE ]
@@ -197,7 +197,7 @@ GO_OBO_URL=http://geneontology.org/ontology/obo_format_1_2/gene_ontology.1_2.obo
 GO_OBO_FILE=gene_ontology.1_2.obo
 
 # download obo dag
-if [ -f go/$GO_OBO_FILE]
+if [ -f go/$GO_OBO_FILE ]
 then
     echo "Gene Ontology Dag file already exists, skipping download"
 else
@@ -211,7 +211,7 @@ GO_ASSOC_GZ=gene_association.goa_ref_human.gz
 GO_ASSOC_FILE=gene_association.goa_ref_human
 
 # download association
-if [ -f $DOWNLOAD_FOLDER/$GO_ASSOC_GZ]
+if [ -f $DOWNLOAD_FOLDER/$GO_ASSOC_GZ ]
 then
     echo "GO gene association file already exists, skipping download"
 else
