@@ -117,7 +117,7 @@ std::vector<NetworKit::count> subgraph_neighbor_min_exists_count(const Subgraphs
             // only check neighbors which are coexpressed in at least one tissue
             if (edge_label.any())
             {
-                result[u] = std::min(result[u], subgraphs.node_exists[v].count());
+                result[u] = std::min<count_t>(result[u], subgraphs.node_exists[v].count());
             }
         });
     });
