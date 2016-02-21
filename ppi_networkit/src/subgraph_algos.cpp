@@ -140,7 +140,7 @@ std::vector<NetworKit::count> subgraph_neighbor_max_exists_count(const Subgraphs
             // only check neighbors which are coexpressed in at least one tissue
             if (edge_label.any())
             {
-                result[u] = std::max(result[u], subgraphs.node_exists[v].count());
+                result[u] = std::max<count_t>(result[u], subgraphs.node_exists[v].count());
             }
         });
     });
