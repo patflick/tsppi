@@ -50,6 +50,7 @@ set(SQLITECPP_BUILD_EXAMPLES OFF)
 set(SQLITECPP_RUN_DOXYGEN OFF)
 set(SQLITECPP_RUN_CPPCHECK OFF)
 set(SQLITECPP_RUN_CPPLINT OFF)
+set(SQLITECPP_INTERNAL_SQLITE OFF CACHE BOOL "use internal sqlite3" FORCE)
 add_subdirectory(ext/SQLiteCpp)
 include_directories("${PROJECT_SOURCE_DIR}/ext/SQLiteCpp/include")
 
@@ -61,7 +62,7 @@ add_subdirectory(src)
 
 # benchmarks for tissue-specific betweenness
 add_executable(benchmark benchmark.cpp)
-target_link_libraries(benchmark ppi_networkit)
+target_link_libraries(benchmark ppi_networkit dl)
 
 # tests executable
 add_executable(tests tests.cpp)
